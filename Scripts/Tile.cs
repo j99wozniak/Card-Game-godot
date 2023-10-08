@@ -23,8 +23,7 @@ public partial class Tile : Node
 	}
 
 	public void AddTileEffect(TileEffect effect){
-		// TODO that's similar logic to Unit add... Maybe unify somehow? 
-		//      But then would either have to change dictionary to just linked list, or this linked list to dictionary
+		// TODO add Unit source (that can be null)
 		effect.parentTile = this;
 		if(!tileEffects.Any()){
 			tileEffects.AddLast(effect);

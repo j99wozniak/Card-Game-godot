@@ -1,0 +1,11 @@
+OnBeginTurn
+OnEndTurn
+OnDamage - Receiving damage goes here. At the end of it, the unit will trigger commands inside the packet
+OnHeal - Receiving healing goes here.
+OnAttacking - Skills that attack trigger this, inserting to it a packet, that can be modified
+OnHealing - Skills that heal trigger this
+OnStartMove - Is triggered before the unit starts moving. For things like removing Aura effects from nearby tiles
+OnEndMove - Is triggered after the unit moved to desired location. For things like applying Aura effects again on nearby tiles, or damaging.
+
+OnMoving - for calculation of cost for the movement. For example Unit Flying, or tile they start on has an Aura that makes sand easier to traverse
+OnMovingThrough - for calculation of cost on the tile that's being traversed. For example Glue on a tile

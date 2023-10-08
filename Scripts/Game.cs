@@ -146,8 +146,7 @@ public partial class Game : Node
 		TileEffect rockyTerrain = new RockyTerrain(1);
 		map.tileMap[3,3].AddTileEffect(rockyTerrain);
 
-		map.tileMap[15,16].cost = 16;
-		map.tileMap[16,15].cost = 16;
+		map.tileMap[16,15].AddTileEffect(new Glue());
 		
 		Unit u1 = new Unit
 		{
@@ -159,10 +158,12 @@ public partial class Game : Node
 			currentStamina = 10,
 			x = 15,
 			y = 15,
-			movementPoints = 12
+			movementPoints = 10
 		};
 
 		map.unitMap[u1.x,u1.y] = u1;
+
+		u1.AddUnitEffect(new Skip());
 
 
 		// Create a Stopwatch instance

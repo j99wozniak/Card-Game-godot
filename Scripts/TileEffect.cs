@@ -14,9 +14,11 @@ public class TileEffect
 	public string countDownTrigger = null; // TODO like onDamage or onMoving
 	public LinkedList<TileEffect> linkedTileEffects; // TODO should remove related effects when it's removed
 	public LinkedList<UnitEffect> linkedUnitEffects; 
+	public LinkedList<TileEffect> childrenTileEffects; // TODO should be removed when parent effect is dicarded, but not the other way
+	public LinkedList<UnitEffect> childrenUnitEffects; 
 
 	public virtual void Execute(Packet packet){}
-	public virtual void MovementExecute(ref float movementCost, Tile tile){}
+	public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){}
 	public void CountDown(){
 	  // TODO
 	}
@@ -29,7 +31,7 @@ public class RockyTerrain : TileEffect
 	name = "RockyTerrain";
 	type = "Physical";
 	trigger = "OnDamage";
-	priority = 5;
+	priority = 1;
 	this.power = power;
   }
   public override void Execute(Packet packet)
@@ -40,5 +42,25 @@ public class RockyTerrain : TileEffect
 	  packet.value = packet.value - power > 0 ? packet.value - power : 0;
 	}
 	GD.Print("Also, the guy that's benefiting from this is called " + parentTile.GetUnit().unitName);
+  }
+}
+
+
+// MOVEMENT EFFECTS
+
+// Changes the cost of the tile to 10
+public class Glue : TileEffect
+{
+  public Glue(){
+	name = "Glue";
+	type = "Chemical";
+	trigger = "OnMovingThrough";
+	priority = 5;
+  }
+  public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit)
+  {
+		if(!movingUnit.HasEffect("Skip")){
+			movementCost = 10;
+		}
   }
 }

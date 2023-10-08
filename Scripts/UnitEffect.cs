@@ -18,7 +18,7 @@ public abstract class UnitEffect
 	public LinkedList<UnitEffect> linkedUnitEffects;
 
 	public virtual void Execute(Packet packet){}
-	public virtual void MovementExecute(ref float movementCost, Tile tile){}
+	public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){}
 	public void CountDown(){ //
 	  if(count <= 100){
 		count--;
@@ -123,3 +123,19 @@ public class PreciseShots : UnitEffect
   }
 }
 
+// Movement effects
+public class Skip : UnitEffect
+{
+  public Skip(){
+	name = "Skip";
+	type = "Physical";
+	trigger = "OnMoving";
+	priority = 5;
+  }
+  public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit)
+  {
+		if(movementCost > 1 && movementCost < 5){
+			movementCost = 1;
+		}
+  }
+}

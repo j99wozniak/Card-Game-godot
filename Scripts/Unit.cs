@@ -64,6 +64,25 @@ public partial class Unit : Node
 			unitEffects[effect.trigger].AddLast(effect);
 		}
 	}
+	
+	public bool HasEffect(string effectName, string effectTrigger = null){
+		if(effectTrigger != null){
+			foreach(UnitEffect e in unitEffects[effectTrigger]){
+				if(e.name == effectName){
+					return true;
+				}
+			}
+			return false;
+		}
+		foreach(KeyValuePair<string, LinkedList<UnitEffect>> list in unitEffects){
+			foreach(UnitEffect e in list.Value){
+				if(e.name == effectName){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	// TODO remove UnitEffect by name (and source?)
 	public void RemoveUnitEffect(UnitEffect effect){
@@ -129,13 +148,18 @@ public partial class Unit : Node
 	}
 
 	public void OnMoving(ref float movementCost, Tile tile){
+		foreach(TileEffect e in tile.tileEffects){
+			if(e.trigger == "OnMovingThrough"){
+				e.MovementExecute(ref movementCost, tile, this);
+			}
+		}
 		foreach(TileEffect e in GetTile().tileEffects){
 			if(e.trigger == "OnMoving"){
-				e.MovementExecute(ref movementCost, tile);
+				e.MovementExecute(ref movementCost, tile, this);
 			}
 		}
 		foreach(UnitEffect e in unitEffects["OnMoving"]){
-			e.MovementExecute(ref movementCost, tile);
+			e.MovementExecute(ref movementCost, tile, this);
 		}
 	}
 
@@ -155,6 +179,7 @@ public partial class Unit : Node
 			e.Apply(packet);
 		}
 	}
+
 
 }
 
