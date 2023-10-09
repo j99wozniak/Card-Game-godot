@@ -35,7 +35,6 @@ public class BitterMedicine : Skill
 	target.OnHealing(new Packet(name, type, Trigger.OnHealing, power, target, source, new LinkedList<Command>(new[]{new Heal()})));
 	Poison bitterPoison = new Poison(power / 10);
 	bitterPoison.source = source;
-	bitterPoison.target = target;
 	target.AddUnitEffect(bitterPoison);
   }
 }

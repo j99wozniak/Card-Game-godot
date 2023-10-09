@@ -1,3 +1,6 @@
+Unit countdowns will trigger when used.
+Tile countdowns need to be triggered for each tile individually
+
 OnBeginTurn
 OnEndTurn
 OnDamage - Receiving damage goes here. At the end of it, the unit will trigger commands inside the packet

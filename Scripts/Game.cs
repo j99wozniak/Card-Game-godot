@@ -21,13 +21,9 @@ public partial class Game : Node
 		
 		//test1();
 
-		test2();
-		// Add rudimentary sprites
+		//test2();
 
-		// Implement and test skill range
-
-		// Implement and test movement
-		
+		test3();
 
 		// U1 has passive Defend
 		// Effect onMove to remove this effect from nerby units, and to apply it when the move is done
@@ -103,7 +99,6 @@ public partial class Game : Node
 		map.unitMap[u2.x,u2.y] = u2;
 
 		UnitEffect dodge1 = new Dodge();
-		dodge1.target = u2;
 		dodge1.source = u2;
 		dodge1.count = 100;
 		u2.AddUnitEffect(dodge1);
@@ -201,6 +196,70 @@ public partial class Game : Node
 		// Print the elapsed time
 		GD.Print($"Elapsed Time: {elapsedMilliseconds} ms");
 
+	}
+
+	void test3(){
+		GameMap map = new GameMap(40, 40);
+		Texture2D plainsTexture = (Texture2D)GD.Load("res://Sprites/Tiles/plains.png");
+		Texture2D sandsTexture = (Texture2D)GD.Load("res://Sprites/Tiles/sands.png");
+		for (int i = 0; i < map.sizeX; i++){
+			for (int j = 0; j < map.sizeY; j++){
+				Node2D tileNode = new Node2D();
+				Tile tile = new Tile();
+				tileNode.AddChild(tile);
+				tile.tileName = "Plains";
+				tile.map = map;
+				tile.x = i;
+				tile.y = j;
+				tile.cost = 1;
+				Sprite2D plainsSprite = new Sprite2D(); // Create a new Sprite2D.
+				plainsSprite.Texture = plainsTexture;
+				tile.tileSprite = plainsSprite;
+				plainsSprite.Name = "spriteNode";
+				tileNode.AddChild(plainsSprite);
+				tileNode.Position = tile.GetRealPosition();
+				AddChild(tileNode);
+				map.tileMap[i,j] = tile;
+			} 
+		}
+		TileEffect rockyTerrain = new RockyTerrain(1);
+		map.tileMap[3,3].AddTileEffect(rockyTerrain);
+
+		map.tileMap[16,15].AddTileEffect(new Glue());
+		
+		Unit u1 = new Unit
+		{
+			unitName = "u1",
+			map = map,
+			baseMaxHp = 20,
+			currentHp = 20,
+			baseMaxStamina = 10,
+			currentStamina = 10,
+			x = 15,
+			y = 15,
+			baseMaxMovement = 10,
+			currentMovement = 10
+		};
+
+		GD.Print($"Before {u1.HasEffect("Poison")} ");
+		map.unitMap[u1.x,u1.y] = u1;
+		UnitEffect poison = new Poison();
+		UnitEffect eager = new Eager();
+
+		poison.count = 2;
+		poison.linkedUnitEffects.AddLast(eager);
+		eager.linkedUnitEffects.AddLast(poison);
+
+		u1.AddUnitEffect(poison);
+		u1.AddUnitEffect(eager);
+
+		u1.OnEndTurn();
+		u1.OnEndTurn();
+		u1.OnEndTurn();
+
+		GD.Print($"Does u1 have Poison: {u1.HasEffect("Poison")} ");
+		GD.Print($"Does u1 have Eager: {u1.HasEffect("Eager")} ");
+		GD.Print($"u1 HP: {u1.currentHp} ");
 	}
 
 }

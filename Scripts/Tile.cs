@@ -40,4 +40,18 @@ public partial class Tile : Node
 			tileEffects.AddLast(effect);
 		}
 	}
+
+	public void RemoveTileEffect(TileEffect effect){
+		tileEffects.Remove(effect);
+	}
+
+	public void CountdownTileEffects(Trigger countdownTrigger){
+		LinkedListNode<TileEffect> e = tileEffects.First;
+		while(e != null){
+			if(e.Value.countdownTrigger == countdownTrigger){
+				e.Value.Countdown();
+			}
+			e = e.Next;
+		}
+	}
 }

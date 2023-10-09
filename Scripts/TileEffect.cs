@@ -11,17 +11,48 @@ public class TileEffect
 	public int power = 0;
 	public Type type = Type.none;
 	public Trigger trigger = Trigger.none;
-	public Trigger countDownTrigger = Trigger.none; // TODO like onDamage or onMoving
-	public LinkedList<TileEffect> linkedTileEffects; // TODO should remove related effects when it's removed
-	public LinkedList<UnitEffect> linkedUnitEffects; 
-	public LinkedList<TileEffect> childrenTileEffects; // TODO should be removed when parent effect is dicarded, but not the other way
-	public LinkedList<UnitEffect> childrenUnitEffects; 
+	public Trigger countdownTrigger = Trigger.none;
+	public LinkedList<TileEffect> linkedTileEffects = new();
+	public LinkedList<UnitEffect> linkedUnitEffects = new(); 
+	public LinkedList<TileEffect> childrenTileEffects = new(); // TODO should be removed when parent effect is dicarded, but not the other way
 
 	public virtual void Execute(Packet packet){}
 	public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){}
 	public virtual void Getter(ref int valueToModify){}
-	public void CountDown(){
-	  // TODO
+	public void Countdown(){
+		foreach(TileEffect e in linkedTileEffects){
+			e.CountdownChild();
+		}
+		foreach(UnitEffect e in linkedUnitEffects){
+			e.CountdownChild();
+		}
+	  if(count <= 100){
+			count--;
+			if(count<=0){
+				RemoveThisEffect();
+			}
+	  }
+	}
+	public void CountdownChild(){
+		if(count <= 100){
+			count--;
+			if(count<=0){
+				RemoveThisEffect();
+			}
+	  }
+	}
+	public void RemoveThisEffect(){
+		parentTile.RemoveTileEffect(this);
+		foreach(TileEffect e in linkedTileEffects){
+			e.linkedTileEffects.Remove(this);
+			e.RemoveThisEffect();
+		}
+		foreach(UnitEffect e in linkedUnitEffects){
+			e.linkedTileEffects.Remove(this);
+			e.RemoveThisEffect();
+		}
+		linkedTileEffects = null;
+		linkedUnitEffects = null;
 	}
 }
 

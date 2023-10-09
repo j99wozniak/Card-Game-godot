@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 
 public static class Movement{
+	// TODO after movement is done, countdown effect affectingg movement.
 	public static Dictionary<(int, int), float> GetAccessibleTiles(Unit unit, GameMap map){
 		Dictionary<(int x, int y), float> accessibleTiles = new Dictionary<(int, int), float>();
 		float maxMovement = unit.currentMovement;

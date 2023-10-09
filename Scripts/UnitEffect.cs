@@ -6,27 +6,54 @@ public abstract class UnitEffect
 {
 	public string name = null;
 	public Unit parentUnit = null;
-	public Unit target = null;
 	public Unit source = null;
 	public int count = 100; // Default (100) means the countdown won't go down
 	public int priority = 0; // The higher the priority the sooner it will be executed
 	public int power = 0;
 	public Type type = Type.none;
 	public Trigger trigger = Trigger.none;
-	public Trigger countDownTrigger = Trigger.none; // TODO like onDamage or onMoving
-	public LinkedList<TileEffect> linkedTileEffects; // TODO should remove related effects when it's removed
-	public LinkedList<UnitEffect> linkedUnitEffects;
+	public Trigger countdownTrigger = Trigger.none;
+	public LinkedList<TileEffect> linkedTileEffects = new();
+	public LinkedList<UnitEffect> linkedUnitEffects = new();
 
 	public virtual void Execute(Packet packet){}
 	public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){}
 	public virtual void Getter(ref int valueToModify){}
-	public void CountDown(){ //
-	  if(count <= 100){
-		count--;
-		if(count<=0){
-			target.RemoveUnitEffect(this);
+	public void Countdown(){
+		foreach(TileEffect e in linkedTileEffects){
+			e.CountdownChild();
 		}
+		foreach(UnitEffect e in linkedUnitEffects){
+			e.CountdownChild();
+		}
+	  if(count <= 100){
+			count--;
+			if(count<=0){
+				RemoveThisEffect();
+			}
 	  }
+	}
+	public void CountdownChild(){
+		if(count <= 100){
+			count--;
+			if(count<=0){
+				RemoveThisEffect();
+			}
+	  }
+	}
+	public void RemoveThisEffect(){
+		GD.Print($"Removing this {this.name}");
+		parentUnit.RemoveUnitEffect(this);
+		foreach(TileEffect e in linkedTileEffects){
+			e.linkedUnitEffects.Remove(this);
+			e.RemoveThisEffect();
+		}
+		foreach(UnitEffect e in linkedUnitEffects){
+			e.linkedUnitEffects.Remove(this);
+			e.RemoveThisEffect();
+		}
+		linkedTileEffects = null;
+		linkedUnitEffects = null;
 	}
 }
 
@@ -41,7 +68,7 @@ public class Poison : UnitEffect
 	  this.power = power;
 	}
 	public override void Execute(Packet packet = null){
-	  target.OnDamage(new Packet(name, type, trigger, power, target, source, new LinkedList<Command>(new[]{new Damage()})));
+	  parentUnit.OnDamage(new Packet(name, type, trigger, power, parentUnit, source, new LinkedList<Command>(new[]{new Damage()})));
 	}
 }
 
@@ -58,10 +85,10 @@ public class Dodge : UnitEffect
   public override void Execute(Packet packet)
   {
 	// TODO apply only on physical
-	GD.Print($"Applying dodge: currentStamina {target.currentStamina}, damage to negate {packet.value}, {packet.trigger}");
-	if(target.currentStamina - 5 >= 0 && packet.value > 1 && packet.trigger == Trigger.OnAttacking){
+	GD.Print($"Applying dodge: currentStamina {parentUnit.currentStamina}, damage to negate {packet.value}, {packet.trigger}");
+	if(parentUnit.currentStamina - 5 >= 0 && packet.value > 1 && packet.trigger == Trigger.OnAttacking){
 		packet.value = 1;
-		target.currentStamina = target.currentStamina - 5;
+		parentUnit.currentStamina = parentUnit.currentStamina - 5;
 	}
   }
 }
@@ -103,7 +130,7 @@ public class Counter : UnitEffect
 	if(packet.source != packet.target && (packet.trigger == Trigger.OnAttacking)){
 	  int reflectedDamage = packet.value - power >= 0 ? power : packet.value;
 	  packet.value = packet.value - power >= 0 ? packet.value - power : 0;
-	  target.OnDamage(new Packet(name, type, Trigger.OnDamage, reflectedDamage, packet.source, packet.target, new LinkedList<Command>(new[]{new Damage()})));
+	  parentUnit.OnDamage(new Packet(name, type, Trigger.OnDamage, reflectedDamage, packet.source, packet.target, new LinkedList<Command>(new[]{new Damage()})));
 	}
   }
 }

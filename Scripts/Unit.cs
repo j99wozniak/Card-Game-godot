@@ -1,5 +1,4 @@
 using Godot;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -132,21 +131,25 @@ public partial class Unit : Node
 
 	public void OnBeginTurn(){
 		ExecuteEffects(Trigger.OnBeginTurn);
+		CountdownUnitEffects(Trigger.OnBeginTurn);
 	}
 
 	public void OnEndTurn(){
 		ExecuteEffects(Trigger.OnEndTurn);
+		CountdownUnitEffects(Trigger.OnEndTurn);
 	}
 
 	// Receive a packet
 	public void OnDamage(Packet damage){
 		ExecuteEffects(Trigger.OnDamage, damage);
 		ApplyCommands(damage);
+		CountdownUnitEffects(Trigger.OnDamage);
 	}
 
 	public void OnHeal(Packet heal){
 		ExecuteEffects(Trigger.OnHeal, heal);
 		ApplyCommands(heal);
+		CountdownUnitEffects(Trigger.OnHeal);
 	}
 
 	// Fire a packet
@@ -154,12 +157,14 @@ public partial class Unit : Node
 		ExecuteEffects(Trigger.OnAttacking , attack);
 		GD.Print($"Attacking with: {attack.name}->{attack.value}");
 		attack.target.OnDamage(attack);
+		CountdownUnitEffects(Trigger.OnAttacking);
 	}
 
 	public void OnHealing(Packet healing){
 		ExecuteEffects(Trigger.OnHealing, healing);
 		GD.Print($"Healing with: {healing.name}->{healing.value}");
 		healing.target.OnHeal(healing);
+		CountdownUnitEffects(Trigger.OnHealing);
 	}
 
 	public void OnStartMove(){
@@ -182,6 +187,14 @@ public partial class Unit : Node
 		}
 	}
 
+	void CountdownUnitEffects(Trigger countdownTrigger){
+		LinkedListNode<UnitEffect> e = unitEffects[countdownTrigger].First;
+		while(e != null){
+			e.Value.Countdown();
+			e = e.Next;
+		}
+	}
+
 	void ExecuteEffects(Trigger trigger, Packet packet = null){
 		foreach(TileEffect e in GetTile().tileEffects){
 			if(e.trigger == trigger){
@@ -198,7 +211,5 @@ public partial class Unit : Node
 			e.Apply(packet);
 		}
 	}
-
-
 }
 
