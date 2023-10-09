@@ -4,13 +4,13 @@ using System.Collections.Generic;
 public class Packet
 {
 	public string name;
-	public string type;
-	public string trigger;
+	public Type type;
+	public Trigger trigger;
 	public int value;
 	public Unit target;
 	public Unit source;
 	public LinkedList<Command> commands;
-	public Packet(string name, string type, string trigger, int value, Unit target, Unit source, LinkedList<Command> commands){
+	public Packet(string name, Type type, Trigger trigger, int value, Unit target, Unit source, LinkedList<Command> commands){
 		this.name = name;
 		this.type = type;
 		this.trigger = trigger;

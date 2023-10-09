@@ -11,9 +11,9 @@ public abstract class UnitEffect
 	public int count = 100; // Default (100) means the countdown won't go down
 	public int priority = 0; // The higher the priority the sooner it will be executed
 	public int power = 0;
-	public string type = null;
-	public string trigger = null;
-	public string countDownTrigger = null; // TODO like onDamage or onMoving
+	public Type type = Type.none;
+	public Trigger trigger = Trigger.none;
+	public Trigger countDownTrigger = Trigger.none; // TODO like onDamage or onMoving
 	public LinkedList<TileEffect> linkedTileEffects; // TODO should remove related effects when it's removed
 	public LinkedList<UnitEffect> linkedUnitEffects;
 
@@ -35,8 +35,8 @@ public class Poison : UnitEffect
 {
 	public Poison(int power = 5){
 	  name = "Poison";
-	  type = "Chemical";
-	  trigger = "OnEndTurn";
+	  type = Type.Chemical;
+	  trigger = Trigger.OnEndTurn;
 	  priority = 5;
 	  this.power = power;
 	}
@@ -51,15 +51,15 @@ public class Dodge : UnitEffect
 {
   public Dodge(){
 	name = "Dodge";
-	type = "Physical";
-	trigger = "OnDamage";
+	type = Type.Physical;
+	trigger = Trigger.OnDamage;
 	priority = 10;
   }
   public override void Execute(Packet packet)
   {
 	// TODO apply only on physical
 	GD.Print($"Applying dodge: currentStamina {target.currentStamina}, damage to negate {packet.value}, {packet.trigger}");
-	if(target.currentStamina - 5 >= 0 && packet.value > 1 && packet.trigger == "OnAttacking"){
+	if(target.currentStamina - 5 >= 0 && packet.value > 1 && packet.trigger == Trigger.OnAttacking){
 		packet.value = 1;
 		target.currentStamina = target.currentStamina - 5;
 	}
@@ -71,8 +71,8 @@ public class Armor : UnitEffect
 {
   public Armor(int power = 5){
 	name = "Armor";
-	type = "Physical";
-	trigger = "OnDamage";
+	type = Type.Physical;
+	trigger = Trigger.OnDamage;
 	priority = 5;
 	this.power = power;
   }
@@ -80,7 +80,7 @@ public class Armor : UnitEffect
   {
 	// TODO apply only on physical
 	GD.Print($"Applying armor: {packet.value}-{power}, {packet.trigger}");
-	if(packet.trigger == "OnAttacking" || packet.trigger == "OnDamage"){
+	if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
 	  packet.value = packet.value - power > 0 ? packet.value - power : 0;
 	}
   }
@@ -90,8 +90,8 @@ public class Counter : UnitEffect
 {
   public Counter(int power = 5){
 	name = "Counter";
-	type = "Physical";
-	trigger = "OnDamage";
+	type = Type.Physical;
+	trigger = Trigger.OnDamage;
 	priority = 20;
 	this.power = power;
   }
@@ -100,10 +100,10 @@ public class Counter : UnitEffect
 	GD.Print($"Applying counter: {packet.value}-{power}, {packet.trigger}");
 	  // TODO check for team and for infinite counter loop
 	  // Think if this shouldn't be considered as an attack
-	if(packet.source != packet.target && (packet.trigger == "OnAttacking")){
+	if(packet.source != packet.target && (packet.trigger == Trigger.OnAttacking)){
 	  int reflectedDamage = packet.value - power >= 0 ? power : packet.value;
 	  packet.value = packet.value - power >= 0 ? packet.value - power : 0;
-	  target.OnDamage(new Packet(name, type, "OnDamage", reflectedDamage, packet.source, packet.target, new LinkedList<Command>(new[]{new Damage()})));
+	  target.OnDamage(new Packet(name, type, Trigger.OnDamage, reflectedDamage, packet.source, packet.target, new LinkedList<Command>(new[]{new Damage()})));
 	}
   }
 }
@@ -112,8 +112,8 @@ public class PreciseShots : UnitEffect
 {
   public PreciseShots(int power = 5){
 	name = "PreciseShots";
-	type = "Physical";
-	trigger = "OnAttacking";
+	type = Type.Physical;
+	trigger = Trigger.OnAttacking;
 	priority = 20;
 	this.power = power;
   }
@@ -129,8 +129,8 @@ public class Skip : UnitEffect
 {
   public Skip(){
 	name = "Skip";
-	type = "Physical";
-	trigger = "OnMoving";
+	type = Type.Physical;
+	trigger = Trigger.OnMoving;
 	priority = 5;
   }
   public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit)
@@ -147,8 +147,8 @@ public class Eager : UnitEffect
 {
   public Eager(){
 	name = "Eager";
-	type = "Physical";
-	trigger = "OnGetMaxMovement";
+	type = Type.Physical;
+	trigger = Trigger.OnGetMaxMovement;
 	priority = 5;
   }
   public override void Getter(ref int movementPoints)

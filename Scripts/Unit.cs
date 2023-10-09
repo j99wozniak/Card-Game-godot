@@ -6,20 +6,20 @@ using System.Linq;
 public partial class Unit : Node
 {
 	// TODO maybe these triggers should be enums?
-	public Dictionary<string, LinkedList<UnitEffect>> unitEffects = new Dictionary<string, LinkedList<UnitEffect>>{
-		{"OnBeginTurn", new LinkedList<UnitEffect>()},
-		{"OnEndTurn", new LinkedList<UnitEffect>()},
-		{"OnDamage", new LinkedList<UnitEffect>()},
-		{"OnHeal", new LinkedList<UnitEffect>()},
-		{"OnAttacking", new LinkedList<UnitEffect>()},
-		{"OnHealing", new LinkedList<UnitEffect>()},
-		{"OnStartMove", new LinkedList<UnitEffect>()},
-		{"OnEndMove", new LinkedList<UnitEffect>()},
-		{"OnMoving", new LinkedList<UnitEffect>()},
+	public Dictionary<Trigger, LinkedList<UnitEffect>> unitEffects = new Dictionary<Trigger, LinkedList<UnitEffect>>{
+		{Trigger.OnBeginTurn, new LinkedList<UnitEffect>()},
+		{Trigger.OnEndTurn, new LinkedList<UnitEffect>()},
+		{Trigger.OnDamage, new LinkedList<UnitEffect>()},
+		{Trigger.OnHeal, new LinkedList<UnitEffect>()},
+		{Trigger.OnAttacking, new LinkedList<UnitEffect>()},
+		{Trigger.OnHealing, new LinkedList<UnitEffect>()},
+		{Trigger.OnStartMove, new LinkedList<UnitEffect>()},
+		{Trigger.OnEndMove, new LinkedList<UnitEffect>()},
+		{Trigger.OnMoving, new LinkedList<UnitEffect>()},
 
-		{"OnGetMaxHp", new LinkedList<UnitEffect>()},
-		{"OnGetMaxStamina", new LinkedList<UnitEffect>()},
-		{"OnGetMaxMovement", new LinkedList<UnitEffect>()},
+		{Trigger.OnGetMaxHp, new LinkedList<UnitEffect>()},
+		{Trigger.OnGetMaxStamina, new LinkedList<UnitEffect>()},
+		{Trigger.OnGetMaxMovement, new LinkedList<UnitEffect>()},
 	};
 
 	public LinkedList<Skill> skills = new();
@@ -29,15 +29,15 @@ public partial class Unit : Node
 	public string unitName;
 
 	public int baseMaxHp;
-	public int maxHp { get { return StatGetter(baseMaxHp, "OnGetMaxHp"); } } 
+	public int maxHp { get { return StatGetter(baseMaxHp, Trigger.OnGetMaxHp); } } 
 	public int currentHp;
 
 	public int baseMaxStamina;
-	public int maxStamina { get { return StatGetter(baseMaxStamina, "OnGetMaxStamina"); } }
+	public int maxStamina { get { return StatGetter(baseMaxStamina, Trigger.OnGetMaxStamina); } }
 	public int currentStamina;
 
 	public int baseMaxMovement;
-	public int maxMovement{ get { return StatGetter(baseMaxMovement, "OnGetMaxMovement"); } }
+	public int maxMovement{ get { return StatGetter(baseMaxMovement, Trigger.OnGetMaxMovement); } }
 	public int currentMovement;
 
 	public int x;
@@ -48,7 +48,7 @@ public partial class Unit : Node
 	// TODO Could probably make this smarter.
 	// like setting an ID for each sequence of effects, 
 	// and then checking if the sequence is the same
-	public int StatGetter(int baseStat, string trigger){
+	public int StatGetter(int baseStat, Trigger trigger){
 		int fetchedStat = baseStat;
 		foreach(TileEffect e in GetTile().tileEffects){
 			if(e.trigger == trigger){
@@ -84,8 +84,8 @@ public partial class Unit : Node
 		}
 	}
 	
-	public bool HasEffect(string effectName, string effectTrigger = null){
-		if(effectTrigger != null){
+	public bool HasEffect(string effectName, Trigger effectTrigger = Trigger.none){
+		if(effectTrigger != Trigger.none){
 			foreach(UnitEffect e in unitEffects[effectTrigger]){
 				if(e.name == effectName){
 					return true;
@@ -93,7 +93,7 @@ public partial class Unit : Node
 			}
 			return false;
 		}
-		foreach(KeyValuePair<string, LinkedList<UnitEffect>> list in unitEffects){
+		foreach(KeyValuePair<Trigger, LinkedList<UnitEffect>> list in unitEffects){
 			foreach(UnitEffect e in list.Value){
 				if(e.name == effectName){
 					return true;
@@ -131,33 +131,33 @@ public partial class Unit : Node
 	}
 
 	public void OnBeginTurn(){
-		ExecuteEffects("OnBeginTurn");
+		ExecuteEffects(Trigger.OnBeginTurn);
 	}
 
 	public void OnEndTurn(){
-		ExecuteEffects("OnEndTurn");
+		ExecuteEffects(Trigger.OnEndTurn);
 	}
 
 	// Receive a packet
 	public void OnDamage(Packet damage){
-		ExecuteEffects("OnDamage", damage);
+		ExecuteEffects(Trigger.OnDamage, damage);
 		ApplyCommands(damage);
 	}
 
 	public void OnHeal(Packet heal){
-		ExecuteEffects("OnHeal", heal);
+		ExecuteEffects(Trigger.OnHeal, heal);
 		ApplyCommands(heal);
 	}
 
 	// Fire a packet
 	public void OnAttacking(Packet attack){
-		ExecuteEffects("OnAttacking", attack);
+		ExecuteEffects(Trigger.OnAttacking , attack);
 		GD.Print($"Attacking with: {attack.name}->{attack.value}");
 		attack.target.OnDamage(attack);
 	}
 
 	public void OnHealing(Packet healing){
-		ExecuteEffects("OnHealing", healing);
+		ExecuteEffects(Trigger.OnHealing, healing);
 		GD.Print($"Healing with: {healing.name}->{healing.value}");
 		healing.target.OnHeal(healing);
 	}
@@ -168,21 +168,21 @@ public partial class Unit : Node
 
 	public void OnMoving(ref float movementCost, Tile tile){
 		foreach(TileEffect e in tile.tileEffects){
-			if(e.trigger == "OnMovingThrough"){
+			if(e.trigger == Trigger.OnMovingThrough){
 				e.MovementExecute(ref movementCost, tile, this);
 			}
 		}
 		foreach(TileEffect e in GetTile().tileEffects){
-			if(e.trigger == "OnMoving"){
+			if(e.trigger == Trigger.OnMoving){
 				e.MovementExecute(ref movementCost, tile, this);
 			}
 		}
-		foreach(UnitEffect e in unitEffects["OnMoving"]){
+		foreach(UnitEffect e in unitEffects[Trigger.OnMoving]){
 			e.MovementExecute(ref movementCost, tile, this);
 		}
 	}
 
-	void ExecuteEffects(string trigger, Packet packet = null){
+	void ExecuteEffects(Trigger trigger, Packet packet = null){
 		foreach(TileEffect e in GetTile().tileEffects){
 			if(e.trigger == trigger){
 				e.Execute(packet);

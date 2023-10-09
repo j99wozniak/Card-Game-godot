@@ -9,9 +9,9 @@ public class TileEffect
 	public int count = 100; // Default (100) means the countdown won't go down
 	public int priority = 0; // The higher the priority the sooner it will be executed
 	public int power = 0;
-	public string type = null;
-	public string trigger = null;
-	public string countDownTrigger = null; // TODO like onDamage or onMoving
+	public Type type = Type.none;
+	public Trigger trigger = Trigger.none;
+	public Trigger countDownTrigger = Trigger.none; // TODO like onDamage or onMoving
 	public LinkedList<TileEffect> linkedTileEffects; // TODO should remove related effects when it's removed
 	public LinkedList<UnitEffect> linkedUnitEffects; 
 	public LinkedList<TileEffect> childrenTileEffects; // TODO should be removed when parent effect is dicarded, but not the other way
@@ -30,8 +30,8 @@ public class RockyTerrain : TileEffect
 {
   public RockyTerrain(int power = 1){
 	name = "RockyTerrain";
-	type = "Physical";
-	trigger = "OnDamage";
+	type = Type.Physical;
+	trigger = Trigger.OnDamage;
 	priority = 1;
 	this.power = power;
   }
@@ -39,7 +39,7 @@ public class RockyTerrain : TileEffect
   {
 	// TODO apply only on physical
 	GD.Print($"Applying RockyTerrain: {packet.value}-{power}, {packet.trigger}");
-	if(packet.trigger == "OnAttacking" || packet.trigger == "OnDamage"){
+	if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
 	  packet.value = packet.value - power > 0 ? packet.value - power : 0;
 	}
 	GD.Print("Also, the guy that's benefiting from this is called " + parentTile.GetUnit().unitName);
@@ -54,8 +54,8 @@ public class Glue : TileEffect
 {
   public Glue(){
 	name = "Glue";
-	type = "Chemical";
-	trigger = "OnMovingThrough";
+	type = Type.Chemical;
+	trigger = Trigger.OnMovingThrough;
 	priority = 5;
   }
   public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit)
