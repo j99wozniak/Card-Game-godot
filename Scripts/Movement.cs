@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public static class Movement{
 	public static Dictionary<(int, int), float> GetAccessibleTiles(Unit unit, GameMap map){
 		Dictionary<(int x, int y), float> accessibleTiles = new Dictionary<(int, int), float>();
-		float maxMovement = unit.movementPoints;
+		float maxMovement = unit.currentMovement;
 
 		Stack<(int x, int y, float cost)> possibilities = new Stack<(int, int, float)>();
 		possibilities.Push((unit.x, unit.y, 0));

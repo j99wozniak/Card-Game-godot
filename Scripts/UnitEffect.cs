@@ -19,6 +19,7 @@ public abstract class UnitEffect
 
 	public virtual void Execute(Packet packet){}
 	public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){}
+	public virtual void Getter(ref int valueToModify){}
 	public void CountDown(){ //
 	  if(count <= 100){
 		count--;
@@ -137,5 +138,21 @@ public class Skip : UnitEffect
 		if(movementCost > 1 && movementCost < 5){
 			movementCost = 1;
 		}
+  }
+}
+
+
+// Getter effects
+public class Eager : UnitEffect
+{
+  public Eager(){
+	name = "Eager";
+	type = "Physical";
+	trigger = "OnGetMaxMovement";
+	priority = 5;
+  }
+  public override void Getter(ref int movementPoints)
+  {
+		movementPoints += 10;
   }
 }

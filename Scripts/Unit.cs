@@ -15,12 +15,11 @@ public partial class Unit : Node
 		{"OnHealing", new LinkedList<UnitEffect>()},
 		{"OnStartMove", new LinkedList<UnitEffect>()},
 		{"OnEndMove", new LinkedList<UnitEffect>()},
-		{"OnMoving", new LinkedList<UnitEffect>()}
-		// TODO Getters, of maxHp, Movement, maxStamina, etc. like {"OnGetMaxHP", new LinkedList<UnitEffect>()}
-		// Should they be based on packets? Or references. Probably references
-		// Should have base value, that then gets changed by effects.
-		// Should probably fire all getters before every `OnX`? 
-			// Or maybe effects that change their value should remember about that.
+		{"OnMoving", new LinkedList<UnitEffect>()},
+
+		{"OnGetMaxHp", new LinkedList<UnitEffect>()},
+		{"OnGetMaxStamina", new LinkedList<UnitEffect>()},
+		{"OnGetMaxMovement", new LinkedList<UnitEffect>()},
 	};
 
 	public LinkedList<Skill> skills = new();
@@ -29,18 +28,38 @@ public partial class Unit : Node
 
 	public string unitName;
 
-	public int maxHp;
+	public int baseMaxHp;
+	public int maxHp { get { return StatGetter(baseMaxHp, "OnGetMaxHp"); } } 
 	public int currentHp;
 
-	public int maxStamina;
+	public int baseMaxStamina;
+	public int maxStamina { get { return StatGetter(baseMaxStamina, "OnGetMaxStamina"); } }
 	public int currentStamina;
 
-	public int movementPoints;
+	public int baseMaxMovement;
+	public int maxMovement{ get { return StatGetter(baseMaxMovement, "OnGetMaxMovement"); } }
+	public int currentMovement;
 
 	public int x;
 	public int y;
 
 	// TODO create constructor
+
+	// TODO Could probably make this smarter.
+	// like setting an ID for each sequence of effects, 
+	// and then checking if the sequence is the same
+	public int StatGetter(int baseStat, string trigger){
+		int fetchedStat = baseStat;
+		foreach(TileEffect e in GetTile().tileEffects){
+			if(e.trigger == trigger){
+				e.Getter(ref fetchedStat);
+			}
+		}
+		foreach(UnitEffect e in unitEffects[trigger]){
+			e.Getter(ref fetchedStat);
+		}
+		return fetchedStat;
+	}
 
 	public Tile GetTile(){
 		return map.tileMap[x,y];

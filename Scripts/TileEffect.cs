@@ -19,6 +19,7 @@ public class TileEffect
 
 	public virtual void Execute(Packet packet){}
 	public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){}
+	public virtual void Getter(ref int valueToModify){}
 	public void CountDown(){
 	  // TODO
 	}

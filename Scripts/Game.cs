@@ -78,9 +78,9 @@ public partial class Game : Node
 		{
 			unitName = "u1",
 			map = map,
-			maxHp = 20,
+			baseMaxHp = 20,
 			currentHp = 20,
-			maxStamina = 10,
+			baseMaxStamina = 10,
 			currentStamina = 10,
 			x = 1,
 			y = 1
@@ -94,9 +94,9 @@ public partial class Game : Node
 		Unit u2 = new Unit();
 		u2.unitName = "u2";
 		u2.map = map;
-		u2.maxHp = 20;
+		u2.baseMaxHp = 20;
 		u2.currentHp = 20;
-		u2.maxStamina = 10;
+		u2.baseMaxStamina = 10;
 		u2.currentStamina = 6;
 		u2.x = 3;
 		u2.y = 3;
@@ -152,18 +152,21 @@ public partial class Game : Node
 		{
 			unitName = "u1",
 			map = map,
-			maxHp = 20,
+			baseMaxHp = 20,
 			currentHp = 20,
-			maxStamina = 10,
+			baseMaxStamina = 10,
 			currentStamina = 10,
 			x = 15,
 			y = 15,
-			movementPoints = 10
+			baseMaxMovement = 10,
+			currentMovement = 10
 		};
 
 		map.unitMap[u1.x,u1.y] = u1;
 
 		u1.AddUnitEffect(new Skip());
+		u1.AddUnitEffect(new Eager());
+		u1.currentMovement = u1.maxMovement;
 
 
 		// Create a Stopwatch instance
