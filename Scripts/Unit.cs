@@ -64,42 +64,58 @@ public partial class Unit : Node
 		return map.tileMap[x,y];
 	}
 
-	// TODO add parentUnit, check for stackability and or uniqueness
 	public void AddUnitEffect(UnitEffect effect){
-		effect.parentUnit = this;
-		if(!unitEffects[effect.trigger].Any()){
-			unitEffects[effect.trigger].AddLast(effect);
+		UnitEffect existingEffect = GetUnitEffectByName(effect.name, effect.trigger);
+		if(existingEffect == null){
+			effect.parentUnit = this;
+			if(!unitEffects[effect.trigger].Any()){
+				unitEffects[effect.trigger].AddLast(effect);
+			}
+			else{
+				for(LinkedListNode<UnitEffect> e = unitEffects[effect.trigger].First; e != null; ){
+					if(e.Value.priority < effect.priority){
+						unitEffects[effect.trigger].AddBefore(e, effect);
+						return;
+					}
+					e = e.Next;
+				}
+				unitEffects[effect.trigger].AddLast(effect);
+			}
 			return;
 		}
-		else{
-			for(LinkedListNode<UnitEffect> e = unitEffects[effect.trigger].First; e != null; ){
-				if(e.Value.priority < effect.priority){
-					unitEffects[effect.trigger].AddBefore(e, effect);
-					return;
+		if(existingEffect.stackable){
+			existingEffect.power += effect.power;
+			effect.power = existingEffect.power;
+		}
+		if(existingEffect.count < effect.count){
+			LinkedListNode<UnitEffect> e = unitEffects[existingEffect.trigger].First;
+			while(e != null){
+				if(e.Value == existingEffect){
+					e.Value = effect;
+					break;
 				}
 				e = e.Next;
 			}
-			unitEffects[effect.trigger].AddLast(effect);
 		}
 	}
 	
-	public bool HasEffect(string effectName, Trigger effectTrigger = Trigger.none){
+	public UnitEffect GetUnitEffectByName(string effectName, Trigger effectTrigger = Trigger.none){
 		if(effectTrigger != Trigger.none){
 			foreach(UnitEffect e in unitEffects[effectTrigger]){
 				if(e.name == effectName){
-					return true;
+					return e;
 				}
 			}
-			return false;
+			return null;
 		}
 		foreach(KeyValuePair<Trigger, LinkedList<UnitEffect>> list in unitEffects){
 			foreach(UnitEffect e in list.Value){
 				if(e.name == effectName){
-					return true;
+					return e;
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 	// TODO remove UnitEffect by name (and source?)

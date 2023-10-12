@@ -24,21 +24,55 @@ public partial class Tile : Node
 
 	public void AddTileEffect(TileEffect effect){
 		// TODO add Unit source (that can be null)
-		effect.parentTile = this;
-		if(!tileEffects.Any()){
-			tileEffects.AddLast(effect);
+		TileEffect existingEffect = GetTileEffectByName(effect.name, effect.trigger);
+		if(existingEffect == null){
+			effect.parentTile = this;
+			if(!tileEffects.Any()){
+				tileEffects.AddLast(effect);
+			}
+			else{
+				for(LinkedListNode<TileEffect> eIterator = tileEffects.First; eIterator != null; ){
+					if(eIterator.Value.priority < effect.priority){
+						tileEffects.AddBefore(eIterator, effect);
+						return;
+					}
+					eIterator = eIterator.Next;
+				}
+				tileEffects.AddLast(effect);
+			}
 			return;
 		}
-		else{
-			for(LinkedListNode<TileEffect> eIterator = tileEffects.First; eIterator != null; ){
-				if(eIterator.Value.priority < effect.priority){
-					tileEffects.AddBefore(eIterator, effect);
-					return;
-				}
-				eIterator = eIterator.Next;
-			}
-			tileEffects.AddLast(effect);
+		if(existingEffect.stackable){
+			existingEffect.power += effect.power;
+			effect.power = existingEffect.power;
 		}
+		if(existingEffect.count < effect.count){
+			LinkedListNode<TileEffect> e = tileEffects.First;
+			while(e != null){
+				if(e.Value == existingEffect){
+					e.Value = effect;
+					break;
+				}
+				e = e.Next;
+			}
+		}
+	}
+
+	public TileEffect GetTileEffectByName(string effectName, Trigger effectTrigger = Trigger.none){
+		if(effectTrigger != Trigger.none){
+			foreach(TileEffect e in tileEffects){
+				if(e.name == effectName && e.trigger == effectTrigger){
+					return e;
+				}
+			}
+			return null;
+		}
+		foreach(TileEffect e in tileEffects){
+				if(e.name == effectName){
+					return e;
+				}
+			}
+		return null;
 	}
 
 	public void RemoveTileEffect(TileEffect effect){

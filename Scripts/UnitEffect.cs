@@ -10,6 +10,7 @@ public abstract class UnitEffect
 	public int count = 100; // Default (100) means the countdown won't go down
 	public int priority = 0; // The higher the priority the sooner it will be executed
 	public int power = 0;
+	public bool stackable = false;
 	public Type type = Type.none;
 	public Trigger trigger = Trigger.none;
 	public Trigger countdownTrigger = Trigger.none;
@@ -66,6 +67,8 @@ public class Poison : UnitEffect
 	  trigger = Trigger.OnEndTurn;
 	  priority = 5;
 	  this.power = power;
+		count = 5;
+		stackable = true;
 	}
 	public override void Execute(Packet packet = null){
 	  parentUnit.OnDamage(new Packet(name, type, trigger, power, parentUnit, source, new LinkedList<Command>(new[]{new Damage()})));

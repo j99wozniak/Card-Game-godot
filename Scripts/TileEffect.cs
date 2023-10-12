@@ -9,6 +9,7 @@ public class TileEffect
 	public int count = 100; // Default (100) means the countdown won't go down
 	public int priority = 0; // The higher the priority the sooner it will be executed
 	public int power = 0;
+	public bool stackable = false;
 	public Type type = Type.none;
 	public Trigger trigger = Trigger.none;
 	public Trigger countdownTrigger = Trigger.none;
@@ -87,11 +88,15 @@ public class Glue : TileEffect
 	name = "Glue";
 	type = Type.Chemical;
 	trigger = Trigger.OnMovingThrough;
+	countdownTrigger = Trigger.OnEndTurn;
+	power = 10;
+	stackable = true;
+	count = 2;
 	priority = 5;
   }
   public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit)
   {
-		if(!movingUnit.HasEffect("Skip")){
+		if(movingUnit.GetUnitEffectByName("Skip") == null){
 			movementCost = 10;
 		}
   }

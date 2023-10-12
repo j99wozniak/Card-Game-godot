@@ -222,10 +222,6 @@ public partial class Game : Node
 				map.tileMap[i,j] = tile;
 			} 
 		}
-		TileEffect rockyTerrain = new RockyTerrain(1);
-		map.tileMap[3,3].AddTileEffect(rockyTerrain);
-
-		map.tileMap[16,15].AddTileEffect(new Glue());
 		
 		Unit u1 = new Unit
 		{
@@ -241,9 +237,10 @@ public partial class Game : Node
 			currentMovement = 10
 		};
 
-		GD.Print($"Before {u1.HasEffect("Poison")} ");
+		GD.Print($"Before {u1.GetUnitEffectByName("Poison")} ");
 		map.unitMap[u1.x,u1.y] = u1;
 		UnitEffect poison = new Poison();
+		UnitEffect poison2 = new Poison();
 		UnitEffect eager = new Eager();
 
 		poison.count = 2;
@@ -251,15 +248,25 @@ public partial class Game : Node
 		eager.linkedUnitEffects.AddLast(poison);
 
 		u1.AddUnitEffect(poison);
+		u1.AddUnitEffect(poison2);
 		u1.AddUnitEffect(eager);
 
-		u1.OnEndTurn();
-		u1.OnEndTurn();
-		u1.OnEndTurn();
 
-		GD.Print($"Does u1 have Poison: {u1.HasEffect("Poison")} ");
-		GD.Print($"Does u1 have Eager: {u1.HasEffect("Eager")} ");
-		GD.Print($"u1 HP: {u1.currentHp} ");
+		TileEffect rockyTerrain = new RockyTerrain(1);
+		map.tileMap[3,3].AddTileEffect(rockyTerrain);
+
+		map.tileMap[16,15].AddTileEffect(new Glue());
+		map.tileMap[16,15].CountdownTileEffects(Trigger.OnEndTurn);
+		map.tileMap[16,15].AddTileEffect(new Glue());
+
+		//u1.OnEndTurn();
+		//u1.OnEndTurn();
+
+		GD.Print($"Does u1 have Poison (count): {u1.GetUnitEffectByName("Poison").count} ");
+		GD.Print($"Does u1 have Poison (power): {u1.GetUnitEffectByName("Poison").power} ");
+		GD.Print($"Does u1 have Eager: {u1.GetUnitEffectByName("Eager")} ");
+		GD.Print($"Does map.tileMap[16,15] have Glue (count): {map.tileMap[16,15].GetTileEffectByName("Glue").count} ");
+		GD.Print($"Does map.tileMap[16,15] have Glue (count): {map.tileMap[16,15].GetTileEffectByName("Glue").power} ");
 	}
 
 }
