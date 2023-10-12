@@ -42,7 +42,19 @@ public partial class Unit : Node
 	public int x;
 	public int y;
 
-	// TODO create constructor
+	public Unit(GameMap map, string unitName, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, int x, int y){
+		this.map = map;
+		this.unitName = unitName;
+		this.baseMaxHp = baseMaxHp;
+		currentHp = baseMaxHp;
+		this.baseMaxStamina = baseMaxStamina;
+		currentStamina = baseMaxStamina;
+		this.baseMaxMovement = baseMaxMovement;
+		currentMovement = baseMaxMovement;
+		this.x = x;
+		this.y = y;
+		map.unitMap[x,y] = this;
+	}
 
 	// TODO Could probably make this smarter.
 	// like setting an ID for each sequence of effects, 

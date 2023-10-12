@@ -4,15 +4,36 @@ using System.Linq;
 
 public partial class Tile : Node
 {
-	public string tileName;
 	public GameMap map;
+	public string tileName;
+	public float cost;
 	public int x;
 	public int y;
-	public float cost;
 	public LinkedList<TileEffect> tileEffects = new();
 	public Sprite2D tileSprite;
 	
-	// TODO create constructor
+	
+	static public Node2D createTileNode(Tile tile, Texture2D texture){
+		Node2D tileNode = new Node2D();
+		tileNode.AddChild(tile);
+		Sprite2D sprite = new Sprite2D(); // Create a new Sprite2D.
+		sprite.Texture = texture;
+		tile.tileSprite = sprite;
+		sprite.Name = "spriteNode";
+		tileNode.AddChild(sprite);
+		tileNode.Position = tile.GetRealPosition();
+		return tileNode;
+	}
+
+	public Tile(GameMap map, string tileName, float cost, int x, int y){
+		this.map = map;
+		this.tileName = tileName;
+		this.cost = cost;
+		this.x = x;
+		this.y = y;
+		map.tileMap[x,y] = this;
+
+	}
 
 	public Vector2 GetRealPosition(){
 		return new Vector2(x*32, y*32);

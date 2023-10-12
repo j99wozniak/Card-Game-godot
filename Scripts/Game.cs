@@ -21,9 +21,9 @@ public partial class Game : Node
 		
 		//test1();
 
-		//test2();
+		test2();
 
-		test3();
+		//test3();
 
 		// U1 has passive Defend
 		// Effect onMove to remove this effect from nerby units, and to apply it when the move is done
@@ -51,52 +51,22 @@ public partial class Game : Node
 
 		for (int i = 0; i < map.sizeX; i++){
 			for (int j = 0; j < map.sizeY; j++){
-				Node2D tileNode = new Node2D();
-				Tile tile = new Tile();
-				tileNode.AddChild(tile);
-				tile.tileName = "Plains";
-				tile.map = map;
-				tile.x = i;
-				tile.y = j;
-				Sprite2D plainsSprite = new Sprite2D(); // Create a new Sprite2D.
-				plainsSprite.Texture = plainsTexture;
-				tile.tileSprite = plainsSprite;
-				tileNode.AddChild(plainsSprite);
-				tileNode.Position = tile.GetRealPosition();
+				Tile tile = new Tile(map, "plains", 1, i, j);
+				Node2D tileNode = Tile.createTileNode(tile, plainsTexture);
 				AddChild(tileNode);
-				map.tileMap[i,j] = tile;
 			} 
 		}
 		TileEffect rockyTerrain = new RockyTerrain(1);
 		map.tileMap[3,3].AddTileEffect(rockyTerrain);
 		
-		Unit u1 = new Unit
-		{
-			unitName = "u1",
-			map = map,
-			baseMaxHp = 20,
-			currentHp = 20,
-			baseMaxStamina = 10,
-			currentStamina = 10,
-			x = 1,
-			y = 1
-		};
+		Unit u1 = new Unit(map, "u1", 20, 15, 8, 5, 5);
 
 		map.unitMap[u1.x,u1.y] = u1;
 
 		u1.AddSkill(new DoubleTap(10));
 		u1.AddUnitEffect(new PreciseShots(5));
 
-		Unit u2 = new Unit();
-		u2.unitName = "u2";
-		u2.map = map;
-		u2.baseMaxHp = 20;
-		u2.currentHp = 20;
-		u2.baseMaxStamina = 10;
-		u2.currentStamina = 6;
-		u2.x = 3;
-		u2.y = 3;
-		map.unitMap[u2.x,u2.y] = u2;
+		Unit u2 = new Unit(map, "u2", 20, 10, 8, 3, 3);
 
 		UnitEffect dodge1 = new Dodge();
 		dodge1.source = u2;
@@ -120,22 +90,9 @@ public partial class Game : Node
 
 		for (int i = 0; i < map.sizeX; i++){
 			for (int j = 0; j < map.sizeY; j++){
-				Node2D tileNode = new Node2D();
-				Tile tile = new Tile();
-				tileNode.AddChild(tile);
-				tile.tileName = "Plains";
-				tile.map = map;
-				tile.x = i;
-				tile.y = j;
-				tile.cost = 1;
-				Sprite2D plainsSprite = new Sprite2D(); // Create a new Sprite2D.
-				plainsSprite.Texture = plainsTexture;
-				tile.tileSprite = plainsSprite;
-				plainsSprite.Name = "spriteNode";
-				tileNode.AddChild(plainsSprite);
-				tileNode.Position = tile.GetRealPosition();
+				Tile tile = new Tile(map, "plains", 1, i, j);
+				Node2D tileNode = Tile.createTileNode(tile, plainsTexture);
 				AddChild(tileNode);
-				map.tileMap[i,j] = tile;
 			} 
 		}
 		TileEffect rockyTerrain = new RockyTerrain(1);
@@ -143,19 +100,7 @@ public partial class Game : Node
 
 		map.tileMap[16,15].AddTileEffect(new Glue());
 		
-		Unit u1 = new Unit
-		{
-			unitName = "u1",
-			map = map,
-			baseMaxHp = 20,
-			currentHp = 20,
-			baseMaxStamina = 10,
-			currentStamina = 10,
-			x = 15,
-			y = 15,
-			baseMaxMovement = 10,
-			currentMovement = 10
-		};
+		Unit u1 = new Unit(map, "u1", 20, 15, 8, 15, 15);
 
 		map.unitMap[u1.x,u1.y] = u1;
 
@@ -176,15 +121,8 @@ public partial class Game : Node
 
 		foreach (var kvp in dict) {
 			GD.Print($"Key = {kvp.Key}, Value = {kvp.Value}");
-			//Sprite2D sandsSprite = new Sprite2D(); // Create a new Sprite2D.
-			//sandsSprite.Texture = sandsTexture;
 			Tile tile = map.tileMap[kvp.Key.x,kvp.Key.y];
-			Node2D tileNode = (Node2D)tile.GetParent();
-			//tile.tileSprite = sandsSprite;
-
-			Sprite2D mySprite = tileNode.GetNode<Sprite2D>("spriteNode");
-			mySprite.Texture = sandsTexture;
-			//tileNode.AddChild(plainsSprite);
+			tile.tileSprite.Texture = sandsTexture;
 		}
 
 		// Stop the stopwatch
@@ -204,38 +142,13 @@ public partial class Game : Node
 		Texture2D sandsTexture = (Texture2D)GD.Load("res://Sprites/Tiles/sands.png");
 		for (int i = 0; i < map.sizeX; i++){
 			for (int j = 0; j < map.sizeY; j++){
-				Node2D tileNode = new Node2D();
-				Tile tile = new Tile();
-				tileNode.AddChild(tile);
-				tile.tileName = "Plains";
-				tile.map = map;
-				tile.x = i;
-				tile.y = j;
-				tile.cost = 1;
-				Sprite2D plainsSprite = new Sprite2D(); // Create a new Sprite2D.
-				plainsSprite.Texture = plainsTexture;
-				tile.tileSprite = plainsSprite;
-				plainsSprite.Name = "spriteNode";
-				tileNode.AddChild(plainsSprite);
-				tileNode.Position = tile.GetRealPosition();
+				Tile tile = new Tile(map, "plains", 1, i, j);
+				Node2D tileNode = Tile.createTileNode(tile, plainsTexture);
 				AddChild(tileNode);
-				map.tileMap[i,j] = tile;
 			} 
 		}
 		
-		Unit u1 = new Unit
-		{
-			unitName = "u1",
-			map = map,
-			baseMaxHp = 20,
-			currentHp = 20,
-			baseMaxStamina = 10,
-			currentStamina = 10,
-			x = 15,
-			y = 15,
-			baseMaxMovement = 10,
-			currentMovement = 10
-		};
+		Unit u1 = new Unit(map, "u1", 20, 15, 8, 15, 15);
 
 		GD.Print($"Before {u1.GetUnitEffectByName("Poison")} ");
 		map.unitMap[u1.x,u1.y] = u1;
