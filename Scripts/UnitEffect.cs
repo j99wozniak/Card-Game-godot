@@ -20,6 +20,7 @@ public abstract class UnitEffect
 	public virtual void Execute(Packet packet){}
 	public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){}
 	public virtual void Getter(ref int valueToModify){}
+	public virtual void Getter(ref int valueToModify, Skill skill){}
 	public void Countdown(){
 		foreach(TileEffect e in linkedTileEffects){
 			e.CountdownChild();
@@ -143,14 +144,15 @@ public class PreciseShots : UnitEffect
   public PreciseShots(int power = 5){
 	name = "PreciseShots";
 	type = Type.Physical;
-	trigger = Trigger.OnAttacking;
+	trigger = Trigger.OnGetSkillPower;
 	priority = 20;
 	this.power = power;
   }
-  public override void Execute(Packet packet)
-  {
-	GD.Print($"Applying PreciseShots: {packet.value}+{power}");
-	packet.value += power;
+	public override void Getter(ref int valueToModify, Skill skill){
+		GD.Print($"Applying PreciseShots: {valueToModify}+{power}");
+		if(skill.category == Category.Offensive && skill.isMelee == false){
+			valueToModify += power;
+		}
   }
 }
 

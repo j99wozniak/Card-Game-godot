@@ -3,37 +3,44 @@ using System.Collections.Generic;
 
 public abstract class Skill
 {
-  public Unit source;
+  public Unit source = null;
   public string name = null;
-  public Type type;
-  public int power = 0;
+  public Type type = Type.none;
+  public Category category = Category.none;
+  public bool isMelee = true;
+  public int basePower = -1;
+  public int currentPower { get { return source.SkillStatGetter(basePower, Trigger.OnGetSkillPower, this); } } 
   // TODO overload for cells, and multiple targets
   public abstract void Fire(Unit target);
 }
 
 public class DoubleTap : Skill
 {
-  public DoubleTap(int power = 10){
+  public DoubleTap(int basePower = 10){
 	name = "DoubleTap";
-	this.power = power;
 	this.type = Type.Physical;
+  this.category = Category.Offensive;
+  this.isMelee = false;
+	this.basePower = basePower;
   }
   public override void Fire(Unit target){
-	source.OnAttacking(new Packet(name, type, Trigger.OnAttacking, power, target, source, new LinkedList<Command>(new[]{new Damage()})));
-	source.OnAttacking(new Packet(name, type, Trigger.OnAttacking, power, target, source, new LinkedList<Command>(new[]{new Damage()})));
+	source.OnAttacking(new Packet(name, type, Trigger.OnAttacking, currentPower, target, source, new LinkedList<Command>(new[]{new Damage()})));
+	source.OnAttacking(new Packet(name, type, Trigger.OnAttacking, currentPower, target, source, new LinkedList<Command>(new[]{new Damage()})));
   }
 }
 
 public class BitterMedicine : Skill
 {
-  public BitterMedicine(int power = 10){
+  public BitterMedicine(int basePower = 10){
 	name = "BitterMedicine";
-	this.power = power;
 	this.type = Type.Chemical;
+  this.category = Category.Supportive;
+  this.isMelee = true;
+	this.basePower = basePower;
   }
   public override void Fire(Unit target){
-	target.OnHealing(new Packet(name, type, Trigger.OnHealing, power, target, source, new LinkedList<Command>(new[]{new Heal()})));
-	Poison bitterPoison = new Poison(power / 10);
+	target.OnHealing(new Packet(name, type, Trigger.OnHealing, currentPower, target, source, new LinkedList<Command>(new[]{new Heal()})));
+	Poison bitterPoison = new Poison();
 	bitterPoison.source = source;
 	target.AddUnitEffect(bitterPoison);
   }

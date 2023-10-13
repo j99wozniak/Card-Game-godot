@@ -19,6 +19,8 @@ public partial class Unit : Node
 		{Trigger.OnGetMaxHp, new LinkedList<UnitEffect>()},
 		{Trigger.OnGetMaxStamina, new LinkedList<UnitEffect>()},
 		{Trigger.OnGetMaxMovement, new LinkedList<UnitEffect>()},
+
+		{Trigger.OnGetSkillPower, new LinkedList<UnitEffect>()},
 	};
 
 	public LinkedList<Skill> skills = new();
@@ -68,6 +70,19 @@ public partial class Unit : Node
 		}
 		foreach(UnitEffect e in unitEffects[trigger]){
 			e.Getter(ref fetchedStat);
+		}
+		return fetchedStat;
+	}
+
+	public int SkillStatGetter(int baseStat, Trigger trigger, Skill skill){
+		int fetchedStat = baseStat;
+		foreach(TileEffect e in GetTile().tileEffects){
+			if(e.trigger == trigger){
+				e.Getter(ref fetchedStat, skill);
+			}
+		}
+		foreach(UnitEffect e in unitEffects[trigger]){
+			e.Getter(ref fetchedStat, skill);
 		}
 		return fetchedStat;
 	}

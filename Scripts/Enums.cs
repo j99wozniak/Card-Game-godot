@@ -15,7 +15,8 @@ public enum Trigger {
 	OnGetMaxHp,
 	OnGetMaxStamina,
 	OnGetMaxMovement,
-	OnMovingThrough
+	OnMovingThrough,
+	OnGetSkillPower
 }
 
 public enum Type {
@@ -25,4 +26,12 @@ public enum Type {
 	Biological,
 	Elemental,
 	Energy
+}
+
+public enum Category {
+	none,
+	Offensive,
+	Defensive,
+	Supportive,
+	Utility
 }

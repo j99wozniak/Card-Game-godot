@@ -19,9 +19,9 @@ public partial class Game : Node
 		//  - Add max hp, so that one can't go over it
 		// U1 uses skill One Tap on U2 dealing massive damage
 		
-		//test1();
+		test1();
 
-		test2();
+		//test2();
 
 		//test3();
 
