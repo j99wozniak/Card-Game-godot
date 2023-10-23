@@ -16,7 +16,8 @@ public enum Trigger {
 	OnGetMaxStamina,
 	OnGetMaxMovement,
 	OnMovingThrough,
-	OnGetSkillPower
+	OnGetSkillPower,
+	OnGetSkillRange
 }
 
 public enum Type {

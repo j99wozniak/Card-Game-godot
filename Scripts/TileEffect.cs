@@ -18,9 +18,9 @@ public class TileEffect
 	public LinkedList<TileEffect> childrenTileEffects = new(); // TODO should be removed when parent effect is dicarded, but not the other way
 
 	public virtual void Execute(Packet packet){}
-	public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){}
+	public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){} // Executed when calculating cost of a tile when attempting to move through it
 	public virtual void Getter(ref int valueToModify){}
-	public virtual void Getter(ref int valueToModify, Skill skill){}
+	public virtual void SkillGetter(ref int valueToModify, Skill skill){}
 	public void Countdown(){
 		foreach(TileEffect e in linkedTileEffects){
 			e.CountdownChild();

@@ -19,9 +19,9 @@ public partial class Game : Node
 		//  - Add max hp, so that one can't go over it
 		// U1 uses skill One Tap on U2 dealing massive damage
 		
-		test1();
+		//test1();
 
-		//test2();
+		test2();
 
 		//test3();
 
@@ -104,10 +104,12 @@ public partial class Game : Node
 
 		map.unitMap[u1.x,u1.y] = u1;
 
-		u1.AddUnitEffect(new Skip());
-		u1.AddUnitEffect(new Eager());
+		//u1.AddUnitEffect(new Skip());
+		//u1.AddUnitEffect(new Eager());
 		u1.currentMovement = u1.maxMovement;
 
+		u1.AddSkill(new DoubleTap(5));
+		u1.AddUnitEffect(new Sniper());
 
 		// Create a Stopwatch instance
 		Stopwatch stopwatch = new Stopwatch();
@@ -117,7 +119,7 @@ public partial class Game : Node
 
 		// Call the function you want to benchmark
 		
-		Dictionary<(int x, int y), float> dict = Movement.GetAccessibleTiles(u1, map);
+		Dictionary<(int x, int y), float> dict = Range.GetAccessibleTiles(u1.GetSkillByName("DoubleTap"), map);
 
 		foreach (var kvp in dict) {
 			GD.Print($"Key = {kvp.Key}, Value = {kvp.Value}");

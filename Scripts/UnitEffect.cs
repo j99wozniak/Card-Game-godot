@@ -18,9 +18,9 @@ public abstract class UnitEffect
 	public LinkedList<UnitEffect> linkedUnitEffects = new();
 
 	public virtual void Execute(Packet packet){}
-	public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){}
+	public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){} // Executed when calculating cost of a tile when attempting to move through it
 	public virtual void Getter(ref int valueToModify){}
-	public virtual void Getter(ref int valueToModify, Skill skill){}
+	public virtual void SkillGetter(ref int valueToModify, Skill skill){}
 	public void Countdown(){
 		foreach(TileEffect e in linkedTileEffects){
 			e.CountdownChild();
@@ -139,23 +139,6 @@ public class Counter : UnitEffect
   }
 }
 
-public class PreciseShots : UnitEffect
-{
-  public PreciseShots(int power = 5){
-	name = "PreciseShots";
-	type = Type.Physical;
-	trigger = Trigger.OnGetSkillPower;
-	priority = 20;
-	this.power = power;
-  }
-	public override void Getter(ref int valueToModify, Skill skill){
-		GD.Print($"Applying PreciseShots: {valueToModify}+{power}");
-		if(skill.category == Category.Offensive && skill.isMelee == false){
-			valueToModify += power;
-		}
-  }
-}
-
 // Movement effects
 public class Skip : UnitEffect
 {
@@ -186,5 +169,36 @@ public class Eager : UnitEffect
   public override void Getter(ref int movementPoints)
   {
 		movementPoints += 10;
+  }
+}
+
+public class PreciseShots : UnitEffect
+{
+  public PreciseShots(int power = 5){
+	name = "PreciseShots";
+	type = Type.Physical;
+	trigger = Trigger.OnGetSkillPower;
+	priority = 20;
+	this.power = power;
+  }
+	public override void SkillGetter(ref int valueToModify, Skill skill){
+		GD.Print($"Applying PreciseShots: {valueToModify}+{power}");
+		if(skill.category == Category.Offensive && skill.isMelee == false){
+			valueToModify += power;
+		}
+  }
+}
+
+public class Sniper : UnitEffect
+{
+  public Sniper(){
+		name = "Sniper";
+		type = Type.Physical;
+		trigger = Trigger.OnGetSkillRange;
+		priority = 5;
+  }
+  public override void SkillGetter(ref int skillRange, Skill skill)
+  {
+		skillRange += 5;
   }
 }

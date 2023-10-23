@@ -2,11 +2,19 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public static class Movement{
-	// TODO after movement is done, countdown effect affectingg movement.
+public static class Range{
+	// TODO after movement is done, countdown effect affecting movement.
 	public static Dictionary<(int, int), float> GetAccessibleTiles(Unit unit, GameMap map){
+		float maxRange = unit.currentMovement;
+		return CalculateAccessibleTiles(unit, map, maxRange, getMovementCostForTile);
+	}
+	public static Dictionary<(int, int), float> GetAccessibleTiles(Skill skill, GameMap map){
+		float maxRange = skill.currentRange;
+		return CalculateAccessibleTiles(skill.source, map, maxRange, getSkillRangeCostForTile);
+	}
+
+	private static Dictionary<(int, int), float> CalculateAccessibleTiles(Unit unit, GameMap map, float maxRange, Func<Unit, Tile, float> getCostFunc){ 
 		Dictionary<(int x, int y), float> accessibleTiles = new Dictionary<(int, int), float>();
-		float maxMovement = unit.currentMovement;
 
 		Stack<(int x, int y, float cost)> possibilities = new Stack<(int, int, float)>();
 		possibilities.Push((unit.x, unit.y, 0));
@@ -23,8 +31,8 @@ public static class Movement{
 				if(modedX >= 0 && modedX < map.sizeX && modedY >= 0 && modedY < map.sizeY){
 					//GD.Print("got in borders");
 					// Check cost for this tile
-					float costWithNextTile = cost + getMovementCostForTile(unit, map.tileMap[modedX, modedY]);
-					if(costWithNextTile <= maxMovement){
+					float costWithNextTile = cost + getCostFunc(unit, map.tileMap[modedX, modedY]);
+					if(costWithNextTile <= maxRange){
 						//GD.Print("cost good");
 						// Check if in Dictionary already
 						// Check if cost in dictionary is lower than cost now
@@ -48,5 +56,11 @@ public static class Movement{
 		unit.OnMoving(ref movementCost, tile);
 		return movementCost;
 	}
+
+	// TODO Can be expanded if needed.
+	static float getSkillRangeCostForTile(Unit unit, Tile tile){
+		return 1;
+	}
+
 
 }

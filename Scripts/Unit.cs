@@ -14,13 +14,14 @@ public partial class Unit : Node
 		{Trigger.OnHealing, new LinkedList<UnitEffect>()},
 		{Trigger.OnStartMove, new LinkedList<UnitEffect>()},
 		{Trigger.OnEndMove, new LinkedList<UnitEffect>()},
-		{Trigger.OnMoving, new LinkedList<UnitEffect>()},
+		{Trigger.OnMoving, new LinkedList <UnitEffect>()},
 
 		{Trigger.OnGetMaxHp, new LinkedList<UnitEffect>()},
 		{Trigger.OnGetMaxStamina, new LinkedList<UnitEffect>()},
 		{Trigger.OnGetMaxMovement, new LinkedList<UnitEffect>()},
 
 		{Trigger.OnGetSkillPower, new LinkedList<UnitEffect>()},
+		{Trigger.OnGetSkillRange, new LinkedList<UnitEffect>()}
 	};
 
 	public LinkedList<Skill> skills = new();
@@ -78,11 +79,11 @@ public partial class Unit : Node
 		int fetchedStat = baseStat;
 		foreach(TileEffect e in GetTile().tileEffects){
 			if(e.trigger == trigger){
-				e.Getter(ref fetchedStat, skill);
+				e.SkillGetter(ref fetchedStat, skill);
 			}
 		}
 		foreach(UnitEffect e in unitEffects[trigger]){
-			e.Getter(ref fetchedStat, skill);
+			e.SkillGetter(ref fetchedStat, skill);
 		}
 		return fetchedStat;
 	}
@@ -158,6 +159,15 @@ public partial class Unit : Node
 
 	public void RemoveSkill(Skill skill){
 		skills.Remove(skill);
+	}
+
+	public Skill GetSkillByName(string skillName){
+		foreach(Skill s in skills){
+			if(s.name == skillName){
+				return s;
+			}
+		}
+		return null;
 	}
 
 	// TODO create a function for first selecting skill, and then targetting 
