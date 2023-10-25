@@ -22,39 +22,39 @@ public class TileEffect
   public virtual void Getter(ref int valueToModify){}
   public virtual void SkillGetter(ref int valueToModify, Skill skill){}
   public void Countdown(){
-	foreach(TileEffect e in linkedTileEffects){
-	  e.CountdownChild();
-	}
-	foreach(UnitEffect e in linkedUnitEffects){
-	  e.CountdownChild();
-	}
-	if(count <= 100){
-	  count--;
-	  if(count<=0){
-		RemoveThisEffect();
-	  }
-	}
+  foreach(TileEffect e in linkedTileEffects){
+    e.CountdownChild();
+  }
+  foreach(UnitEffect e in linkedUnitEffects){
+    e.CountdownChild();
+  }
+  if(count <= 100){
+    count--;
+    if(count<=0){
+    RemoveThisEffect();
+    }
+  }
   }
   public void CountdownChild(){
-	if(count <= 100){
-	  count--;
-	  if(count<=0){
-		RemoveThisEffect();
-	  }
-	}
+  if(count <= 100){
+    count--;
+    if(count<=0){
+    RemoveThisEffect();
+    }
+  }
   }
   public void RemoveThisEffect(){
-	parentTile.RemoveTileEffect(this);
-	foreach(TileEffect e in linkedTileEffects){
-	  e.linkedTileEffects.Remove(this);
-	  e.RemoveThisEffect();
-	}
-	foreach(UnitEffect e in linkedUnitEffects){
-	  e.linkedTileEffects.Remove(this);
-	  e.RemoveThisEffect();
-	}
-	linkedTileEffects = null;
-	linkedUnitEffects = null;
+  parentTile.RemoveTileEffect(this);
+  foreach(TileEffect e in linkedTileEffects){
+    e.linkedTileEffects.Remove(this);
+    e.RemoveThisEffect();
+  }
+  foreach(UnitEffect e in linkedUnitEffects){
+    e.linkedTileEffects.Remove(this);
+    e.RemoveThisEffect();
+  }
+  linkedTileEffects = null;
+  linkedUnitEffects = null;
   }
 }
 
@@ -73,7 +73,7 @@ public class RockyTerrain : TileEffect
   // TODO apply only on physical
   GD.Print($"Applying RockyTerrain: {packet.value} - {power}, {packet.name}, for {parentTile.GetUnit().unitName}");
   if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
-	packet.value = packet.value - power > 0 ? packet.value - power : 0;
+  packet.value = packet.value - power > 0 ? packet.value - power : 0;
   }
   }
 }
@@ -96,8 +96,8 @@ public class Glue : TileEffect
   }
   public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit)
   {
-	if(movingUnit.GetUnitEffectByName("Skip") == null){
-	  movementCost = 10;
-	}
+  if(movingUnit.GetUnitEffectByName("Skip") == null){
+    movementCost = 10;
+  }
   }
 }

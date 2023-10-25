@@ -22,40 +22,40 @@ public abstract class UnitEffect
   public virtual void Getter(ref int valueToModify){}
   public virtual void SkillGetter(ref int valueToModify, Skill skill){}
   public void Countdown(){
-	foreach(TileEffect e in linkedTileEffects){
-	  e.CountdownChild();
-	}
-	foreach(UnitEffect e in linkedUnitEffects){
-	  e.CountdownChild();
-	}
-	if(count <= 100){
-	  count--;
-	  if(count<=0){
-		RemoveThisEffect();
-	  }
-	}
+  foreach(TileEffect e in linkedTileEffects){
+    e.CountdownChild();
+  }
+  foreach(UnitEffect e in linkedUnitEffects){
+    e.CountdownChild();
+  }
+  if(count <= 100){
+    count--;
+    if(count<=0){
+    RemoveThisEffect();
+    }
+  }
   }
   public void CountdownChild(){
-	if(count <= 100){
-	  count--;
-	  if(count<=0){
-		RemoveThisEffect();
-	  }
-	}
+  if(count <= 100){
+    count--;
+    if(count<=0){
+    RemoveThisEffect();
+    }
+  }
   }
   public void RemoveThisEffect(){
-	GD.Print($"Removing this {this.name}");
-	parentUnit.RemoveUnitEffect(this);
-	foreach(TileEffect e in linkedTileEffects){
-	  e.linkedUnitEffects.Remove(this);
-	  e.RemoveThisEffect();
-	}
-	foreach(UnitEffect e in linkedUnitEffects){
-	  e.linkedUnitEffects.Remove(this);
-	  e.RemoveThisEffect();
-	}
-	linkedTileEffects = null;
-	linkedUnitEffects = null;
+  GD.Print($"Removing this {this.name}");
+  parentUnit.RemoveUnitEffect(this);
+  foreach(TileEffect e in linkedTileEffects){
+    e.linkedUnitEffects.Remove(this);
+    e.RemoveThisEffect();
+  }
+  foreach(UnitEffect e in linkedUnitEffects){
+    e.linkedUnitEffects.Remove(this);
+    e.RemoveThisEffect();
+  }
+  linkedTileEffects = null;
+  linkedUnitEffects = null;
   }
 }
 
@@ -63,16 +63,16 @@ public abstract class UnitEffect
 public class Poison : UnitEffect
 {
   public Poison(int power = 5){
-	name = "Poison";
-	type = Type.Chemical;
-	trigger = Trigger.OnEndTurn;
-	priority = 5;
-	this.power = power;
-	count = 5;
-	stackable = true;
+  name = "Poison";
+  type = Type.Chemical;
+  trigger = Trigger.OnEndTurn;
+  priority = 5;
+  this.power = power;
+  count = 5;
+  stackable = true;
   }
   public override void Execute(Packet packet = null){
-	parentUnit.OnDamage(new Packet(name, type, trigger, power, parentUnit, source, new List<Command>(new[]{new Damage()})));
+  parentUnit.OnDamage(new Packet(name, type, trigger, power, parentUnit, source, new List<Command>(new[]{new Damage()})));
   }
 }
 
@@ -91,8 +91,8 @@ public class Dodge : UnitEffect
   // TODO apply only on physical
   GD.Print($"Applying dodge: currentStamina {parentUnit.currentStamina}, damage to negate {packet.value}, {packet.trigger}");
   if(parentUnit.currentStamina - 5 >= 0 && packet.value > 1 && packet.trigger == Trigger.OnAttacking){
-	packet.value = 1;
-	source.OnConsumeStamina(new Packet(name, Type.Biological, Trigger.OnConsumeStamina, 5, parentUnit, parentUnit, new List<Command>(new[]{new ConsumeStamina()})));
+  packet.value = 1;
+  source.OnConsumeStamina(new Packet(name, Type.Biological, Trigger.OnConsumeStamina, 5, parentUnit, parentUnit, new List<Command>(new[]{new ConsumeStamina()})));
   }
   }
 }
@@ -112,7 +112,7 @@ public class Armor : UnitEffect
   // TODO apply only on physical
   GD.Print($"Applying armor: {packet.value}-{power}, {packet.trigger}");
   if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
-	packet.value = packet.value - power > 0 ? packet.value - power : 0;
+  packet.value = packet.value - power > 0 ? packet.value - power : 0;
   }
   }
 }
@@ -129,12 +129,12 @@ public class Counter : UnitEffect
   public override void Execute(Packet packet)
   {
   GD.Print($"Applying counter: {packet.value}-{power}, {packet.trigger}");
-	// TODO check for team and for infinite counter loop
-	// Think if this shouldn't be considered as an attack
+  // TODO check for team and for infinite counter loop
+  // Think if this shouldn't be considered as an attack
   if(packet.source != packet.target && (packet.trigger == Trigger.OnAttacking)){
-	int reflectedDamage = packet.value - power >= 0 ? power : packet.value;
-	packet.value = packet.value - power >= 0 ? packet.value - power : 0;
-	parentUnit.OnDamage(new Packet(name, type, Trigger.OnDamage, reflectedDamage, packet.source, packet.target, new List<Command>(new[]{new Damage()})));
+  int reflectedDamage = packet.value - power >= 0 ? power : packet.value;
+  packet.value = packet.value - power >= 0 ? packet.value - power : 0;
+  parentUnit.OnDamage(new Packet(name, type, Trigger.OnDamage, reflectedDamage, packet.source, packet.target, new List<Command>(new[]{new Damage()})));
   }
   }
 }
@@ -150,9 +150,9 @@ public class Skip : UnitEffect
   }
   public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit)
   {
-	if(movementCost > 1 && movementCost < 5){
-	  movementCost = 1;
-	}
+  if(movementCost > 1 && movementCost < 5){
+    movementCost = 1;
+  }
   }
 }
 
@@ -168,7 +168,7 @@ public class Eager : UnitEffect
   }
   public override void Getter(ref int movementPoints)
   {
-	movementPoints += 10;
+  movementPoints += 10;
   }
 }
 
@@ -182,23 +182,23 @@ public class PreciseShots : UnitEffect
   this.power = power;
   }
   public override void SkillGetter(ref int valueToModify, Skill skill){
-	GD.Print($"Applying PreciseShots: {valueToModify}+{power}");
-	if(skill.category == Category.Offensive && skill.isMelee == false){
-	  valueToModify += power;
-	}
+  GD.Print($"Applying PreciseShots: {valueToModify}+{power}");
+  if(skill.category == Category.Offensive && skill.isMelee == false){
+    valueToModify += power;
+  }
   }
 }
 
 public class Sniper : UnitEffect
 {
   public Sniper(){
-	name = "Sniper";
-	type = Type.Physical;
-	trigger = Trigger.OnGetSkillRange;
-	priority = 5;
+  name = "Sniper";
+  type = Type.Physical;
+  trigger = Trigger.OnGetSkillRange;
+  priority = 5;
   }
   public override void SkillGetter(ref int skillRange, Skill skill)
   {
-	skillRange += 5;
+  skillRange += 5;
   }
 }
