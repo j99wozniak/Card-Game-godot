@@ -16,12 +16,12 @@ public abstract class Skill
   public int currentRange { get { return source.SkillStatGetter(baseRange, Trigger.OnGetSkillRange, this); } } 
   // TODO make targeting schemes - single target/multiple selected targets/radius and self/targeted
   public void UseSkill(List<Tile> targetList){
-  source.OnConsumeStamina(new Packet(name, Type.Biological, Trigger.OnConsumeStamina, currentCost, source, source, new List<Command>(new[]{new ConsumeStamina()})));
-  Fire(targetList);
+    source.OnConsumeStamina(new Packet(this, new ConsumeStamina()));
+    Fire(targetList);
   }
   public void Fire(List<Tile> targetList){
-  foreach(Tile targetTile in targetList){
-  FireEffect(targetTile);
+    foreach(Tile targetTile in targetList){
+    FireEffect(targetTile);
   }
   }
   public abstract void FireEffect(Tile targetTile);
@@ -30,37 +30,37 @@ public abstract class Skill
 public class DoubleTap : Skill
 {
   public DoubleTap(int basePower = 10){
-  name = "DoubleTap";
-  this.type = Type.Physical;
-  this.category = Category.Offensive;
-  this.isMelee = false;
-  this.basePower = basePower;
-  this.baseCost = 5;
-  this.baseRange = 5;
+    name = "DoubleTap";
+    this.type = Type.Physical;
+    this.category = Category.Offensive;
+    this.isMelee = false;
+    this.basePower = basePower;
+    this.baseCost = 5;
+    this.baseRange = 5;
   }
   public override void FireEffect(Tile targetTile){
-  Unit target = targetTile.GetUnit();
-  source.OnAttacking(new Packet(name, type, Trigger.OnAttacking, currentPower, target, source, new List<Command>(new[]{new Damage()})));
-  source.OnAttacking(new Packet(name, type, Trigger.OnAttacking, currentPower, target, source, new List<Command>(new[]{new Damage()})));
+    Unit target = targetTile.GetUnit();
+    source.OnAttacking(new Packet(this, target, currentPower, new Damage()));
+    source.OnAttacking(new Packet(this, target, currentPower, new Damage()));
   }
 }
 
 public class BitterMedicine : Skill
 {
   public BitterMedicine(int basePower = 10){
-  name = "BitterMedicine";
-  this.type = Type.Chemical;
-  this.category = Category.Supportive;
-  this.isMelee = true;
-  this.basePower = basePower;
-  this.baseCost = 2;
-  this.baseRange = 2;
+    name = "BitterMedicine";
+    this.type = Type.Chemical;
+    this.category = Category.Supportive;
+    this.isMelee = true;
+    this.basePower = basePower;
+    this.baseCost = 2;
+    this.baseRange = 2;
   }
   public override void FireEffect(Tile targetTile){
-  Unit target = targetTile.GetUnit();
-  target.OnHealing(new Packet(name, type, Trigger.OnHealing, currentPower, target, source, new List<Command>(new[]{new Heal()})));
-  Poison bitterPoison = new Poison();
-  bitterPoison.source = source;
-  target.AddUnitEffect(bitterPoison);
+    Unit target = targetTile.GetUnit();
+    target.OnHealing(new Packet(this, target, currentPower, new Heal()));
+    Poison bitterPoison = new Poison();
+    bitterPoison.source = source;
+    target.AddUnitEffect(bitterPoison);
   }
 }

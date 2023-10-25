@@ -11,13 +11,49 @@ public class Packet
   public Unit source;
   public List<Command> commands;
   public Packet(string name, Type type, Trigger trigger, int value, Unit target, Unit source, List<Command> commands){
-  this.name = name;
-  this.type = type;
-  this.trigger = trigger;
-  this.value = value;
-  this.target = target;
-  this.source = source;
-  this.commands = commands;
+    this.name = name;
+    this.type = type;
+    this.trigger = trigger;
+    this.value = value;
+    this.target = target;
+    this.source = source;
+    this.commands = commands;
+  }
+  public Packet(string name, Type type, Trigger trigger, int value, Unit target, Unit source, Command command){
+    this.name = name;
+    this.type = type;
+    this.trigger = trigger;
+    this.value = value;
+    this.target = target;
+    this.source = source;
+    this.commands = new List<Command>(new[]{command});
+  }
+  public Packet(Skill skill, Unit target, int value, Damage damageCommand){
+    this.name = skill.name;
+    this.type = skill.type;
+    this.trigger = Trigger.OnAttacking;
+    this.value = value;
+    this.target = target;
+    this.source = skill.source;
+    this.commands = new List<Command>(new[]{damageCommand});
+  }
+  public Packet(Skill skill, Unit target, int value, Heal healCommand){
+    this.name = skill.name;
+    this.type = skill.type;
+    this.trigger = Trigger.OnHealing;
+    this.value = value;
+    this.target = target;
+    this.source = skill.source;
+    this.commands = new List<Command>(new[]{healCommand});
+  }
+  public Packet(Skill skill, ConsumeStamina consumeStaminaCommand){
+    this.name = skill.name;
+    this.type = Type.Biological;
+    this.trigger = Trigger.OnConsumeStamina;
+    this.value = skill.currentCost;
+    this.target = skill.source;
+    this.source = skill.source;
+    this.commands = new List<Command>(new[]{consumeStaminaCommand});
   }
 } 
 
