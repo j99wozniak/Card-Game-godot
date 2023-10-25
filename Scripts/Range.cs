@@ -6,18 +6,19 @@ public static class Range{
 	// TODO after movement is done, countdown effect affecting movement.
 	public static Dictionary<(int, int), float> GetAccessibleTiles(Unit unit, GameMap map){
 		float maxRange = unit.currentMovement;
-		return CalculateAccessibleTiles(unit, map, maxRange, getMovementCostForTile);
+		return CalculateAccessibleTiles(unit, map, unit.x, unit.y, maxRange, getMovementCostForTile);
 	}
 	public static Dictionary<(int, int), float> GetAccessibleTiles(Skill skill, GameMap map){
 		float maxRange = skill.currentRange;
-		return CalculateAccessibleTiles(skill.source, map, maxRange, getSkillRangeCostForTile);
+		return CalculateAccessibleTiles(skill.source, map, skill.source.x, skill.source.y, maxRange, getSkillRangeCostForTile);
 	}
+	// TODO can be overloaded for radious.
 
-	private static Dictionary<(int, int), float> CalculateAccessibleTiles(Unit unit, GameMap map, float maxRange, Func<Unit, Tile, float> getCostFunc){ 
+	private static Dictionary<(int, int), float> CalculateAccessibleTiles(Unit unit, GameMap map, int startX, int startY, float maxRange, Func<Unit, Tile, float> getCostFunc){ 
 		Dictionary<(int x, int y), float> accessibleTiles = new Dictionary<(int, int), float>();
 
 		Stack<(int x, int y, float cost)> possibilities = new Stack<(int, int, float)>();
-		possibilities.Push((unit.x, unit.y, 0));
+		possibilities.Push((startX, startY, 0));
 
 		List<(int modX, int modY)> directions = new List<(int, int)>{(-1, 0), (1, 0), (0, -1), (0, 1)};
 

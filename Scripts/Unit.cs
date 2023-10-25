@@ -11,6 +11,8 @@ public partial class Unit : Node
 		{Trigger.OnDamage, new LinkedList<UnitEffect>()},
 		{Trigger.OnHeal, new LinkedList<UnitEffect>()},
 		{Trigger.OnAttacking, new LinkedList<UnitEffect>()},
+		{Trigger.OnConsumeStamina, new LinkedList<UnitEffect>()},
+		{Trigger.OnReplenishStamina, new LinkedList<UnitEffect>()},
 		{Trigger.OnHealing, new LinkedList<UnitEffect>()},
 		{Trigger.OnStartMove, new LinkedList<UnitEffect>()},
 		{Trigger.OnEndMove, new LinkedList<UnitEffect>()},
@@ -21,6 +23,7 @@ public partial class Unit : Node
 		{Trigger.OnGetMaxMovement, new LinkedList<UnitEffect>()},
 
 		{Trigger.OnGetSkillPower, new LinkedList<UnitEffect>()},
+		{Trigger.OnGetSkillCost, new LinkedList<UnitEffect>()},
 		{Trigger.OnGetSkillRange, new LinkedList<UnitEffect>()}
 	};
 
@@ -172,11 +175,10 @@ public partial class Unit : Node
 
 	// TODO create a function for first selecting skill, and then targetting 
 		// Maybe then we no longer will have skillName, but just reference to picked skill?
-	// TODO overload for cells, multiple targets
-	public void FireSkill(string skillName, Unit target){
+	public void UseSkill(string skillName, List<Tile> targetList){
 		foreach(Skill s in skills){
 			if(s.name == skillName){
-				s.Fire(target);
+				s.UseSkill(targetList);
 				return;
 			}
 		}
@@ -194,7 +196,9 @@ public partial class Unit : Node
 
 	// Receive a packet
 	public void OnDamage(Packet damage){
+		GD.Print($"{this.unitName} Geting damaged with: {damage.name}-{damage.value}");
 		ExecuteEffects(Trigger.OnDamage, damage);
+		GD.Print($"{this.unitName} Final value of damage {damage.name}-{damage.value}");
 		ApplyCommands(damage);
 		CountdownUnitEffects(Trigger.OnDamage);
 	}
@@ -205,17 +209,30 @@ public partial class Unit : Node
 		CountdownUnitEffects(Trigger.OnHeal);
 	}
 
+	public void OnConsumeStamina(Packet consumeStamina){
+		ExecuteEffects(Trigger.OnConsumeStamina, consumeStamina);
+		ApplyCommands(consumeStamina);
+		CountdownUnitEffects(Trigger.OnConsumeStamina);
+	}
+
+	public void OnReplenishStamina(Packet replenishStamina){
+		ExecuteEffects(Trigger.OnReplenishStamina, replenishStamina);
+		ApplyCommands(replenishStamina);
+		CountdownUnitEffects(Trigger.OnReplenishStamina);
+	}
+
 	// Fire a packet
 	public void OnAttacking(Packet attack){
+		GD.Print($"{this.unitName} Attacking with: {attack.name}-{attack.value}->{attack.target.unitName}");
 		ExecuteEffects(Trigger.OnAttacking , attack);
-		GD.Print($"Attacking with: {attack.name}->{attack.value}");
+		GD.Print($"{this.unitName} Final attack value: {attack.name}-{attack.value}->{attack.target.unitName}");
 		attack.target.OnDamage(attack);
 		CountdownUnitEffects(Trigger.OnAttacking);
 	}
 
 	public void OnHealing(Packet healing){
 		ExecuteEffects(Trigger.OnHealing, healing);
-		GD.Print($"Healing with: {healing.name}->{healing.value}");
+		GD.Print($"{this.unitName} Final Healing with: {healing.name}-{healing.value}->{healing.target.unitName}");
 		healing.target.OnHeal(healing);
 		CountdownUnitEffects(Trigger.OnHealing);
 	}

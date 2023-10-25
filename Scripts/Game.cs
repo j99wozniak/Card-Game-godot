@@ -19,9 +19,9 @@ public partial class Game : Node
 		//  - Add max hp, so that one can't go over it
 		// U1 uses skill One Tap on U2 dealing massive damage
 		
-		//test1();
+		test1();
 
-		test2();
+		//test2();
 
 		//test3();
 
@@ -68,6 +68,10 @@ public partial class Game : Node
 
 		Unit u2 = new Unit(map, "u2", 20, 10, 8, 3, 3);
 
+		map.unitMap[u2.x,u2.y] = u2;
+
+		GD.Print($"u2 hp = {u2.currentHp}, u2 st = {u2.currentStamina}, u1 st = {u1.currentStamina}");
+		
 		UnitEffect dodge1 = new Dodge();
 		dodge1.source = u2;
 		dodge1.count = 100;
@@ -75,12 +79,12 @@ public partial class Game : Node
 
 		u2.AddSkill(new BitterMedicine(10));
 
-		u1.FireSkill("DoubleTap", u2);
-		u2.FireSkill("BitterMedicine", u2);
+		u1.UseSkill("DoubleTap", new List<Tile>(){map.tileMap[u2.x,u2.y]});
+		u2.UseSkill("BitterMedicine", new List<Tile>(){map.tileMap[u2.x,u2.y]});
 
 		u1.OnEndTurn();
 		u2.OnEndTurn();
-		GD.Print(u2.currentHp);
+		GD.Print($"u2 hp = {u2.currentHp}, u2 st = {u2.currentStamina}, u1 st = {u1.currentStamina}");
 	}
 
 	void test2(){

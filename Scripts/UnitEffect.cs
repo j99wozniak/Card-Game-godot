@@ -72,7 +72,7 @@ public class Poison : UnitEffect
 		stackable = true;
 	}
 	public override void Execute(Packet packet = null){
-	  parentUnit.OnDamage(new Packet(name, type, trigger, power, parentUnit, source, new LinkedList<Command>(new[]{new Damage()})));
+	  parentUnit.OnDamage(new Packet(name, type, trigger, power, parentUnit, source, new List<Command>(new[]{new Damage()})));
 	}
 }
 
@@ -92,7 +92,7 @@ public class Dodge : UnitEffect
 	GD.Print($"Applying dodge: currentStamina {parentUnit.currentStamina}, damage to negate {packet.value}, {packet.trigger}");
 	if(parentUnit.currentStamina - 5 >= 0 && packet.value > 1 && packet.trigger == Trigger.OnAttacking){
 		packet.value = 1;
-		parentUnit.currentStamina = parentUnit.currentStamina - 5;
+		source.OnConsumeStamina(new Packet(name, Type.Biological, Trigger.OnConsumeStamina, 5, parentUnit, parentUnit, new List<Command>(new[]{new ConsumeStamina()})));
 	}
   }
 }
@@ -134,7 +134,7 @@ public class Counter : UnitEffect
 	if(packet.source != packet.target && (packet.trigger == Trigger.OnAttacking)){
 	  int reflectedDamage = packet.value - power >= 0 ? power : packet.value;
 	  packet.value = packet.value - power >= 0 ? packet.value - power : 0;
-	  parentUnit.OnDamage(new Packet(name, type, Trigger.OnDamage, reflectedDamage, packet.source, packet.target, new LinkedList<Command>(new[]{new Damage()})));
+	  parentUnit.OnDamage(new Packet(name, type, Trigger.OnDamage, reflectedDamage, packet.source, packet.target, new List<Command>(new[]{new Damage()})));
 	}
   }
 }

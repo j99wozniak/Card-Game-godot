@@ -10,10 +10,21 @@ public abstract class Skill
   public bool isMelee = true;
   public int basePower = -1;
   public int currentPower { get { return source.SkillStatGetter(basePower, Trigger.OnGetSkillPower, this); } } 
+  public int baseCost = 1;
+  public int currentCost { get { return source.SkillStatGetter(baseCost, Trigger.OnGetSkillCost, this); } } 
   public int baseRange = 1;
   public int currentRange { get { return source.SkillStatGetter(baseRange, Trigger.OnGetSkillRange, this); } } 
-  // TODO overload for cells, and multiple targets
-  public abstract void Fire(Unit target);
+  // TODO make targeting schemes - single target/multiple selected targets/radius and self/targeted
+  public void UseSkill(List<Tile> targetList){
+	source.OnConsumeStamina(new Packet(name, Type.Biological, Trigger.OnConsumeStamina, currentCost, source, source, new List<Command>(new[]{new ConsumeStamina()})));
+	Fire(targetList);
+  }
+  public void Fire(List<Tile> targetList){
+	foreach(Tile targetTile in targetList){
+	  FireEffect(targetTile);
+	}
+  }
+  public abstract void FireEffect(Tile targetTile);
 }
 
 public class DoubleTap : Skill
@@ -24,11 +35,13 @@ public class DoubleTap : Skill
 	this.category = Category.Offensive;
 	this.isMelee = false;
 	this.basePower = basePower;
+	this.baseCost = 5;
 	this.baseRange = 5;
   }
-  public override void Fire(Unit target){
-	source.OnAttacking(new Packet(name, type, Trigger.OnAttacking, currentPower, target, source, new LinkedList<Command>(new[]{new Damage()})));
-	source.OnAttacking(new Packet(name, type, Trigger.OnAttacking, currentPower, target, source, new LinkedList<Command>(new[]{new Damage()})));
+  public override void FireEffect(Tile targetTile){
+	Unit target = targetTile.GetUnit();
+	source.OnAttacking(new Packet(name, type, Trigger.OnAttacking, currentPower, target, source, new List<Command>(new[]{new Damage()})));
+	source.OnAttacking(new Packet(name, type, Trigger.OnAttacking, currentPower, target, source, new List<Command>(new[]{new Damage()})));
   }
 }
 
@@ -40,9 +53,12 @@ public class BitterMedicine : Skill
 	this.category = Category.Supportive;
 	this.isMelee = true;
 	this.basePower = basePower;
+	this.baseCost = 2;
+	this.baseRange = 2;
   }
-  public override void Fire(Unit target){
-	target.OnHealing(new Packet(name, type, Trigger.OnHealing, currentPower, target, source, new LinkedList<Command>(new[]{new Heal()})));
+  public override void FireEffect(Tile targetTile){
+	Unit target = targetTile.GetUnit();
+	target.OnHealing(new Packet(name, type, Trigger.OnHealing, currentPower, target, source, new List<Command>(new[]{new Heal()})));
 	Poison bitterPoison = new Poison();
 	bitterPoison.source = source;
 	target.AddUnitEffect(bitterPoison);

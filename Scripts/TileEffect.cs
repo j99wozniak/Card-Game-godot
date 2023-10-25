@@ -71,11 +71,10 @@ public class RockyTerrain : TileEffect
   public override void Execute(Packet packet)
   {
 	// TODO apply only on physical
-	GD.Print($"Applying RockyTerrain: {packet.value}-{power}, {packet.trigger}");
+	GD.Print($"Applying RockyTerrain: {packet.value} - {power}, {packet.name}, for {parentTile.GetUnit().unitName}");
 	if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
 	  packet.value = packet.value - power > 0 ? packet.value - power : 0;
 	}
-	GD.Print("Also, the guy that's benefiting from this is called " + parentTile.GetUnit().unitName);
   }
 }
 

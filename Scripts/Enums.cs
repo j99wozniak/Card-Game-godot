@@ -7,6 +7,8 @@ public enum Trigger {
 	OnEndTurn,
 	OnDamage,
 	OnHeal,
+	OnConsumeStamina,
+	OnReplenishStamina,
 	OnAttacking,
 	OnHealing,
 	OnStartMove,
@@ -17,6 +19,7 @@ public enum Trigger {
 	OnGetMaxMovement,
 	OnMovingThrough,
 	OnGetSkillPower,
+	OnGetSkillCost,
 	OnGetSkillRange
 }
 
