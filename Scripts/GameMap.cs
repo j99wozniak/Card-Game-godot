@@ -8,9 +8,9 @@ public class GameMap
   public Unit[,] unitMap;
 
   public GameMap(int sizeX, int sizeY){
-  this.sizeX = sizeX;
-  this.sizeY = sizeY;
-  tileMap = new Tile[sizeX,sizeY];
-  unitMap = new Unit[sizeX,sizeY];
+    this.sizeX = sizeX;
+    this.sizeY = sizeY;
+    tileMap = new Tile[sizeX,sizeY];
+    unitMap = new Unit[sizeX,sizeY];
   }
 }

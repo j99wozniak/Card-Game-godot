@@ -63,16 +63,16 @@ public abstract class UnitEffect
 public class Poison : UnitEffect
 {
   public Poison(int power = 5){
-  name = "Poison";
-  type = Type.Chemical;
-  trigger = Trigger.OnEndTurn;
-  priority = 5;
-  this.power = power;
-  count = 5;
-  stackable = true;
+    name = "Poison";
+    type = Type.Chemical;
+    trigger = Trigger.OnEndTurn;
+    priority = 5;
+    this.power = power;
+    count = 5;
+    stackable = true;
   }
   public override void Execute(Packet packet = null){
-  parentUnit.OnDamage(new Packet(name, type, trigger, power, parentUnit, source, new List<Command>(new[]{new Damage()})));
+    parentUnit.OnDamage(new Packet(name, type, trigger, power, parentUnit, source, new Damage()));
   }
 }
 
@@ -81,19 +81,20 @@ public class Poison : UnitEffect
 public class Dodge : UnitEffect
 {
   public Dodge(){
-  name = "Dodge";
-  type = Type.Physical;
-  trigger = Trigger.OnDamage;
-  priority = 10;
+    name = "Dodge";
+    type = Type.Physical;
+    trigger = Trigger.OnDamage;
+    priority = 10;
   }
   public override void Execute(Packet packet)
   {
-  // TODO apply only on physical
-  GD.Print($"Applying dodge: currentStamina {parentUnit.currentStamina}, damage to negate {packet.value}, {packet.trigger}");
-  if(parentUnit.currentStamina - 5 >= 0 && packet.value > 1 && packet.trigger == Trigger.OnAttacking){
-  packet.value = 1;
-  source.OnConsumeStamina(new Packet(name, Type.Biological, Trigger.OnConsumeStamina, 5, parentUnit, parentUnit, new List<Command>(new[]{new ConsumeStamina()})));
-  }
+    // TODO apply only on physical
+    if(parentUnit.currentStamina - 5 >= 0 && packet.value > 1 && packet.trigger == Trigger.OnAttacking){
+      
+      GD.Print($"Applying dodge: currentStamina {parentUnit.currentStamina}, damage to negate {packet.value}, {packet.trigger}");
+      packet.value = 1;
+      parentUnit.OnConsumeStamina(new Packet(name, Type.Biological, Trigger.OnConsumeStamina, 5, parentUnit, parentUnit, new ConsumeStamina()));
+    }
   }
 }
 
@@ -101,41 +102,40 @@ public class Dodge : UnitEffect
 public class Armor : UnitEffect
 {
   public Armor(int power = 5){
-  name = "Armor";
-  type = Type.Physical;
-  trigger = Trigger.OnDamage;
-  priority = 5;
-  this.power = power;
+    name = "Armor";
+    type = Type.Physical;
+    trigger = Trigger.OnDamage;
+    priority = 5;
+    this.power = power;
   }
   public override void Execute(Packet packet)
   {
-  // TODO apply only on physical
-  GD.Print($"Applying armor: {packet.value}-{power}, {packet.trigger}");
-  if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
-  packet.value = packet.value - power > 0 ? packet.value - power : 0;
-  }
+    // TODO apply only on physical
+    GD.Print($"Applying armor: {packet.value}-{power}, {packet.trigger}");
+    if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
+      packet.value = packet.value - power > 0 ? packet.value - power : 0;
+    }
   }
 }
 
 public class Counter : UnitEffect
 {
   public Counter(int power = 5){
-  name = "Counter";
-  type = Type.Physical;
-  trigger = Trigger.OnDamage;
-  priority = 20;
-  this.power = power;
+    name = "Counter";
+    type = Type.Physical;
+    trigger = Trigger.OnDamage;
+    priority = 20;
+    this.power = power;
   }
-  public override void Execute(Packet packet)
-  {
-  GD.Print($"Applying counter: {packet.value}-{power}, {packet.trigger}");
-  // TODO check for team and for infinite counter loop
-  // Think if this shouldn't be considered as an attack
-  if(packet.source != packet.target && (packet.trigger == Trigger.OnAttacking)){
-  int reflectedDamage = packet.value - power >= 0 ? power : packet.value;
-  packet.value = packet.value - power >= 0 ? packet.value - power : 0;
-  parentUnit.OnDamage(new Packet(name, type, Trigger.OnDamage, reflectedDamage, packet.source, packet.target, new List<Command>(new[]{new Damage()})));
-  }
+  public override void Execute(Packet packet){
+    GD.Print($"Applying counter: {packet.value}-{power}, {packet.trigger}");
+    // TODO check for team and for infinite counter loop
+    // Think if this shouldn't be considered as an attack
+    if(packet.source != packet.target && (packet.trigger == Trigger.OnAttacking)){
+      int reflectedDamage = packet.value - power >= 0 ? power : packet.value;
+      packet.value = packet.value - power >= 0 ? packet.value - power : 0;
+      parentUnit.OnDamage(new Packet(name, type, Trigger.OnDamage, reflectedDamage, packet.source, packet.target, new List<Command>(new[]{new Damage()})));
+    }
   }
 }
 
@@ -143,16 +143,15 @@ public class Counter : UnitEffect
 public class Skip : UnitEffect
 {
   public Skip(){
-  name = "Skip";
-  type = Type.Physical;
-  trigger = Trigger.OnMoving;
-  priority = 5;
+    name = "Skip";
+    type = Type.Physical;
+    trigger = Trigger.OnMoving;
+    priority = 5;
   }
-  public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit)
-  {
-  if(movementCost > 1 && movementCost < 5){
-    movementCost = 1;
-  }
+  public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){
+    if(movementCost > 1 && movementCost < 5){
+      movementCost = 1;
+    }
   }
 }
 
@@ -161,14 +160,13 @@ public class Skip : UnitEffect
 public class Eager : UnitEffect
 {
   public Eager(){
-  name = "Eager";
-  type = Type.Physical;
-  trigger = Trigger.OnGetMaxMovement;
-  priority = 5;
+    name = "Eager";
+    type = Type.Physical;
+    trigger = Trigger.OnGetMaxMovement;
+    priority = 5;
   }
-  public override void Getter(ref int movementPoints)
-  {
-  movementPoints += 10;
+  public override void Getter(ref int movementPoints){
+    movementPoints += 10;
   }
 }
 

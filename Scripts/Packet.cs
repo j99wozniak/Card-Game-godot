@@ -64,40 +64,35 @@ public abstract class Command
 
 public class Damage : Command
 {
-  public override void Apply(Packet packet)
-  {
-  packet.target.currentHp = packet.target.currentHp - packet.value > 0 ? packet.target.currentHp - packet.value : 0;
+  public override void Apply(Packet packet){
+    packet.target.currentHp = packet.target.currentHp - packet.value > 0 ? packet.target.currentHp - packet.value : 0;
   }
 }
 
 public class Heal : Command
 {
-  public override void Apply(Packet packet)
-  {
-  packet.target.currentHp = packet.target.currentHp + packet.value < packet.target.maxHp ? packet.target.currentHp + packet.value : packet.target.maxHp;
+  public override void Apply(Packet packet){
+    packet.target.currentHp = packet.target.currentHp + packet.value < packet.target.maxHp ? packet.target.currentHp + packet.value : packet.target.maxHp;
   }
 }
 
 public class ConsumeStamina : Command
 {
-  public override void Apply(Packet packet)
-  {
-  packet.target.currentStamina = packet.target.currentStamina - packet.value > 0 ? packet.target.currentStamina - packet.value : 0;
+  public override void Apply(Packet packet){
+    packet.target.currentStamina = packet.target.currentStamina - packet.value > 0 ? packet.target.currentStamina - packet.value : 0;
   }
 }
 
 public class ReplenishStamina : Command
 {
-  public override void Apply(Packet packet)
-  {
-  packet.target.currentStamina = packet.target.currentStamina + packet.value < packet.target.maxStamina ? packet.target.currentStamina + packet.value : packet.target.maxStamina;
+  public override void Apply(Packet packet){
+    packet.target.currentStamina = packet.target.currentStamina + packet.value < packet.target.maxStamina ? packet.target.currentStamina + packet.value : packet.target.maxStamina;
   }
 }
 
 public class VampiricHeal : Command
 {
-  public override void Apply(Packet packet)
-  {
-  packet.source.currentHp = packet.source.currentHp + packet.value < packet.source.maxHp ? packet.source.currentHp + packet.value : packet.source.maxHp;
+  public override void Apply(Packet packet){
+    packet.source.currentHp = packet.source.currentHp + packet.value < packet.source.maxHp ? packet.source.currentHp + packet.value : packet.source.maxHp;
   }
 }

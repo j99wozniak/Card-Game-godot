@@ -22,39 +22,39 @@ public class TileEffect
   public virtual void Getter(ref int valueToModify){}
   public virtual void SkillGetter(ref int valueToModify, Skill skill){}
   public void Countdown(){
-  foreach(TileEffect e in linkedTileEffects){
-    e.CountdownChild();
-  }
-  foreach(UnitEffect e in linkedUnitEffects){
-    e.CountdownChild();
-  }
-  if(count <= 100){
-    count--;
-    if(count<=0){
-    RemoveThisEffect();
+    foreach(TileEffect e in linkedTileEffects){
+      e.CountdownChild();
     }
-  }
-  }
+    foreach(UnitEffect e in linkedUnitEffects){
+      e.CountdownChild();
+    }
+    if(count <= 100){
+      count--;
+      if(count<=0){
+        RemoveThisEffect();
+      }
+    }
+    }
   public void CountdownChild(){
-  if(count <= 100){
-    count--;
-    if(count<=0){
-    RemoveThisEffect();
+    if(count <= 100){
+      count--;
+      if(count<=0){
+        RemoveThisEffect();
+      }
     }
-  }
   }
   public void RemoveThisEffect(){
-  parentTile.RemoveTileEffect(this);
-  foreach(TileEffect e in linkedTileEffects){
-    e.linkedTileEffects.Remove(this);
-    e.RemoveThisEffect();
-  }
-  foreach(UnitEffect e in linkedUnitEffects){
-    e.linkedTileEffects.Remove(this);
-    e.RemoveThisEffect();
-  }
-  linkedTileEffects = null;
-  linkedUnitEffects = null;
+    parentTile.RemoveTileEffect(this);
+    foreach(TileEffect e in linkedTileEffects){
+      e.linkedTileEffects.Remove(this);
+      e.RemoveThisEffect();
+    }
+    foreach(UnitEffect e in linkedUnitEffects){
+      e.linkedTileEffects.Remove(this);
+      e.RemoveThisEffect();
+    }
+    linkedTileEffects = null;
+    linkedUnitEffects = null;
   }
 }
 
@@ -62,19 +62,34 @@ public class TileEffect
 public class RockyTerrain : TileEffect
 {
   public RockyTerrain(int power = 1){
-  name = "RockyTerrain";
-  type = Type.Physical;
-  trigger = Trigger.OnDamage;
-  priority = 1;
-  this.power = power;
+    name = "RockyTerrain";
+    type = Type.Physical;
+    trigger = Trigger.OnDamage;
+    priority = 1;
+    this.power = power;
   }
-  public override void Execute(Packet packet)
-  {
-  // TODO apply only on physical
-  GD.Print($"Applying RockyTerrain: {packet.value} - {power}, {packet.name}, for {parentTile.GetUnit().unitName}");
-  if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
-  packet.value = packet.value - power > 0 ? packet.value - power : 0;
+  public override void Execute(Packet packet){
+    // TODO apply only on physical
+    if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
+      GD.Print($"Applying RockyTerrain: {packet.value} - {power}, {packet.name}, for {parentTile.GetUnit().unitName}");
+      packet.value = packet.value - power > 0 ? packet.value - power : 0;
+    }
   }
+}
+
+public class Flame : TileEffect
+{
+  public Flame(int power = 3){
+    name = "Flame";
+    type = Type.Elemental;
+    trigger = Trigger.OnEndTurn;
+    priority = 5;
+    this.power = power;
+  }
+  public override void Execute(Packet packet){
+    // TODO apply only on physical
+    GD.Print($"Applying Flame: {power}, for {parentTile.GetUnit().unitName}");
+    parentTile.GetUnit().OnDamage(new Packet(name, type, trigger, power, parentTile.GetUnit(), source, new Damage()));;
   }
 }
 
@@ -85,19 +100,18 @@ public class RockyTerrain : TileEffect
 public class Glue : TileEffect
 {
   public Glue(){
-  name = "Glue";
-  type = Type.Chemical;
-  trigger = Trigger.OnMovingThrough;
-  countdownTrigger = Trigger.OnEndTurn;
-  power = 10;
-  stackable = true;
-  count = 2;
-  priority = 5;
+    name = "Glue";
+    type = Type.Chemical;
+    trigger = Trigger.OnMovingThrough;
+    countdownTrigger = Trigger.OnEndTurn;
+    power = 10;
+    stackable = true;
+    count = 2;
+    priority = 5;
   }
-  public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit)
-  {
-  if(movingUnit.GetUnitEffectByName("Skip") == null){
-    movementCost = 10;
-  }
+  public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){
+    if(movingUnit.GetUnitEffectByName("Skip") == null){
+      movementCost = 10;
+    }
   }
 }

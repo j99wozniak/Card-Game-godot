@@ -5,6 +5,9 @@ using System.Diagnostics;
 
 public partial class Game : Node
 {
+  private int numberOfTeams = 2;
+  private int currentTeam = 1;
+  private GameMap map;
   // Called when the node enters the scene tree for the first time.
   public override void _Ready()
   {
@@ -46,7 +49,7 @@ public partial class Game : Node
   }
 
   void test1(){
-    GameMap map = new GameMap(40, 40);
+    map = new GameMap(40, 40);
     Texture2D plainsTexture = (Texture2D)GD.Load("res://Sprites/Tiles/plains.png");
 
     for (int i = 0; i < map.sizeX; i++){
@@ -56,39 +59,37 @@ public partial class Game : Node
         AddChild(tileNode);
       } 
     }
-    TileEffect rockyTerrain = new RockyTerrain(1);
-    map.tileMap[3,3].AddTileEffect(rockyTerrain);
+    // SETUP
+    map.tileMap[3,3].AddTileEffect(new RockyTerrain(1));
+    map.tileMap[3,3].AddTileEffect(new Flame());
     
-    Unit u1 = new Unit(map, "u1", 20, 15, 8, 5, 5);
-
+    Unit u1 = new Unit(map, "u1", 1, 20, 15, 8, 5, 5);
     map.unitMap[u1.x,u1.y] = u1;
-
     u1.AddSkill(new DoubleTap(10));
     u1.AddUnitEffect(new PreciseShots(5));
 
-    Unit u2 = new Unit(map, "u2", 20, 10, 8, 3, 3);
-
+    Unit u2 = new Unit(map, "u2", 2, 20, 10, 8, 3, 3);
     map.unitMap[u2.x,u2.y] = u2;
-
-    GD.Print($"u2 hp = {u2.currentHp}, u2 st = {u2.currentStamina}, u1 st = {u1.currentStamina}");
-    
-    UnitEffect dodge1 = new Dodge();
-    dodge1.source = u2;
-    dodge1.count = 100;
-    u2.AddUnitEffect(dodge1);
-
+    u2.AddUnitEffect(new Dodge());
     u2.AddSkill(new BitterMedicine(10));
 
+    GD.Print($"u2 hp = {u2.currentHp}, u2 st = {u2.currentStamina}, u1 st = {u1.currentStamina}");
+
+    // GAME
     u1.UseSkill("DoubleTap", new List<Tile>(){map.tileMap[u2.x,u2.y]});
+    NextTurn();
     u2.UseSkill("BitterMedicine", new List<Tile>(){map.tileMap[u2.x,u2.y]});
 
-    u1.OnEndTurn();
-    u2.OnEndTurn();
+    NextTurn();
+    NextTurn();
+
+    NextTurn();
+
     GD.Print($"u2 hp = {u2.currentHp}, u2 st = {u2.currentStamina}, u1 st = {u1.currentStamina}");
   }
 
   void test2(){
-    GameMap map = new GameMap(40, 40);
+    map = new GameMap(40, 40);
     Texture2D plainsTexture = (Texture2D)GD.Load("res://Sprites/Tiles/plains.png");
     Texture2D sandsTexture = (Texture2D)GD.Load("res://Sprites/Tiles/sands.png");
 
@@ -104,7 +105,7 @@ public partial class Game : Node
 
     map.tileMap[16,15].AddTileEffect(new Glue());
     
-    Unit u1 = new Unit(map, "u1", 20, 15, 8, 15, 15);
+    Unit u1 = new Unit(map, "u1", 1, 20, 15, 8, 15, 15);
 
     map.unitMap[u1.x,u1.y] = u1;
 
@@ -143,7 +144,7 @@ public partial class Game : Node
   }
 
   void test3(){
-    GameMap map = new GameMap(40, 40);
+    map = new GameMap(40, 40);
     Texture2D plainsTexture = (Texture2D)GD.Load("res://Sprites/Tiles/plains.png");
     Texture2D sandsTexture = (Texture2D)GD.Load("res://Sprites/Tiles/sands.png");
     for (int i = 0; i < map.sizeX; i++){
@@ -154,7 +155,7 @@ public partial class Game : Node
       } 
     }
     
-    Unit u1 = new Unit(map, "u1", 20, 15, 8, 15, 15);
+    Unit u1 = new Unit(map, "u1", 1, 20, 15, 8, 15, 15);
 
     GD.Print($"Before {u1.GetUnitEffectByName("Poison")} ");
     map.unitMap[u1.x,u1.y] = u1;
@@ -186,6 +187,55 @@ public partial class Game : Node
     GD.Print($"Does u1 have Eager: {u1.GetUnitEffectByName("Eager")} ");
     GD.Print($"Does map.tileMap[16,15] have Glue (count): {map.tileMap[16,15].GetTileEffectByName("Glue").count} ");
     GD.Print($"Does map.tileMap[16,15] have Glue (count): {map.tileMap[16,15].GetTileEffectByName("Glue").power} ");
+  }
+
+  private void NextTurn(){
+    GD.Print($"---- End turn of team {currentTeam}");
+    EndTurn();
+    nextTeam();
+    GD.Print($"---- Begin turn of team {currentTeam}");
+    BeginTurn();
+  }
+
+  private void nextTeam(){
+    currentTeam += 1;
+    if(currentTeam>numberOfTeams){
+      currentTeam = 1;
+    }
+  }
+
+  public void EndTurn(){
+    foreach(Unit unit in map.unitMap){
+      if(unit!=null && unit.team == currentTeam){
+        unit.OnEndTurn();
+      }
+    }
+    foreach(Tile tile in map.tileMap){
+      foreach(TileEffect tileEffect in tile.tileEffects){
+        if(tileEffect.countdownTrigger == Trigger.OnEndTurn){
+          if(tileEffect.source == null || tileEffect.source.team == currentTeam){
+            tileEffect.Countdown();
+          }
+        }
+      }
+    }
+  }
+
+  public void BeginTurn(){
+    foreach(Unit unit in map.unitMap){
+      if(unit!=null && unit.team == currentTeam){
+        unit.OnBeginTurn();
+      }
+    }
+    foreach(Tile tile in map.tileMap){
+      foreach(TileEffect tileEffect in tile.tileEffects){
+        if(tileEffect.countdownTrigger == Trigger.OnBeginTurn){
+          if(tileEffect.source == null || tileEffect.source.team == currentTeam){
+            tileEffect.Countdown();
+          }
+        }
+      }
+    }
   }
 
 }
