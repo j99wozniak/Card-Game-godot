@@ -20,9 +20,9 @@ public abstract class Skill
 	Fire(targetList);
   }
   public void Fire(List<Tile> targetList){
-	foreach(Tile targetTile in targetList){
-	  FireEffect(targetTile);
-	}
+  foreach(Tile targetTile in targetList){
+	FireEffect(targetTile);
+  }
   }
   public abstract void FireEffect(Tile targetTile);
 }
