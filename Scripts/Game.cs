@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 
 public partial class Game : Node
@@ -56,12 +57,24 @@ public partial class Game : Node
       for (int j = 0; j < map.sizeY; j++){
         Tile tile = new Tile(map, "plains", 1, i, j);
         Node2D tileNode = Tile.createTileNode(tile, plainsTexture);
+        tileNode.Name = $"{i}x{j}y";
         AddChild(tileNode);
       } 
     }
     // SETUP
     map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("RockyTerrain"));
     map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("Flame"));
+
+    map.tileMap[3,4].HighlightTile();
+    map.tileMap[3,4].RemoveHighlight();
+
+    map.tileMap[3,3].HighlightTile();
+
+    
+    map.tileMap[3,4].SelectTile();
+    map.tileMap[3,4].RemoveSelection();
+
+    map.tileMap[3,3].SelectTile();
     
     Unit u1 = new Unit(map, "u1", 1, 20, 15, 8, 5, 5);
     map.unitMap[u1.x,u1.y] = u1;
