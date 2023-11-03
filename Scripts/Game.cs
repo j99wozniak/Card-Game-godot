@@ -60,8 +60,8 @@ public partial class Game : Node
       } 
     }
     // SETUP
-    map.tileMap[3,3].AddTileEffect(new RockyTerrain(1));
-    map.tileMap[3,3].AddTileEffect(new Flame());
+    map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("RockyTerrain"));
+    map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("Flame"));
     
     Unit u1 = new Unit(map, "u1", 1, 20, 15, 8, 5, 5);
     map.unitMap[u1.x,u1.y] = u1;
@@ -70,8 +70,8 @@ public partial class Game : Node
 
     Unit u2 = new Unit(map, "u2", 2, 20, 10, 8, 3, 3);
     map.unitMap[u2.x,u2.y] = u2;
-    u2.AddUnitEffect(new Dodge());
-    u2.AddSkill(new BitterMedicine(10));
+    u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
+    u2.AddSkill(Factory.GetSkill("BitterMedicine"));
 
     GD.Print($"u2 hp = {u2.currentHp}, u2 st = {u2.currentStamina}, u1 st = {u1.currentStamina}");
 
