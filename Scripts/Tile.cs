@@ -13,7 +13,7 @@ public partial class Tile : Node
   public LinkedList<TileEffect> tileEffects = new();
   public Sprite2D tileSprite;
   public static Texture2D selectTexture = (Texture2D)GD.Load("res://Sprites/Tiles/select.png");
-  //static Sprite2D selectSprite = new Sprite2D{Texture = selectTexture, Name = "selectNode", ZIndex = 1}; // FOR EXCLUSIVE SELECTION
+  static Sprite2D selectSprite = new Sprite2D{Texture = selectTexture, Name = "selectNode", ZIndex = 1}; // FOR EXCLUSIVE SELECTION
   
   
   static public Node2D createTileNode(Tile tile, Texture2D texture){
@@ -39,11 +39,11 @@ public partial class Tile : Node
   }
 
   public Vector2 GetRealPosition(){
-  return new Vector2(x*32, y*32);
+    return new Vector2(x*Game.TileSize, y*Game.TileSize);
   }
 
   public Unit GetUnit(){
-  return map.unitMap[x,y];
+    return map.unitMap[x,y];
   }
 
   public void HighlightTile(){
@@ -55,14 +55,16 @@ public partial class Tile : Node
   }
 
   public void SelectTile(){
-    Sprite2D selectSprite = new Sprite2D{Texture = selectTexture, Name = "selectNode", ZIndex = 1};
-    //selectSprite.GetParent().RemoveChild(selectSprite); // (maybe add if GetParent not null)
+    //Sprite2D selectSprite = new Sprite2D{Texture = selectTexture, Name = "selectNode", ZIndex = 1};
+    if(selectSprite.GetParent() != null){
+      selectSprite.GetParent().RemoveChild(selectSprite); // (maybe add if GetParent not null)
+    }
     parentNode.AddChild(selectSprite);
   }
 
   public void RemoveSelection(){
-    parentNode.GetNode<Sprite2D>("selectNode").QueueFree();
-    //parentNode.RemoveChild(parentNode.GetNode<Sprite2D>("selectNode"));
+    //parentNode.GetNode<Sprite2D>("selectNode").QueueFree();
+    parentNode.RemoveChild(parentNode.GetNode<Sprite2D>("selectNode"));
   }
 
   public void AddTileEffect(TileEffect effect){

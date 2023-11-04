@@ -4,14 +4,23 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 
-public partial class Game : Node
+public partial class Game : Node2D
 {
+  public static int TileSize = 32;
+  public Controller controller;
   private int numberOfTeams = 2;
   private int currentTeam = 1;
-  private GameMap map;
+  public GameMap map;
   // Called when the node enters the scene tree for the first time.
   public override void _Ready()
   {
+    Camera2D camera = new Camera2D();
+    camera.Enabled = true;
+    AddChild(camera);
+    controller = new Controller();
+    controller.parentGame = this;
+    AddChild(controller);
+    GD.Print($"{this.Owner}");
     // Tests to make: 
     // ## U1 uses skill Double Tap, while having passive Precise Shots, on U2 that has passive Dodge, but only enough stamina to dodge once
     // ## U2 uses skill Bitter Medicine on self, which gives it poison
