@@ -94,18 +94,7 @@ public partial class Game : Node2D
     map.unitMap[u2.x,u2.y] = u2;
     u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
     u2.AddSkill(Factory.GetSkill("BitterMedicine"));
-
-    GD.Print($"u2 hp = {u2.currentHp}, u2 st = {u2.currentStamina}, u1 st = {u1.currentStamina}");
-
-    // GAME
-    u1.UseSkill("DoubleTap", new List<Tile>(){map.tileMap[u2.x,u2.y]});
-    NextTurn();
-    u2.UseSkill("BitterMedicine", new List<Tile>(){map.tileMap[u2.x,u2.y]});
-
-    NextTurn();
-    NextTurn();
-
-    NextTurn();
+    u2.AddSkill(Factory.GetSkill("DoubleTap"));
 
     GD.Print($"u2 hp = {u2.currentHp}, u2 st = {u2.currentStamina}, u1 st = {u1.currentStamina}");
   }
