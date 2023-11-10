@@ -1,6 +1,8 @@
 using Godot;
+using static Godot.CanvasItem;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public partial class Unit : Node
 {
@@ -30,6 +32,7 @@ public partial class Unit : Node
   public LinkedList<Skill> skills = new();
 
   public GameMap map;
+  public Node2D parentNode;
 
   public string unitName;
 
@@ -49,6 +52,29 @@ public partial class Unit : Node
 
   public int x;
   public int y;
+
+  public AnimatedSprite2D sprite;
+
+  static public Node2D createUnitNode(Unit unit, SpriteFrames spriteFrames){
+    Node2D unitNode = new Node2D();
+    unitNode.Name = unit.unitName + "_node";
+    unitNode.Position = unit.GetRealPosition();
+    unit.parentNode = unitNode;
+
+    AnimatedSprite2D unitSpriteNode = new AnimatedSprite2D();
+    unitSpriteNode.SpriteFrames = spriteFrames;
+    unitSpriteNode.Autoplay = "right_idle";
+    unitSpriteNode.Name = "animatedSpriteNode";
+    unitSpriteNode.TextureFilter = TextureFilterEnum.Nearest;
+    unit.sprite = unitSpriteNode;
+    unitNode.AddChild(unitSpriteNode);
+
+    return unitNode;
+  }
+
+  public Vector2 GetRealPosition(){
+    return new Vector2(x*Game.TileSize, y*Game.TileSize);
+  }
 
   public Unit(GameMap map, string unitName, int team, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, int x, int y){
     this.map = map;
@@ -222,6 +248,22 @@ public partial class Unit : Node
     ExecuteEffects(Trigger.OnReplenishStamina, replenishStamina);
     ApplyCommands(replenishStamina);
     CountdownUnitEffects(Trigger.OnReplenishStamina);
+  }
+
+  public void PlayAnimation(string anim){
+    GD.Print("actioning");
+    sprite.Animation = anim;
+    if(!sprite.IsConnected("animation_finished", Callable.From(new Action(GoBackIdle)))){
+      sprite.AnimationFinished += GoBackIdle;
+    }
+    sprite.Play();
+  }
+
+  public void GoBackIdle(){
+    GD.Print("goinback");
+    sprite.Animation = "right_idle";
+    sprite.Play();
+    sprite.AnimationFinished -= GoBackIdle;
   }
 
   // Fire a packet

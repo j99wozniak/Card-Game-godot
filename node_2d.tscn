@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://bq0ckvhdpa33n"]
+[gd_scene load_steps=4 format=3 uid="uid://bq0ckvhdpa33n"]
 
 [ext_resource type="Texture2D" uid="uid://bnpkdhc1r2s05" path="res://icon.svg" id="1_inkr3"]
 [ext_resource type="Script" path="res://Scripts/Game.cs" id="1_x86nl"]
+[ext_resource type="SpriteFrames" uid="uid://1s5vdpss41gh" path="res://Sprites/Units/Frames/ArcherFrames.tres" id="3_3dyj4"]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_x86nl")
@@ -9,3 +10,10 @@ script = ExtResource("1_x86nl")
 [node name="Icon" type="Sprite2D" parent="."]
 position = Vector2(60, 80)
 texture = ExtResource("1_inkr3")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+position = Vector2(-125, -63)
+sprite_frames = ExtResource("3_3dyj4")
+animation = &"double_tap_right"
+autoplay = "front_idle"

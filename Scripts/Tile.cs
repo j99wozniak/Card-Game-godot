@@ -4,13 +4,13 @@ using System.Linq;
 
 public partial class Tile : Node
 {
+  public LinkedList<TileEffect> tileEffects = new();
   public GameMap map;
   public Node2D parentNode;
   public string tileName;
   public float cost;
   public int x;
   public int y;
-  public LinkedList<TileEffect> tileEffects = new();
   public Sprite2D tileSprite;
   public static Texture2D selectTexture = (Texture2D)GD.Load("res://Sprites/Tiles/select.png");
   static Sprite2D selectSprite = new Sprite2D{Texture = selectTexture, Name = "selectNode", ZIndex = 1}; // FOR EXCLUSIVE SELECTION

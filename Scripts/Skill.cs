@@ -42,6 +42,7 @@ public class DoubleTap : Skill
     Unit target = targetTile.GetUnit();
     source.OnAttacking(new Packet(this, target, currentPower, new Damage()));
     source.OnAttacking(new Packet(this, target, currentPower, new Damage()));
+    source.PlayAnimation("double_tap_right");
   }
 }
 

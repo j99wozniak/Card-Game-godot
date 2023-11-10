@@ -103,6 +103,12 @@ public partial class Controller : Node
           }
         }
       }
+      else if (inputEventMouseButton.IsPressed() && inputEventMouseButton.ButtonIndex == MouseButton.WheelUp){
+        camera.Zoom = new Vector2(camera.Zoom.X+0.2f, camera.Zoom.Y+0.2f);
+      }
+      else if (inputEventMouseButton.IsPressed() && inputEventMouseButton.ButtonIndex == MouseButton.WheelDown){
+        camera.Zoom = new Vector2(camera.Zoom.X-0.2f, camera.Zoom.Y-0.2f);
+      }
     }
       //GD.Print(GetTree().Root.GetNode("Node2D").GetNode<Node2D>("Node2D").GetGlobalMousePosition());
   }
