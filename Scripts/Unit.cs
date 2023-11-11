@@ -3,6 +3,7 @@ using static Godot.CanvasItem;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Reflection;
 
 public partial class Unit : Node
 {
@@ -249,7 +250,7 @@ public partial class Unit : Node
     ApplyCommands(replenishStamina);
     CountdownUnitEffects(Trigger.OnReplenishStamina);
   }
-
+/*
   public void PlayAnimation(string anim){
     GD.Print("actioning");
     sprite.Animation = anim;
@@ -258,12 +259,32 @@ public partial class Unit : Node
     }
     sprite.Play();
   }
+*/
+  Queue<string> animationQueue = new Queue<string>();
+  bool queueEmpty = true;
+  public void PlayAnimation(string anim){
+    if(queueEmpty){
+      queueEmpty = false;
+      sprite.Animation = anim;
+      sprite.Play();
+      sprite.AnimationFinished += FinishAnimation;
+    }
+    else{
+      animationQueue.Enqueue(anim);
+    }
+  }
 
-  public void GoBackIdle(){
-    GD.Print("goinback");
-    sprite.Animation = "right_idle";
-    sprite.Play();
-    sprite.AnimationFinished -= GoBackIdle;
+  public void FinishAnimation(){
+    if(animationQueue.Count == 0){
+      sprite.Animation = "right_idle";
+      sprite.Play();
+      sprite.AnimationFinished -= FinishAnimation;
+      queueEmpty = true;
+    }
+    else{
+      sprite.Animation = animationQueue.Dequeue();
+      sprite.Play();
+    }
   }
 
   // Fire a packet

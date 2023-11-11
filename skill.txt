@@ -1,0 +1,19 @@
+public class BitterMedicineA : Skill
+{
+  public BitterMedicineA(int basePower = 10){
+    name = "BitterMedicineA";
+    this.type = Type.Chemical;
+    this.category = Category.Supportive;
+    this.isMelee = true;
+    this.basePower = basePower;
+    this.baseCost = 2;
+    this.baseRange = 2;
+  }
+  public override void FireEffect(Tile targetTile){
+    Unit target = targetTile.GetUnit();
+    target.OnHealing(new Packet(this, target, currentPower, new Heal()));
+    Poison bitterPoison = new Poison();
+    bitterPoison.source = source;
+    target.AddUnitEffect(bitterPoison);
+  }
+}
