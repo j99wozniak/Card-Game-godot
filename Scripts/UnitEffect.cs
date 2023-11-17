@@ -11,6 +11,7 @@ public abstract class UnitEffect
   public int priority = 0; // The higher the priority the sooner it will be executed
   public int power = 0;
   public bool stackable = false;
+  public bool removedOnDeath = true;
   public Type type = Type.none;
   public Trigger trigger = Trigger.none;
   public Trigger countdownTrigger = Trigger.none;
@@ -44,7 +45,7 @@ public abstract class UnitEffect
   }
   }
   public void RemoveThisEffect(){
-  GD.Print($"Removing this {this.name}");
+  GD.Print($"Removing {this.name} on {parentUnit.unitName}");
   parentUnit.RemoveUnitEffect(this);
   foreach(TileEffect e in linkedTileEffects){
     e.linkedUnitEffects.Remove(this);

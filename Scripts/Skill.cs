@@ -40,10 +40,10 @@ public class DoubleTap : Skill
   }
   public override void FireEffect(Tile targetTile){
     Unit target = targetTile.GetUnit();
-    source.OnAttacking(new Packet(this, target, currentPower, new Damage()));
+    source.PlayAnimation("skill_right");
     source.OnAttacking(new Packet(this, target, currentPower, new Damage()));
     source.PlayAnimation("skill_right");
-    source.PlayAnimation("skill_right");
+    source.OnAttacking(new Packet(this, target, currentPower, new Damage()));
   }
 }
 

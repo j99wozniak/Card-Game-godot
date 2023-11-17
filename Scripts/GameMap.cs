@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Godot;
 
 public class GameMap
@@ -6,6 +7,7 @@ public class GameMap
   public int sizeY;
   public Tile[,] tileMap;
   public Unit[,] unitMap;
+  public List<Unit> graveyard = new();
 
   public GameMap(int sizeX, int sizeY){
     this.sizeX = sizeX;

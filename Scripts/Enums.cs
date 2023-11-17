@@ -5,6 +5,7 @@ public enum Trigger {
   none,
   OnBeginTurn, 
   OnEndTurn,
+  OnDeath,
   OnDamage,
   OnHeal,
   OnConsumeStamina,

@@ -23,6 +23,8 @@ public partial class Controller : Node
     GetTree().Root.GetNode<Node2D>("Node2D").AddChild(popupMenu);
     Action<int> callback = new Action<int>(SelectSkill);
     popupMenu.Connect("id_pressed", Callable.From(callback));
+    camera.Zoom = new Vector2(2.2f, 2.2f);
+    camera.Position = new Vector2(220f, 120f);
   }
 
   // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -73,7 +75,8 @@ public partial class Controller : Node
           if(selectedUnit != null){
             int id = 0;
             foreach(Skill skill in selectedUnit.skills){
-              popupMenu.AddItem($"{skill.name} | {skill.currentPower}🏹 | {skill.currentCost}⚡", id);
+              popupMenu.AddItem($"{skill.name} | {skill.currentPower}🗡️ | {skill.currentCost}⚡", id);
+              popupMenu.SetItemTooltip(id, $"{skill.currentRange}🏹");
               if(selectedUnit.currentStamina < skill.currentCost){
                 popupMenu.SetItemDisabled(id, true);
               }

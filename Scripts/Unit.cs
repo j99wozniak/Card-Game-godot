@@ -11,6 +11,7 @@ public partial class Unit : Node
   public Dictionary<Trigger, LinkedList<UnitEffect>> unitEffects = new Dictionary<Trigger, LinkedList<UnitEffect>>{
   {Trigger.OnBeginTurn, new LinkedList<UnitEffect>()},
   {Trigger.OnEndTurn, new LinkedList<UnitEffect>()},
+  {Trigger.OnDeath, new LinkedList <UnitEffect>()},
   {Trigger.OnDamage, new LinkedList<UnitEffect>()},
   {Trigger.OnHeal, new LinkedList<UnitEffect>()},
   {Trigger.OnAttacking, new LinkedList<UnitEffect>()},
@@ -41,7 +42,8 @@ public partial class Unit : Node
 
   public int baseMaxHp;
   public int maxHp { get { return StatGetter(baseMaxHp, Trigger.OnGetMaxHp); } } 
-  public int currentHp;
+  private int _currentHp;
+  public int currentHp { get { return _currentHp; } set { _currentHp = value; if(value==0){ OnDeath(); } } }
 
   public int baseMaxStamina;
   public int maxStamina { get { return StatGetter(baseMaxStamina, Trigger.OnGetMaxStamina); } }
@@ -163,17 +165,17 @@ public partial class Unit : Node
   public UnitEffect GetUnitEffectByName(string effectName, Trigger effectTrigger = Trigger.none){
     if(effectTrigger != Trigger.none){
       foreach(UnitEffect e in unitEffects[effectTrigger]){
-      if(e.name == effectName){
-        return e;
-      }
+        if(e.name == effectName){
+          return e;
+        }
       }
       return null;
     }
     foreach(KeyValuePair<Trigger, LinkedList<UnitEffect>> list in unitEffects){
       foreach(UnitEffect e in list.Value){
-      if(e.name == effectName){
-        return e;
-      }
+        if(e.name == effectName){
+          return e;
+        }
       }
     }
     return null;
@@ -203,8 +205,6 @@ public partial class Unit : Node
     return null;
   }
 
-  // TODO create a function for first selecting skill, and then targetting 
-  // Maybe then we no longer will have skillName, but just reference to picked skill?
   public void UseSkill(string skillName, List<Tile> targetList){
     foreach(Skill s in skills){
       if(s.name == skillName){
@@ -222,6 +222,25 @@ public partial class Unit : Node
   public void OnEndTurn(){
     ExecuteEffects(Trigger.OnEndTurn);
     CountdownUnitEffects(Trigger.OnEndTurn);
+  }
+
+  public void OnDeath(){
+    ExecuteEffects(Trigger.OnDeath);
+    CountdownUnitEffects(Trigger.OnDeath);
+    if(currentHp == 0){
+      PlayAnimation("right_death");
+      map.unitMap[x, y] = null;
+      map.graveyard.Add(this);
+      foreach(KeyValuePair<Trigger, LinkedList<UnitEffect>> list in unitEffects){
+        LinkedListNode<UnitEffect> e = list.Value.First;
+        while(e != null){
+          if(e.Value.removedOnDeath){
+            e.Value.RemoveThisEffect();
+          }
+          e = e.Next;
+        }
+      }
+    }
   }
 
   // Receive a packet
@@ -270,16 +289,23 @@ public partial class Unit : Node
       sprite.AnimationFinished += FinishAnimation;
     }
     else{
-      animationQueue.Enqueue(anim);
+      if(currentHp != 0 || anim.Contains("death")){
+        animationQueue.Enqueue(anim);
+      }
     }
   }
 
   public void FinishAnimation(){
     if(animationQueue.Count == 0){
-      sprite.Animation = "right_idle";
-      sprite.Play();
-      sprite.AnimationFinished -= FinishAnimation;
-      queueEmpty = true;
+      if(sprite.Animation.ToString().Contains("death")){
+        parentNode.QueueFree();
+      }
+      else{
+        sprite.Animation = "right_idle";
+        sprite.Play();
+        sprite.AnimationFinished -= FinishAnimation;
+        queueEmpty = true;
+      }
     }
     else{
       sprite.Animation = animationQueue.Dequeue();
