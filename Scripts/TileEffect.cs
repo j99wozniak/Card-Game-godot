@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class TileEffect
 {
+  public static int CurrentTileEffectID = 0;
+  public int ID = CurrentTileEffectID++;
   public string name = null;
   public Tile parentTile = null;
   public Unit source;

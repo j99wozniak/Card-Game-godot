@@ -2,11 +2,11 @@ using Godot;
 using static Godot.CanvasItem;
 using System.Collections.Generic;
 using System.Linq;
-using System;
-using System.Reflection;
 
 public partial class Unit : Node
 {
+  public static int CurrentUnitID = 0;
+  public int ID;
   // TODO maybe these triggers should be enums?
   public Dictionary<Trigger, LinkedList<UnitEffect>> unitEffects = new Dictionary<Trigger, LinkedList<UnitEffect>>{
   {Trigger.OnBeginTurn, new LinkedList<UnitEffect>()},
@@ -80,6 +80,7 @@ public partial class Unit : Node
   }
 
   public Unit(GameMap map, string unitName, int team, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, int x, int y){
+    this.ID = CurrentUnitID++;
     this.map = map;
     this.unitName = unitName;
     this.team = team;
@@ -150,15 +151,9 @@ public partial class Unit : Node
       existingEffect.power += effect.power;
       effect.power = existingEffect.power;
     }
-    if(existingEffect.count < effect.count){
-      LinkedListNode<UnitEffect> e = unitEffects[existingEffect.trigger].First;
-      while(e != null){
-      if(e.Value == existingEffect){
-        e.Value = effect;
-        break;
-      }
-      e = e.Next;
-      }
+    if(existingEffect.count < effect.count || existingEffect.power < effect.power){
+      RemoveUnitEffect(existingEffect);
+      AddUnitEffect(effect);
     }
   }
   

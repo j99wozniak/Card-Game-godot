@@ -29,12 +29,12 @@ public abstract class Skill
 
 public class DoubleTap : Skill
 {
-  public DoubleTap(int basePower = 10){
+  public DoubleTap(){
     name = "DoubleTap";
     this.type = Type.Physical;
     this.category = Category.Offensive;
     this.isMelee = false;
-    this.basePower = basePower;
+    this.basePower = 10;
     this.baseCost = 5;
     this.baseRange = 5;
   }
@@ -49,12 +49,12 @@ public class DoubleTap : Skill
 
 public class BitterMedicine : Skill
 {
-  public BitterMedicine(int basePower = 10){
+  public BitterMedicine(){
     name = "BitterMedicine";
     this.type = Type.Chemical;
     this.category = Category.Supportive;
     this.isMelee = true;
-    this.basePower = basePower;
+    this.basePower = 10;
     this.baseCost = 2;
     this.baseRange = 2;
   }

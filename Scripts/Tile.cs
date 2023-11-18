@@ -4,6 +4,7 @@ using System.Linq;
 
 public partial class Tile : Node
 {
+  public int ID;
   public LinkedList<TileEffect> tileEffects = new();
   public GameMap map;
   public Node2D parentNode;
@@ -30,6 +31,7 @@ public partial class Tile : Node
   }
 
   public Tile(GameMap map, string tileName, float cost, int x, int y){
+    this.ID = map.sizeX*x+y;
     this.map = map;
     this.tileName = tileName;
     this.cost = cost;

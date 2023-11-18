@@ -1,9 +1,10 @@
 using Godot;
-using System.Collections;
 using System.Collections.Generic;
 
 public abstract class UnitEffect
 {
+  public static int CurrentUnitEffectID = 0;
+  public int ID = CurrentUnitEffectID++;
   public string name = null;
   public Unit parentUnit = null;
   public Unit source = null;
@@ -23,40 +24,40 @@ public abstract class UnitEffect
   public virtual void Getter(ref int valueToModify){}
   public virtual void SkillGetter(ref int valueToModify, Skill skill){}
   public void Countdown(){
-  foreach(TileEffect e in linkedTileEffects){
-    e.CountdownChild();
-  }
-  foreach(UnitEffect e in linkedUnitEffects){
-    e.CountdownChild();
-  }
-  if(count <= 100){
-    count--;
-    if(count<=0){
-    RemoveThisEffect();
+    foreach(TileEffect e in linkedTileEffects){
+      e.CountdownChild();
     }
-  }
+    foreach(UnitEffect e in linkedUnitEffects){
+      e.CountdownChild();
+    }
+    if(count <= 100){
+      count--;
+      if(count<=0){
+        RemoveThisEffect();
+      }
+    }
   }
   public void CountdownChild(){
-  if(count <= 100){
-    count--;
-    if(count<=0){
-    RemoveThisEffect();
+    if(count <= 100){
+      count--;
+      if(count<=0){
+      RemoveThisEffect();
+      }
     }
   }
-  }
   public void RemoveThisEffect(){
-  GD.Print($"Removing {this.name} on {parentUnit.unitName}");
-  parentUnit.RemoveUnitEffect(this);
-  foreach(TileEffect e in linkedTileEffects){
-    e.linkedUnitEffects.Remove(this);
-    e.RemoveThisEffect();
-  }
-  foreach(UnitEffect e in linkedUnitEffects){
-    e.linkedUnitEffects.Remove(this);
-    e.RemoveThisEffect();
-  }
-  linkedTileEffects = null;
-  linkedUnitEffects = null;
+    GD.Print($"Removing {this.name}({this.ID}) on {parentUnit.unitName}");
+    parentUnit.RemoveUnitEffect(this);
+    foreach(TileEffect e in linkedTileEffects){
+      e.linkedUnitEffects.Remove(this);
+      e.RemoveThisEffect();
+    }
+    foreach(UnitEffect e in linkedUnitEffects){
+      e.linkedUnitEffects.Remove(this);
+      e.RemoveThisEffect();
+    }
+    linkedTileEffects = null;
+    linkedUnitEffects = null;
   }
 }
 
@@ -174,30 +175,30 @@ public class Eager : UnitEffect
 public class PreciseShots : UnitEffect
 {
   public PreciseShots(int power = 5){
-  name = "PreciseShots";
-  type = Type.Physical;
-  trigger = Trigger.OnGetSkillPower;
-  priority = 20;
-  this.power = power;
+    name = "PreciseShots";
+    type = Type.Physical;
+    trigger = Trigger.OnGetSkillPower;
+    priority = 20;
+    this.power = power;
   }
   public override void SkillGetter(ref int valueToModify, Skill skill){
-  GD.Print($"Applying PreciseShots: {valueToModify}+{power}");
-  if(skill.category == Category.Offensive && skill.isMelee == false){
-    valueToModify += power;
-  }
+    GD.Print($"Applying PreciseShots: {valueToModify}+{power}");
+    if(skill.category == Category.Offensive && skill.isMelee == false){
+      valueToModify += power;
+    }
   }
 }
 
 public class Sniper : UnitEffect
 {
   public Sniper(){
-  name = "Sniper";
-  type = Type.Physical;
-  trigger = Trigger.OnGetSkillRange;
-  priority = 5;
+    name = "Sniper";
+    type = Type.Physical;
+    trigger = Trigger.OnGetSkillRange;
+    priority = 5;
   }
   public override void SkillGetter(ref int skillRange, Skill skill)
   {
-  skillRange += 5;
+    skillRange += 5;
   }
 }

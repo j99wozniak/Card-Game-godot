@@ -60,6 +60,12 @@ public partial class Game : Node2D
   }
 
   void test1(){
+	var button = new Button();
+	button.Text = "Next Turn";
+	button.ZIndex = 2;
+	button.Pressed += NextTurn;
+	AddChild(button);
+
 	map = new GameMap(40, 40);
 	Texture2D plainsTexture = (Texture2D)GD.Load("res://Sprites/Tiles/plains.png");
 
@@ -67,7 +73,7 @@ public partial class Game : Node2D
 	  for (int j = 0; j < map.sizeY; j++){
 		Tile tile = new Tile(map, "plains", 1, i, j);
 		Node2D tileNode = Tile.createTileNode(tile, plainsTexture);
-		tileNode.Name = $"{i}x{j}y";
+		tileNode.Name = $"{tile.ID}";
 		AddChild(tileNode);
 	  } 
 	}
@@ -91,7 +97,7 @@ public partial class Game : Node2D
 	Node2D unit1Node = Unit.createUnitNode(u1, unitSpriteSheet);
 	AddChild(unit1Node);
 	map.unitMap[u1.x,u1.y] = u1;
-	u1.AddSkill(new DoubleTap(10));
+	u1.AddSkill(new DoubleTap());
 	u1.AddUnitEffect(new PreciseShots(5));
 
 	Unit u2 = new Unit(map, "u2", 2, 20, 10, 8, 3, 3);
@@ -131,7 +137,7 @@ public partial class Game : Node2D
 	//u1.AddUnitEffect(new Eager());
 	u1.currentMovement = u1.maxMovement;
 
-	u1.AddSkill(new DoubleTap(5));
+	u1.AddSkill(new DoubleTap());
 	u1.AddUnitEffect(new Sniper());
 
 	// Create a Stopwatch instance
@@ -207,7 +213,7 @@ public partial class Game : Node2D
 	GD.Print($"Does map.tileMap[16,15] have Glue (count): {map.tileMap[16,15].GetTileEffectByName("Glue").power} ");
   }
 
-  private void NextTurn(){
+  public void NextTurn(){
 	GD.Print($"---- End turn of team {currentTeam}");
 	EndTurn();
 	nextTeam();
