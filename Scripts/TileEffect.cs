@@ -95,6 +95,22 @@ public class Flame : TileEffect
   }
 }
 
+public class HealingAuraTile : TileEffect
+{
+  public HealingAuraTile(int power = 5){
+    name = "HealingAuraTile";
+    type = Type.Chemical;
+    trigger = Trigger.OnEndTurn;
+    priority = 5;
+    this.power = power;
+  }
+  public override void Execute(Packet packet = null){
+    Unit target = parentTile.GetUnit();
+    if(target != null){
+      source.OnHealing(new Packet("HealingAuraTile", type, Trigger.OnHealing, power, target, source, new Heal()));
+    }
+  }
+}
 
 // MOVEMENT EFFECTS
 

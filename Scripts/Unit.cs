@@ -43,7 +43,7 @@ public partial class Unit : Node
   public int baseMaxHp;
   public int maxHp { get { return StatGetter(baseMaxHp, Trigger.OnGetMaxHp); } } 
   private int _currentHp;
-  public int currentHp { get { return _currentHp; } set { _currentHp = value; if(value==0){ OnDeath(); } } }
+  public int currentHp { get { return _currentHp; } set { _currentHp = value; UpdateHpLabel(); if(value==0){ OnDeath(); } } }
 
   public int baseMaxStamina;
   public int maxStamina { get { return StatGetter(baseMaxStamina, Trigger.OnGetMaxStamina); } }
@@ -57,6 +57,7 @@ public partial class Unit : Node
   public int y;
 
   public AnimatedSprite2D sprite;
+  public Label currentHpLabel;
 
   static public Node2D createUnitNode(Unit unit, SpriteFrames spriteFrames){
     Node2D unitNode = new Node2D();
@@ -72,7 +73,23 @@ public partial class Unit : Node
     unit.sprite = unitSpriteNode;
     unitNode.AddChild(unitSpriteNode);
 
+    Label currentHpLabel = new Label();
+    currentHpLabel.ZIndex = 2;
+    currentHpLabel.Scale = new Vector2(0.6f, 0.6f);
+    currentHpLabel.AddThemeColorOverride("font_outline_color", new Color(0,0,0,1));
+    currentHpLabel.AddThemeConstantOverride("outline_size", 15);
+    unit.currentHpLabel = currentHpLabel;
+    unitNode.AddChild(currentHpLabel);
+    unit.UpdateHpLabel();
+
     return unitNode;
+  }
+
+  // TODO add function that updates all GUI visible variables
+  public void UpdateHpLabel(){
+    if(currentHpLabel!=null){
+      currentHpLabel.Text = $"{currentHp}/{maxHp}❤️";
+    }
   }
 
   public Vector2 GetRealPosition(){
@@ -138,23 +155,24 @@ public partial class Unit : Node
       else{
       for(LinkedListNode<UnitEffect> e = unitEffects[effect.trigger].First; e != null; ){
         if(e.Value.priority < effect.priority){
-        unitEffects[effect.trigger].AddBefore(e, effect);
-        return;
+          unitEffects[effect.trigger].AddBefore(e, effect);
+          UpdateHpLabel();
+          return;
         }
         e = e.Next;
       }
       unitEffects[effect.trigger].AddLast(effect);
       }
-      return;
     }
-    if(existingEffect.stackable){
+    else if(existingEffect.stackable){
       existingEffect.power += effect.power;
       effect.power = existingEffect.power;
     }
-    if(existingEffect.count < effect.count || existingEffect.power < effect.power){
+    else if(existingEffect.count < effect.count || existingEffect.power < effect.power){
       RemoveUnitEffect(existingEffect);
       AddUnitEffect(effect);
     }
+    UpdateHpLabel();
   }
   
   public UnitEffect GetUnitEffectByName(string effectName, Trigger effectTrigger = Trigger.none){
@@ -251,6 +269,7 @@ public partial class Unit : Node
     ExecuteEffects(Trigger.OnHeal, heal);
     ApplyCommands(heal);
     CountdownUnitEffects(Trigger.OnHeal);
+    GD.Print($"{this.unitName} Geting healed with: {heal.name}-{heal.value}");
   }
 
   public void OnConsumeStamina(Packet consumeStamina){
@@ -325,8 +344,15 @@ public partial class Unit : Node
   }
 
   public void OnStartMove(){
-
+    ExecuteEffects(Trigger.OnStartMove);
+    CountdownUnitEffects(Trigger.OnStartMove);
   }
+
+  public void OnEndMove(){
+    ExecuteEffects(Trigger.OnEndMove);
+    CountdownUnitEffects(Trigger.OnEndMove);
+  }
+
 
   public void OnMoving(ref float movementCost, Tile tile){
     foreach(TileEffect e in tile.tileEffects){

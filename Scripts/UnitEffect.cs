@@ -73,7 +73,7 @@ public class Poison : UnitEffect
     count = 5;
     stackable = true;
   }
-  public override void Execute(Packet packet = null){
+  public override void Execute(Packet packet= null){
     parentUnit.OnDamage(new Packet(name, type, trigger, power, parentUnit, source, new Damage()));
   }
 }
@@ -157,6 +157,40 @@ public class Skip : UnitEffect
   }
 }
 
+public class RemoveHealingAura : UnitEffect
+{
+  public RemoveHealingAura(){
+    name = "RemoveHealingAura";
+    type = Type.Chemical;
+    trigger = Trigger.OnStartMove;
+    priority = 5;
+  }
+  public override void Execute(Packet packet= null){
+    foreach(TileEffect e in linkedTileEffects){
+      e.RemoveThisEffect();
+    }
+  }
+}
+
+public class ApplyHealingAura : UnitEffect
+{
+  public ApplyHealingAura(){
+    name = "ApplyHealingAura";
+    type = Type.Chemical;
+    trigger = Trigger.OnEndMove;
+    priority = 5;
+  }
+  public override void Execute(Packet packet= null){
+    //TODO might want to add check for Auras range
+    Dictionary<(int x, int y), float> toApplyAuraTo = Range.GetRadius(parentUnit.map, parentUnit.x, parentUnit.y, 4);
+    foreach (var kvp in toApplyAuraTo) {
+      TileEffect HealingAuraTile = new HealingAuraTile();
+      HealingAuraTile.source = parentUnit;
+      linkedUnitEffects.First.Value.linkedTileEffects.AddLast(HealingAuraTile);
+      parentUnit.map.tileMap[kvp.Key.x, kvp.Key.y].AddTileEffect(HealingAuraTile);
+    }
+  }
+}
 
 // Getter effects
 public class Eager : UnitEffect

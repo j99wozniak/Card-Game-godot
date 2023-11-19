@@ -66,3 +66,50 @@ public class BitterMedicine : Skill
     target.AddUnitEffect(bitterPoison);
   }
 }
+
+public class HealingAura : Skill
+{
+  public HealingAura(){
+    name = "HealingAura";
+    this.type = Type.Chemical;
+    this.category = Category.Supportive;
+    this.isMelee = true;
+    this.basePower = 10;
+    this.baseCost = 2;
+    this.baseRange = 4;
+  }
+    public override void FireEffect(Tile targetTile){
+      Unit target = targetTile.GetUnit();
+      UnitEffect removeHealingAura = new RemoveHealingAura();
+      target.AddUnitEffect(removeHealingAura);
+      UnitEffect applyHealingAura = new ApplyHealingAura();
+      target.AddUnitEffect(applyHealingAura);
+      removeHealingAura.linkedUnitEffects.AddFirst(applyHealingAura);
+      applyHealingAura.linkedUnitEffects.AddFirst(removeHealingAura);
+      applyHealingAura.Execute(null);
+    }
+}
+
+public class Teleport : Skill
+{
+  public Teleport(){
+    name = "Teleport";
+    this.type = Type.Energy;
+    this.category = Category.Utility;
+    this.isMelee = true;
+    this.basePower = 10;
+    this.baseCost = 2;
+    this.baseRange = 4;
+  }
+    public override void FireEffect(Tile targetTile){
+      Unit target = targetTile.GetUnit();
+      GD.Print($"{target.GetUnitEffectByName("RemoveHealingAura", Trigger.OnStartMove)}, {target.GetUnitEffectByName("ApplyHealingAura", Trigger.OnEndMove)}");
+      target.OnStartMove();
+      target.map.unitMap[target.x, target.y] = null;
+      target.x = 10;
+      target.y = 10;
+      target.map.unitMap[target.x, target.y] = target;
+      target.parentNode.Position = target.GetRealPosition();
+      target.OnEndMove();
+    }
+}

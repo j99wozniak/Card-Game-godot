@@ -12,6 +12,9 @@ public static class Range{
     float maxRange = skill.currentRange;
     return CalculateAccessibleTiles(skill.source, map, skill.source.x, skill.source.y, maxRange, getSkillRangeCostForTile);
   }
+  public static Dictionary<(int, int), float> GetRadius(GameMap map, int x, int y, int r){
+    return CalculateAccessibleTiles(null, map, x, y, r, getCostOne);
+  }
   // TODO can be overloaded for radious.
 
   private static Dictionary<(int, int), float> CalculateAccessibleTiles(Unit unit, GameMap map, int startX, int startY, float maxRange, Func<Unit, Tile, float> getCostFunc){ 
@@ -60,6 +63,10 @@ public static class Range{
 
   // TODO Can be expanded if needed.
   static float getSkillRangeCostForTile(Unit unit, Tile tile){
+    return 1;
+  }
+
+  static float getCostOne(Unit unit=null, Tile tile=null){
     return 1;
   }
 

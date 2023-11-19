@@ -33,7 +33,7 @@ public partial class Game : Node2D
 	//  - Add max hp, so that one can't go over it
 	// U1 uses skill One Tap on U2 dealing massive damage
 	
-	test1();
+	test_aura();
 
 	//test2();
 
@@ -211,6 +211,45 @@ public partial class Game : Node2D
 	GD.Print($"Does u1 have Eager: {u1.GetUnitEffectByName("Eager")} ");
 	GD.Print($"Does map.tileMap[16,15] have Glue (count): {map.tileMap[16,15].GetTileEffectByName("Glue").count} ");
 	GD.Print($"Does map.tileMap[16,15] have Glue (count): {map.tileMap[16,15].GetTileEffectByName("Glue").power} ");
+  }
+
+  void test_aura(){
+	var button = new Button();
+	button.Text = "Next Turn";
+	button.ZIndex = 2;
+	button.Pressed += NextTurn;
+	AddChild(button);
+
+	map = new GameMap(40, 40);
+	Texture2D plainsTexture = (Texture2D)GD.Load("res://Sprites/Tiles/plains.png");
+
+	for (int i = 0; i < map.sizeX; i++){
+	  for (int j = 0; j < map.sizeY; j++){
+	  Tile tile = new Tile(map, "plains", 1, i, j);
+	  Node2D tileNode = Tile.createTileNode(tile, plainsTexture);
+	  tileNode.Name = $"{i}x{j}y#{tile.ID}";
+	  AddChild(tileNode);
+	  } 
+	}
+	// SETUP
+	
+	SpriteFrames unitSpriteSheet = (SpriteFrames)GD.Load("res://Sprites/Units/Frames/ArcherFrames.tres");
+	Unit u1 = new Unit(map, "u1", 1, 40, 100, 8, 5, 5);
+	Node2D unit1Node = Unit.createUnitNode(u1, unitSpriteSheet);
+	AddChild(unit1Node);
+	map.unitMap[u1.x,u1.y] = u1;
+	u1.AddSkill(new DoubleTap());
+	u1.AddUnitEffect(new PreciseShots(5));
+
+	Unit u2 = new Unit(map, "u2", 2, 40, 100, 8, 3, 3);
+	Node2D unit2Node = Unit.createUnitNode(u2, unitSpriteSheet);
+	AddChild(unit2Node);
+	map.unitMap[u2.x,u2.y] = u2;
+	u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
+	u2.AddSkill(Factory.GetSkill("BitterMedicine"));
+	u2.AddSkill(Factory.GetSkill("DoubleTap"));
+  u2.AddSkill(Factory.GetSkill("HealingAura"));
+  u2.AddSkill(Factory.GetSkill("Teleport"));
   }
 
   public void NextTurn(){
