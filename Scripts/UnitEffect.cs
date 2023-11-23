@@ -166,8 +166,11 @@ public class RemoveHealingAura : UnitEffect
     priority = 5;
   }
   public override void Execute(Packet packet= null){
-    foreach(TileEffect e in linkedTileEffects){
-      e.RemoveThisEffect();
+    for(LinkedListNode<TileEffect> e = linkedTileEffects.First; e != null;){
+      e.Value.RemoveThisEffect();
+      LinkedListNode<TileEffect> n = e.Next;
+      linkedTileEffects.Remove(e);
+      e = n;
     }
   }
 }

@@ -176,7 +176,6 @@ public static class SaveUtil
 
                 Tile currentTile = game.map.tileMap[i,j];
                 if(currentTile.tilePreset == TilePreset.none){
-                    
                     Save.CustomTileSave customTile = new(){
                         ID = currentTile.ID,
                         tileName = currentTile.tileName,

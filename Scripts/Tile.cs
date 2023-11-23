@@ -79,7 +79,7 @@ public partial class Tile : Node
 
   public void AddTileEffect(TileEffect effect){
     // TODO add Unit source (that can be null) and implement related logic
-    TileEffect existingEffect = GetTileEffectByName(effect.name, effect.trigger);
+    TileEffect existingEffect = GetTileEffectByNameAndSource(effect.name, effect.source, effect.trigger);
     if(existingEffect == null){
       effect.parentTile = this;
       if(!tileEffects.Any()){
@@ -124,6 +124,23 @@ public partial class Tile : Node
     }
     foreach(TileEffect e in tileEffects){
       if(e.name == effectName){
+        return e;
+      }
+    }
+    return null;
+  }
+
+  public TileEffect GetTileEffectByNameAndSource(string effectName, Unit source, Trigger effectTrigger = Trigger.none){
+    if(effectTrigger != Trigger.none){
+      foreach(TileEffect e in tileEffects){
+      if(e.name == effectName && e.source == source && e.trigger == effectTrigger){
+        return e;
+      }
+    }
+      return null;
+    }
+    foreach(TileEffect e in tileEffects){
+      if(e.name == effectName && e.source == source){
         return e;
       }
     }

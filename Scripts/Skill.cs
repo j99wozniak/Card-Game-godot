@@ -80,6 +80,7 @@ public class HealingAura : Skill
   }
     public override void FireEffect(Tile targetTile){
       Unit target = targetTile.GetUnit();
+      target.GetUnitEffectByName("ApplyHealingAura")?.RemoveThisEffect();
       UnitEffect removeHealingAura = new RemoveHealingAura(){source = source};
       target.AddUnitEffect(removeHealingAura);
       UnitEffect applyHealingAura = new ApplyHealingAura(){source = source};
