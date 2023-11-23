@@ -61,7 +61,7 @@ public class BitterMedicine : Skill
   public override void FireEffect(Tile targetTile){
     Unit target = targetTile.GetUnit();
     target.OnHealing(new Packet(this, target, currentPower, new Heal()));
-    Poison bitterPoison = new Poison();
+    Poison bitterPoison = new Poison(){source = source};;
     bitterPoison.source = source;
     target.AddUnitEffect(bitterPoison);
   }
@@ -80,9 +80,9 @@ public class HealingAura : Skill
   }
     public override void FireEffect(Tile targetTile){
       Unit target = targetTile.GetUnit();
-      UnitEffect removeHealingAura = new RemoveHealingAura();
+      UnitEffect removeHealingAura = new RemoveHealingAura(){source = source};
       target.AddUnitEffect(removeHealingAura);
-      UnitEffect applyHealingAura = new ApplyHealingAura();
+      UnitEffect applyHealingAura = new ApplyHealingAura(){source = source};
       target.AddUnitEffect(applyHealingAura);
       removeHealingAura.linkedUnitEffects.AddFirst(applyHealingAura);
       applyHealingAura.linkedUnitEffects.AddFirst(removeHealingAura);

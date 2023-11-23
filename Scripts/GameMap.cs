@@ -1,10 +1,12 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 
-public class GameMap
+public partial class GameMap : Node2D
 {
   public int sizeX;
   public int sizeY;
+  public int maxSize {get {return Math.Max(sizeX, sizeY);}} // Max size
   public Tile[,] tileMap;
   public Unit[,] unitMap;
   public List<Unit> graveyard = new();
@@ -15,4 +17,5 @@ public class GameMap
     tileMap = new Tile[sizeX,sizeY];
     unitMap = new Unit[sizeX,sizeY];
   }
+  
 }

@@ -5,7 +5,7 @@ using System.Linq;
 
 public partial class Unit : Node
 {
-  public static int CurrentUnitID = 0;
+  public static int currentUnitID = 1;
   public int ID;
   // TODO maybe these triggers should be enums?
   public Dictionary<Trigger, LinkedList<UnitEffect>> unitEffects = new Dictionary<Trigger, LinkedList<UnitEffect>>{
@@ -52,10 +52,11 @@ public partial class Unit : Node
   public int baseMaxMovement;
   public int maxMovement{ get { return StatGetter(baseMaxMovement, Trigger.OnGetMaxMovement); } }
   public int currentMovement;
+  public bool isDead;
 
   public int x;
   public int y;
-
+  public UnitSpriteFrames unitSpriteFrames;
   public AnimatedSprite2D sprite;
   public Label currentHpLabel;
 
@@ -93,11 +94,11 @@ public partial class Unit : Node
   }
 
   public Vector2 GetRealPosition(){
-    return new Vector2(x*Game.TileSize, y*Game.TileSize);
+    return new Vector2(x*Game.tileSize, y*Game.tileSize);
   }
 
-  public Unit(GameMap map, string unitName, int team, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, int x, int y){
-    this.ID = CurrentUnitID++;
+  public Unit(GameMap map, string unitName, int team, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, int x, int y, UnitSpriteFrames unitSpriteFrames, bool isDead = false){
+    this.ID = currentUnitID++;
     this.map = map;
     this.unitName = unitName;
     this.team = team;
@@ -109,8 +110,13 @@ public partial class Unit : Node
     currentMovement = baseMaxMovement;
     this.x = x;
     this.y = y;
-    map.unitMap[x,y] = this;
+    this.unitSpriteFrames = unitSpriteFrames;
+    this.isDead = isDead;
+    if(!isDead){
+      map.unitMap[x,y] = this;
+    }
   }
+  
 
   // TODO Could probably make this smarter.
   // like setting an ID for each sequence of effects, 
@@ -243,6 +249,7 @@ public partial class Unit : Node
     if(currentHp == 0){
       PlayAnimation("right_death");
       map.unitMap[x, y] = null;
+      isDead = true;
       map.graveyard.Add(this);
       foreach(KeyValuePair<Trigger, LinkedList<UnitEffect>> list in unitEffects){
         LinkedListNode<UnitEffect> e = list.Value.First;

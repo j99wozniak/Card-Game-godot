@@ -48,11 +48,14 @@ public partial class Controller : Node
       if (eventKey.Pressed && eventKey.Keycode == Key.D){
         camera.Position = new Vector2(camera.Position.X+20, camera.Position.Y);
       }
+      if (eventKey.Pressed && eventKey.Keycode == Key.Left){
+        parentGame.LoadGame();
+      }
     }
-    else if (@event is InputEventMouseMotion eventMouseMotion){
+    else if (@event is InputEventMouseMotion eventMouseMotion && IsInstanceValid(parentGame.map)){
       Vector2 currentPosition = GetTree().Root.GetNode<Node2D>("Node2D").GetGlobalMousePosition();
-      int xTile = (int)Math.Floor((currentPosition.X + Game.TileSize/2) / Game.TileSize);
-      int yTile = (int)Math.Floor((currentPosition.Y + Game.TileSize/2) / Game.TileSize);
+      int xTile = (int)Math.Floor((currentPosition.X + Game.tileSize/2) / Game.tileSize);
+      int yTile = (int)Math.Floor((currentPosition.Y + Game.tileSize/2) / Game.tileSize);
       if(currentState == State.SELECTING_UNIT){
         if(xTile>=0 && yTile>=0 && xTile < parentGame.map.sizeX && yTile < parentGame.map.sizeY){
           selectedTile = parentGame.map.tileMap[xTile, yTile];

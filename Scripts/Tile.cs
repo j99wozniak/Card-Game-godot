@@ -1,10 +1,12 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 public partial class Tile : Node
 {
   public int ID;
+  public TilePreset tilePreset = TilePreset.none;
   public LinkedList<TileEffect> tileEffects = new();
   public GameMap map;
   public Node2D parentNode;
@@ -14,11 +16,16 @@ public partial class Tile : Node
   public int y;
   public Sprite2D tileSprite;
   public static Texture2D selectTexture = (Texture2D)GD.Load("res://Sprites/Tiles/select.png");
-  static Sprite2D selectSprite = new Sprite2D{Texture = selectTexture, Name = "selectNode", ZIndex = 1}; // FOR EXCLUSIVE SELECTION
+  public TileTexture tileTexture;
+  static Sprite2D selectSprite;
   
+  static public Node2D createTileNode(Tile tile){
+    return createTileNode(tile, Factory.GetTileTexture(tile.tileTexture));
+  }
   
   static public Node2D createTileNode(Tile tile, Texture2D texture){
     Node2D tileNode = new Node2D();
+		tileNode.Name = $"{tile.x}x{tile.y}y#{tile.ID}";
     tileNode.AddChild(tile);
     Sprite2D sprite = new Sprite2D(); // Create a new Sprite2D.
     sprite.Texture = texture;
@@ -30,18 +37,19 @@ public partial class Tile : Node
     return tileNode;
   }
 
-  public Tile(GameMap map, string tileName, float cost, int x, int y){
-    this.ID = map.sizeX*x+y;
+  public Tile(GameMap map, string tileName, float cost, int x, int y, TileTexture tileTexture = TileTexture.none){
+    this.ID = map.maxSize*x+y;
     this.map = map;
     this.tileName = tileName;
     this.cost = cost;
     this.x = x;
     this.y = y;
+    this.tileTexture = tileTexture;
     map.tileMap[x,y] = this;
   }
 
   public Vector2 GetRealPosition(){
-    return new Vector2(x*Game.TileSize, y*Game.TileSize);
+    return new Vector2(x*Game.tileSize, y*Game.tileSize);
   }
 
   public Unit GetUnit(){
@@ -57,10 +65,10 @@ public partial class Tile : Node
   }
 
   public void SelectTile(){
-    //Sprite2D selectSprite = new Sprite2D{Texture = selectTexture, Name = "selectNode", ZIndex = 1};
-    if(selectSprite.GetParent() != null){
-      selectSprite.GetParent().RemoveChild(selectSprite); // (maybe add if GetParent not null)
+    if(!IsInstanceValid(selectSprite)){
+      selectSprite = new Sprite2D{Texture = selectTexture, Name = "selectNode", ZIndex = 1};
     }
+    selectSprite.GetParent()?.RemoveChild(selectSprite); // (maybe add if GetParent not null)
     parentNode.AddChild(selectSprite);
   }
 

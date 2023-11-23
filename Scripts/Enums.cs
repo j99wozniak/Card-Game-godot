@@ -1,5 +1,3 @@
-using Godot;
-using System;
 
 public enum Trigger {
   none,
@@ -39,4 +37,21 @@ public enum Category {
   Defensive,
   Supportive,
   Utility
+}
+
+public enum UnitSpriteFrames {
+  none,
+  blueArcher
+}
+
+public enum TileTexture{
+  none,
+  Plains,
+  Sands
+}
+
+public enum TilePreset{
+  none,
+  Plains,
+  Sands
 }

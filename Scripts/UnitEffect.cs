@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 public abstract class UnitEffect
 {
-  public static int CurrentUnitEffectID = 0;
-  public int ID = CurrentUnitEffectID++;
+  public static int currentUnitEffectID = 1;
+  public int ID = currentUnitEffectID++;
   public string name = null;
   public Unit parentUnit = null;
   public Unit source = null;
@@ -208,12 +208,12 @@ public class Eager : UnitEffect
 
 public class PreciseShots : UnitEffect
 {
-  public PreciseShots(int power = 5){
+  public PreciseShots(){
     name = "PreciseShots";
     type = Type.Physical;
     trigger = Trigger.OnGetSkillPower;
     priority = 20;
-    this.power = power;
+    this.power = 5;
   }
   public override void SkillGetter(ref int valueToModify, Skill skill){
     GD.Print($"Applying PreciseShots: {valueToModify}+{power}");

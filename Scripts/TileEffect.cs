@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 public class TileEffect
 {
-  public static int CurrentTileEffectID = 0;
-  public int ID = CurrentTileEffectID++;
+  public static int currentTileEffectID = 1;
+  public int ID = currentTileEffectID++;
   public string name = null;
   public Tile parentTile = null;
   public Unit source;
@@ -17,7 +17,6 @@ public class TileEffect
   public Trigger countdownTrigger = Trigger.none;
   public LinkedList<TileEffect> linkedTileEffects = new();
   public LinkedList<UnitEffect> linkedUnitEffects = new(); 
-  public LinkedList<TileEffect> childrenTileEffects = new(); // TODO should be removed when parent effect is dicarded, but not the other way
 
   public virtual void Execute(Packet packet){}
   public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){} // Executed when calculating cost of a tile when attempting to move through it
@@ -63,12 +62,12 @@ public class TileEffect
 // For now lowers all damage received by `power` 
 public class RockyTerrain : TileEffect
 {
-  public RockyTerrain(int power = 1){
+  public RockyTerrain(){
     name = "RockyTerrain";
     type = Type.Physical;
     trigger = Trigger.OnDamage;
     priority = 1;
-    this.power = power;
+    this.power = 1;
   }
   public override void Execute(Packet packet){
     // TODO apply only on physical
@@ -81,12 +80,12 @@ public class RockyTerrain : TileEffect
 
 public class Flame : TileEffect
 {
-  public Flame(int power = 3){
+  public Flame(){
     name = "Flame";
     type = Type.Elemental;
     trigger = Trigger.OnEndTurn;
     priority = 5;
-    this.power = power;
+    this.power = 3;
   }
   public override void Execute(Packet packet){
     // TODO apply only on physical
@@ -97,12 +96,12 @@ public class Flame : TileEffect
 
 public class HealingAuraTile : TileEffect
 {
-  public HealingAuraTile(int power = 5){
+  public HealingAuraTile(){
     name = "HealingAuraTile";
     type = Type.Chemical;
     trigger = Trigger.OnEndTurn;
     priority = 5;
-    this.power = power;
+    this.power = 5;
   }
   public override void Execute(Packet packet = null){
     Unit target = parentTile.GetUnit();
