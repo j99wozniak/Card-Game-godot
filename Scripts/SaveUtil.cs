@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text;
+using System.Data;
+using System.Diagnostics;
 
 public class Save
 {
@@ -95,8 +97,65 @@ public static class SaveUtil
     static JsonSerializerOptions options = new JsonSerializerOptions{
         IncludeFields = true, 
         WriteIndented = true,
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault};
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault
+        };
 
+    static Save.UnitSave SaveUnit(Unit currentUnit){
+        Save.UnitSave unitSave = new(){
+            ID = currentUnit.ID,
+            unitName = currentUnit.unitName,
+            team = currentUnit.team,
+            baseMaxHp = currentUnit.baseMaxHp,
+            currentHp = currentUnit.currentHp,
+            baseMaxStamina = currentUnit.baseMaxStamina,
+            currentStamina = currentUnit.currentStamina,
+            baseMaxMovement = currentUnit.baseMaxStamina,
+            currentMovement = currentUnit.currentMovement,
+            isDead = currentUnit.isDead,
+            x = currentUnit.x,
+            y = currentUnit.y,
+            unitSpriteFrames = (int)currentUnit.unitSpriteFrames
+        };
+        foreach(Skill s in currentUnit.skills){
+            Save.UnitSave.SkillSave skillSave = new(){
+                sourceID = s.source?.ID ?? 0,
+                name = s.name,
+                type = (int) s.type,
+                category = (int) s.category,
+                isMelee = s.isMelee,
+                basePower = s.basePower,
+                baseCost = s.baseCost,
+                baseRange = s.baseRange
+            };
+            unitSave.skillSaves.Add(skillSave);
+        }
+        foreach (KeyValuePair<Trigger, LinkedList<UnitEffect>> list in currentUnit.unitEffects){
+            foreach(UnitEffect e in list.Value){
+                Save.UnitSave.UnitEffectSave unitEffectSave = new(){
+                    ID = e.ID,
+                    name = e.name,
+                    parentUnitID = e.parentUnit.ID,
+                    sourceID = e.source?.ID ?? 0,
+                    count = e.count,
+                    priority = e.priority,
+                    power = e.power,
+                    stackable = e.stackable,
+                    removedOnDeath = e.removedOnDeath,
+                    type = (int)e.type,
+                    trigger = (int)e.trigger,
+                    countdownTrigger = (int)e.countdownTrigger
+                };
+                foreach (UnitEffect lue in e.linkedUnitEffects){
+                    unitEffectSave.linkedUnitEffectsIDs.Add(lue.ID);
+                }
+                foreach(TileEffect lte in e.linkedTileEffects){
+                    unitEffectSave.linkedTileEffectsIDs.Add(lte.ID);
+                }
+                unitSave.unitEffects.Add(unitEffectSave);
+            }
+        }
+        return unitSave;
+    }
     public static Save CreateSave(Game game){
         Save save = new Save
         {
@@ -116,62 +175,7 @@ public static class SaveUtil
             for (int j = 0; j < game.map.sizeY; j++){
                 Unit currentUnit = game.map.unitMap[i,j];
                 if(currentUnit!=null){
-                    Save.UnitSave unitSave = new(){
-                        ID = currentUnit.ID,
-                        unitName = currentUnit.unitName,
-                        team = currentUnit.team,
-                        baseMaxHp = currentUnit.baseMaxHp,
-                        currentHp = currentUnit.currentHp,
-                        baseMaxStamina = currentUnit.baseMaxStamina,
-                        currentStamina = currentUnit.currentStamina,
-                        baseMaxMovement = currentUnit.baseMaxStamina,
-                        currentMovement = currentUnit.currentMovement,
-                        isDead = currentUnit.isDead,
-                        x = currentUnit.x,
-                        y = currentUnit.y,
-                        unitSpriteFrames = (int)currentUnit.unitSpriteFrames
-                    };
-
-                    foreach(Skill s in currentUnit.skills){
-                        Save.UnitSave.SkillSave skillSave = new(){
-                            sourceID = s.source?.ID ?? 0,
-                            name = s.name,
-                            type = (int) s.type,
-                            category = (int) s.category,
-                            isMelee = s.isMelee,
-                            basePower = s.basePower,
-                            baseCost = s.baseCost,
-                            baseRange = s.baseRange
-                        };
-                        unitSave.skillSaves.Add(skillSave);
-                    }
-
-                    foreach (KeyValuePair<Trigger, LinkedList<UnitEffect>> list in currentUnit.unitEffects){
-                        foreach(UnitEffect e in list.Value){
-                            Save.UnitSave.UnitEffectSave unitEffectSave = new(){
-                                ID = e.ID,
-                                name = e.name,
-                                parentUnitID = e.parentUnit.ID,
-                                sourceID = e.source?.ID ?? 0,
-                                count = e.count,
-                                priority = e.priority,
-                                power = e.power,
-                                stackable = e.stackable,
-                                removedOnDeath = e.removedOnDeath,
-                                type = (int)e.type,
-                                trigger = (int)e.trigger,
-                                countdownTrigger = (int)e.countdownTrigger
-                            };
-                            foreach (UnitEffect lue in e.linkedUnitEffects){
-                                unitEffectSave.linkedUnitEffectsIDs.Add(lue.ID);
-                            }
-                            foreach(TileEffect lte in e.linkedTileEffects){
-                                unitEffectSave.linkedTileEffectsIDs.Add(lte.ID);
-                            }
-                            unitSave.unitEffects.Add(unitEffectSave);
-                        }
-                    }
-                    save.units.Add(unitSave);
+                    save.units.Add(SaveUnit(currentUnit));
                 }
 
                 Tile currentTile = game.map.tileMap[i,j];
@@ -212,6 +216,11 @@ public static class SaveUtil
             } 
         }
         save.presetTiles = tempPresetTiles.ToString();
+
+        foreach(Unit deadUnit in game.map.graveyard){
+            save.units.Add(SaveUnit(deadUnit));
+        }
+
         return save;
     }
     public static string SaveGame(Game game){
@@ -233,14 +242,19 @@ public static class SaveUtil
 
         Func<int, (int x, int y)> toXY = ID => (ID / map.maxSize, ID % map.maxSize);
         string[] presetTiles = save.presetTiles.Split(',', StringSplitOptions.TrimEntries);
+        
+        // The bottleneck for speed is of course adding the child (3/4 of the time of the time is spent on that)
+        // Maybe think about keeping the children, and just switching the Tile object inside?
         foreach(string t in presetTiles){
             if(!string.IsNullOrWhiteSpace(t)){
-                (int ID, TilePreset tilePreset) = t.Split(":") switch {
-                    var tab => (int.Parse(tab[0]), (TilePreset)int.Parse(tab[1]))};
+                var tab = t.Split(":");
+                int ID = int.Parse(tab[0]);
+                TilePreset tilePreset = (TilePreset)int.Parse(tab[1]);
                 Tile newPresetTile = Factory.GetPresetTile(tilePreset, ID, map);
                 map.AddChild(Tile.createTileNode(newPresetTile));
             }
         }
+
         foreach(Save.CustomTileSave t in save.customTiles){
             (int x, int y) = toXY(t.ID);
             Tile newCustom = new Tile(map, t.tileName, t.cost, x, y, (TileTexture) t.tileTexture);
@@ -259,9 +273,10 @@ public static class SaveUtil
             if(u.isDead){
                 map.graveyard.Add(newUnit);
             }
+            else{
+                map.AddChild(Unit.createUnitNode(newUnit));
+            }
             lookupUnits.Add(u.ID, newUnit);
-            SpriteFrames uSpriteFrames = Factory.GetUnitSpriteFrames(newUnit.unitSpriteFrames);
-            map.AddChild(Unit.createUnitNode(newUnit, uSpriteFrames));
             
             foreach(Save.UnitSave.UnitEffectSave ue in u.unitEffects){
                 UnitEffect newEffect = Factory.GetUnitEffect(ue.name);
@@ -322,30 +337,38 @@ public static class SaveUtil
             }
         }
         foreach(Save.TileEffectSave te in save.tileEffects){
-                TileEffect currentEffect = lookupTileEffects[te.ID];
-                currentEffect.source = lookupUnits?.GetValueOrDefault(te.sourceID);
+            TileEffect currentEffect = lookupTileEffects[te.ID];
+            currentEffect.source = lookupUnits?.GetValueOrDefault(te.sourceID);
 
-                foreach(int lueID in te.linkedUnitEffectsIDs){
-                    currentEffect.linkedUnitEffects.AddLast(lookupUnitEffects[lueID]);
-                }
-                foreach(int lteID in te.linkedTileEffectsIDs){
-                    currentEffect.linkedTileEffects.AddLast(lookupTileEffects[lteID]);
-                }
+            foreach(int lueID in te.linkedUnitEffectsIDs){
+                currentEffect.linkedUnitEffects.AddLast(lookupUnitEffects[lueID]);
             }
+            foreach(int lteID in te.linkedTileEffectsIDs){
+                currentEffect.linkedTileEffects.AddLast(lookupTileEffects[lteID]);
+            }
+        }
+
         // Set the rest of variables
         game.numberOfTeams = save.numberOfTeams;
         game.currentTeam = save.currentTeam;
         Unit.currentUnitID = save.currentUnitID;
         UnitEffect.currentUnitEffectID = save.currentUnitEffectID;
         TileEffect.currentTileEffectID = save.currentTileEffectID;
-        if(game.map != null){
-            game.map.QueueFree();
-        }
+
+        // Another massive bottleneck is removing all of the elements.
+        // If performance of Load is ever an issue think about creating a dummy map
+        //  and applying some kind of delta on it, instead of always removing and creating a new map.
+        // OR BETTER YET, JUST REMEMBER X LAST MAPS in some kind of array. 
+        //  We have more than enough ram for that.
+        //  Just remove them from the scene after they're used.
+        //  Would creating new map after every move be noticable? 
+        // But for now the performance is good enough to be mostly unnoticable. 
+        game.map?.QueueFree();
         game.map = map;
         game.AddChild(map);
     }
+    static FileAccess file = FileAccess.Open("user://save_game.json", FileAccess.ModeFlags.ReadWrite);
     public static Save LoadSave(){
-        using var file = FileAccess.Open("user://save_game.json", FileAccess.ModeFlags.Read);
         string loadJson = file.GetAsText();
         Save loadedSave = JsonSerializer.Deserialize<Save>(loadJson, options);
         return loadedSave;

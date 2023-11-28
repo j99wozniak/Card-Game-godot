@@ -31,6 +31,9 @@ public static class Factory
     }
     return null;
   }
+  public static Tile GetPresetTile(TilePreset tilePreset, int x, int y, GameMap map){
+    return GetPresetTile(tilePreset, map.tileID(x,y), map);
+  }
   public static Tile GetPresetTile(TilePreset tilePreset, int ID, GameMap map){
     int x = ID / map.maxSize;
     int y = ID % map.maxSize;

@@ -43,7 +43,7 @@ public partial class Unit : Node
   public int baseMaxHp;
   public int maxHp { get { return StatGetter(baseMaxHp, Trigger.OnGetMaxHp); } } 
   private int _currentHp;
-  public int currentHp { get { return _currentHp; } set { _currentHp = value; UpdateHpLabel(); if(value==0){ OnDeath(); } } }
+  public int currentHp { get { return _currentHp; } set { _currentHp = value; UpdateHpLabel(); if(value==0 && !isDead){ OnDeath(); } } }
 
   public int baseMaxStamina;
   public int maxStamina { get { return StatGetter(baseMaxStamina, Trigger.OnGetMaxStamina); } }
@@ -59,6 +59,10 @@ public partial class Unit : Node
   public UnitSpriteFrames unitSpriteFrames;
   public AnimatedSprite2D sprite;
   public Label currentHpLabel;
+
+  static public Node2D createUnitNode(Unit unit){
+    return createUnitNode(unit, Factory.GetUnitSpriteFrames(unit.unitSpriteFrames));
+  }
 
   static public Node2D createUnitNode(Unit unit, SpriteFrames spriteFrames){
     Node2D unitNode = new Node2D();
@@ -303,34 +307,44 @@ public partial class Unit : Node
   Queue<string> animationQueue = new Queue<string>();
   bool queueEmpty = true;
   public void PlayAnimation(string anim){
-    if(queueEmpty){
-      queueEmpty = false;
-      sprite.Animation = anim;
-      sprite.Play();
-      sprite.AnimationFinished += FinishAnimation;
+    if(IsInstanceValid(parentNode)){
+      if(queueEmpty){
+        queueEmpty = false;
+        sprite.Animation = anim;
+        sprite.Play();
+        sprite.AnimationFinished += FinishAnimation;
+      }
+      else{
+        if(currentHp != 0 || anim.Contains("death")){
+          animationQueue.Enqueue(anim);
+        }
+      }
     }
     else{
-      if(currentHp != 0 || anim.Contains("death")){
-        animationQueue.Enqueue(anim);
-      }
+      GD.Print($"Tried to play animation {anim} but {unitName} doesn't have physical node2d");
     }
   }
 
   public void FinishAnimation(){
-    if(animationQueue.Count == 0){
-      if(sprite.Animation.ToString().Contains("death")){
-        parentNode.QueueFree();
+    if(IsInstanceValid(parentNode)){
+      if(animationQueue.Count == 0){
+        if(sprite.Animation.ToString().Contains("death")){
+          parentNode.QueueFree();
+        }
+        else{
+          sprite.Animation = "right_idle";
+          sprite.Play();
+          sprite.AnimationFinished -= FinishAnimation;
+          queueEmpty = true;
+        }
       }
       else{
-        sprite.Animation = "right_idle";
+        sprite.Animation = animationQueue.Dequeue();
         sprite.Play();
-        sprite.AnimationFinished -= FinishAnimation;
-        queueEmpty = true;
       }
     }
     else{
-      sprite.Animation = animationQueue.Dequeue();
-      sprite.Play();
+      GD.Print($"Tried to finish animation but {unitName} already doesn't have physical node2d");
     }
   }
 
