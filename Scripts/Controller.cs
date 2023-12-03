@@ -11,9 +11,10 @@ public partial class Controller : Node
   
   private PopupMenu popupMenu;
   private Tile selectedTile;
+  private Unit selectedUnit;
   private Skill selectedSkill;
   private State currentState = State.SELECTING_UNIT;
-  Dictionary<(int x, int y), float> rangeDict;
+  Dictionary<(int x, int y), float> rangeDict = new();
   // Called when the node enters the scene tree for the first time.
   public override void _Ready()
   {
@@ -62,7 +63,7 @@ public partial class Controller : Node
           selectedTile.SelectTile();
         }
       }
-      else if(currentState == State.TARGET_SKILL){
+      else if(currentState == State.TARGET_SKILL || currentState == State.TARGET_MOVEMENT){
         if(rangeDict.ContainsKey((xTile, yTile))){
           selectedTile = parentGame.map.tileMap[xTile, yTile];
           selectedTile.SelectTile();
@@ -74,7 +75,7 @@ public partial class Controller : Node
         GD.Print("Right Click");
         if(currentState == State.SELECTING_UNIT){
           popupMenu.Clear();
-          Unit selectedUnit = selectedTile.GetUnit();
+          selectedUnit = selectedTile.GetUnit();
           if(selectedUnit != null){
             int id = 0;
             foreach(Skill skill in selectedUnit.skills){
@@ -89,9 +90,9 @@ public partial class Controller : Node
             popupMenu.Popup(new Rect2I((int)inputEventMouseButton.Position.X, (int)inputEventMouseButton.Position.Y, 10, 10));
           }
         }
-        else if(currentState == State.TARGET_SKILL){
+        else if(currentState == State.TARGET_SKILL || currentState == State.TARGET_MOVEMENT){
           RemoveHighlights();
-          rangeDict = null;
+          rangeDict = new();
           selectedSkill = null;
           currentState = State.SELECTING_UNIT;
         }
@@ -103,8 +104,26 @@ public partial class Controller : Node
           if(selectedTile.GetUnit()!=null){
             selectedSkill.UseSkill(new List<Tile> {selectedTile});
             RemoveHighlights();
-            rangeDict = null;
+            rangeDict = new();
             selectedSkill = null;
+            currentState = State.SELECTING_UNIT;
+          }
+        }
+        else if(selectedTile.GetUnit()!=null && (currentState == State.SELECTING_UNIT || currentState == State.TARGET_MOVEMENT)){
+          selectedUnit = selectedTile.GetUnit();
+          currentState = State.TARGET_MOVEMENT;
+          RemoveHighlights();
+          rangeDict = Range.GetAccessibleMovementTiles(selectedUnit, parentGame.map);
+          Tile.SetHighlightColor("BLUE_VIOLET");
+          HighlightTiles();
+          selectedTile.RemoveSelection();
+          selectedTile = null;
+        }
+        else if(currentState == State.TARGET_MOVEMENT){
+          if(selectedTile.GetUnit()==null){
+            selectedUnit.MoveUnit(selectedTile);
+            RemoveHighlights();
+            selectedUnit = null;
             currentState = State.SELECTING_UNIT;
           }
         }
@@ -123,8 +142,10 @@ public partial class Controller : Node
   public void SelectSkill(int id){
     selectedSkill = selectedTile.GetUnit().skills.ElementAt(id);
     currentState = State.TARGET_SKILL;
-
-    rangeDict = Range.GetAccessibleTiles(selectedSkill, parentGame.map);
+    
+    RemoveHighlights();
+    rangeDict = Range.GetAccessibleSkillTiles(selectedSkill, parentGame.map);
+    Tile.SetHighlightColor("AQUAMARINE");
     HighlightTiles();
     selectedTile.RemoveSelection();
     selectedTile = null;

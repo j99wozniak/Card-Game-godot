@@ -18,6 +18,7 @@ public partial class Tile : Node
   public static Texture2D selectTexture = (Texture2D)GD.Load("res://Sprites/Tiles/select.png");
   public TileTexture tileTexture;
   static Sprite2D selectSprite;
+  static Color highlightColor = new Color(0.5f, 1f, 1f);
   
   static public Node2D createTileNode(Tile tile){
     return createTileNode(tile, Factory.GetTileTexture(tile.tileTexture));
@@ -56,8 +57,11 @@ public partial class Tile : Node
     return map.unitMap[x,y];
   }
 
+  static public void SetHighlightColor(string color){
+    highlightColor = new Color(color);
+  }
   public void HighlightTile(){
-    tileSprite.SelfModulate = new Color(0.5f, 1f, 1f);
+    tileSprite.SelfModulate = highlightColor;
   }
 
   public void RemoveHighlight(){

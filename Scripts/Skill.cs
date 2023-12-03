@@ -104,7 +104,6 @@ public class Teleport : Skill
   }
     public override void FireEffect(Tile targetTile){
       Unit target = targetTile.GetUnit();
-      GD.Print($"{target.GetUnitEffectByName("RemoveHealingAura", Trigger.OnStartMove)}, {target.GetUnitEffectByName("ApplyHealingAura", Trigger.OnEndMove)}");
       target.OnStartMove();
       target.map.unitMap[target.x, target.y] = null;
       target.x = 10;

@@ -151,6 +151,16 @@ public partial class Unit : Node
     return fetchedStat;
   }
 
+  public void MoveUnit(Tile targetTile){
+    OnStartMove();
+    map.unitMap[x, y] = null;
+    x = targetTile.x;
+    y = targetTile.y;
+    map.unitMap[x, y] = this;
+    parentNode.Position = GetRealPosition();
+    OnEndMove();
+  }
+
   public Tile GetTile(){
     return map.tileMap[x,y];
   }

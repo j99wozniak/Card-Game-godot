@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 public static class Range{
   // TODO after movement is done, countdown effect affecting movement.
-  public static Dictionary<(int, int), float> GetAccessibleTiles(Unit unit, GameMap map){
+  public static Dictionary<(int, int), float> GetAccessibleMovementTiles(Unit unit, GameMap map){
     float maxRange = unit.currentMovement;
     return CalculateAccessibleTiles(unit, map, unit.x, unit.y, maxRange, getMovementCostForTile);
   }
-  public static Dictionary<(int, int), float> GetAccessibleTiles(Skill skill, GameMap map){
+  public static Dictionary<(int, int), float> GetAccessibleSkillTiles(Skill skill, GameMap map){
     float maxRange = skill.currentRange;
     return CalculateAccessibleTiles(skill.source, map, skill.source.x, skill.source.y, maxRange, getSkillRangeCostForTile);
   }
