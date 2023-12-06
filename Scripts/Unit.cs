@@ -60,11 +60,21 @@ public partial class Unit : Node
   public AnimatedSprite2D sprite;
   public Label currentHpLabel;
 
-  static public Node2D createUnitNode(Unit unit){
-    return createUnitNode(unit, Factory.GetUnitSpriteFrames(unit.unitSpriteFrames));
+  public void AddUnitToMap(GameMap map){
+    this.map = map;
+    if(!isDead){
+      map.unitMap[x,y] = this;
+    }
+    else{
+      map.graveyard.Add(this);
+    }
+    map.AddChild(CreateUnitNode(this));
+  }
+  static public Node2D CreateUnitNode(Unit unit){
+    return CreateUnitNode(unit, Factory.GetUnitSpriteFrames(unit.unitSpriteFrames));
   }
 
-  static public Node2D createUnitNode(Unit unit, SpriteFrames spriteFrames){
+  static public Node2D CreateUnitNode(Unit unit, SpriteFrames spriteFrames){
     Node2D unitNode = new Node2D();
     unitNode.Name = unit.unitName + "_node";
     unitNode.Position = unit.GetRealPosition();
@@ -101,9 +111,8 @@ public partial class Unit : Node
     return new Vector2(x*Game.tileSize, y*Game.tileSize);
   }
 
-  public Unit(GameMap map, string unitName, int team, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, int x, int y, UnitSpriteFrames unitSpriteFrames, bool isDead = false){
+  public Unit(string unitName, int team, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, int x, int y, UnitSpriteFrames unitSpriteFrames, bool isDead = false){
     this.ID = currentUnitID++;
-    this.map = map;
     this.unitName = unitName;
     this.team = team;
     this.baseMaxHp = baseMaxHp;
@@ -116,9 +125,6 @@ public partial class Unit : Node
     this.y = y;
     this.unitSpriteFrames = unitSpriteFrames;
     this.isDead = isDead;
-    if(!isDead){
-      map.unitMap[x,y] = this;
-    }
   }
   
 

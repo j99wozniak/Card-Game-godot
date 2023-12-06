@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text;
-using System.Data;
-using System.Diagnostics;
 
 public class Save
 {
@@ -98,8 +96,7 @@ public static class SaveUtil
         IncludeFields = true, 
         WriteIndented = true,
         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault
-        };
-
+    };
     static Save.UnitSave SaveUnit(Unit currentUnit){
         Save.UnitSave unitSave = new(){
             ID = currentUnit.ID,
@@ -226,12 +223,63 @@ public static class SaveUtil
     public static string SaveGame(Game game){
         Save save = CreateSave(game);
         string saveJson = JsonSerializer.Serialize<Save>(save, options);
-        using(var file = FileAccess.Open("user://save_game.json", FileAccess.ModeFlags.Write)){
-            file.StoreString(saveJson);
-        }
+        using FileAccess saveFile = FileAccess.Open("user://Saves/save_game.json", FileAccess.ModeFlags.Write);
+        saveFile.StoreString(saveJson);
+        
         return saveJson;
     }
 
+    public static string SaveDeck(List<Unit> units){
+        Save deckSave = new Save();
+        foreach(Unit u in units){
+            Save.UnitSave us = SaveUnit(u);
+            deckSave.units.Add(us);
+        }
+        string saveJson = JsonSerializer.Serialize<Save>(deckSave, options);
+        using FileAccess deckFile = FileAccess.Open("user://Decks/deck1.json", FileAccess.ModeFlags.Write);
+        deckFile.StoreString(saveJson);
+        return saveJson;
+    }
+    
+    static Unit CreateUnit(Save.UnitSave unitSave, bool newUnit = false, Dictionary<int, UnitEffect> lookupUnitEffects = null){
+        Unit unit = new Unit(unitSave.unitName, unitSave.team, 
+            unitSave.baseMaxHp, unitSave.baseMaxStamina, 
+            unitSave.baseMaxMovement, unitSave.x, unitSave.y, 
+            (UnitSpriteFrames) unitSave.unitSpriteFrames, unitSave.isDead);
+        if(!newUnit){
+        unit.ID = unitSave.ID;
+        }
+        unit.currentHp = unitSave.currentHp;
+        unit.currentMovement = unitSave.currentMovement;
+        unit.currentStamina = unitSave.currentStamina;
+        foreach(Save.UnitSave.UnitEffectSave ue in unitSave.unitEffects){
+            UnitEffect newEffect = Factory.GetUnitEffect(ue.name);
+            newEffect.ID = ue.ID;
+            newEffect.parentUnit = unit;
+            newEffect.count = ue.count;
+            newEffect.priority = ue.priority;
+            newEffect.power = ue.power;
+            newEffect.stackable = ue.stackable;
+            newEffect.removedOnDeath = ue.removedOnDeath;
+            newEffect.type = (Type) ue.type;
+            newEffect.trigger = (Trigger) ue.trigger;
+            newEffect.countdownTrigger = (Trigger) ue.countdownTrigger;
+            lookupUnitEffects?.Add(ue.ID, newEffect);
+            unit.AddUnitEffect(newEffect);
+        }
+        foreach(Save.UnitSave.SkillSave s in unitSave.skillSaves){
+            Skill newSkill = Factory.GetSkill(s.name);
+            newSkill.name = s.name;
+            newSkill.type = (Type) s.type;
+            newSkill.category = (Category) s.category;
+            newSkill.isMelee = s.isMelee;
+            newSkill.basePower = s.basePower;
+            newSkill.baseCost = s.baseCost;
+            newSkill.baseRange = s.baseRange;
+            unit.AddSkill(newSkill);
+        }
+        return unit;
+    }
     public static void CreateGame(Game game, Save save){
         Dictionary<int, Unit> lookupUnits = new();
         Dictionary<int, UnitEffect> lookupUnitEffects = new();
@@ -262,37 +310,9 @@ public static class SaveUtil
         }
 
         foreach(Save.UnitSave u in save.units){
-            Unit newUnit = new Unit(map, u.unitName, 
-                u.team, u.baseMaxHp, u.baseMaxStamina, 
-                u.baseMaxMovement, u.x, u.y, 
-                (UnitSpriteFrames) u.unitSpriteFrames, u.isDead);
-            newUnit.ID = u.ID;
-            newUnit.currentHp = u.currentHp;
-            newUnit.currentMovement = u.currentMovement;
-            newUnit.currentStamina = u.currentStamina;
-            if(u.isDead){
-                map.graveyard.Add(newUnit);
-            }
-            else{
-                map.AddChild(Unit.createUnitNode(newUnit));
-            }
-            lookupUnits.Add(u.ID, newUnit);
-            
-            foreach(Save.UnitSave.UnitEffectSave ue in u.unitEffects){
-                UnitEffect newEffect = Factory.GetUnitEffect(ue.name);
-                newEffect.ID = ue.ID;
-                newEffect.parentUnit = newUnit;
-                newEffect.count = ue.count;
-                newEffect.priority = ue.priority;
-                newEffect.power = ue.power;
-                newEffect.stackable = ue.stackable;
-                newEffect.removedOnDeath = ue.removedOnDeath;
-                newEffect.type = (Type) ue.type;
-                newEffect.trigger = (Trigger) ue.trigger;
-                newEffect.countdownTrigger = (Trigger) ue.countdownTrigger;
-                lookupUnitEffects.Add(ue.ID, newEffect);
-                newUnit.AddUnitEffect(newEffect);
-            }
+            Unit restoredUnit = CreateUnit(u, newUnit:false, lookupUnitEffects);
+            restoredUnit.AddUnitToMap(map);
+            lookupUnits.Add(u.ID, restoredUnit);
         }
         foreach(Save.TileEffectSave te in save.tileEffects){
             TileEffect newEffect = Factory.GetTileEffect(te.name);
@@ -312,17 +332,15 @@ public static class SaveUtil
 
         foreach(Save.UnitSave u in save.units){
             Unit currentUnit = lookupUnits[u.ID];
-            foreach(Save.UnitSave.SkillSave s in u.skillSaves){
-                Skill newSkill = Factory.GetSkill(s.name);
-                newSkill.source = lookupUnits?.GetValueOrDefault(s.sourceID);
-                newSkill.name = s.name;
-                newSkill.type = (Type) s.type;
-                newSkill.category = (Category) s.category;
-                newSkill.isMelee = s.isMelee;
-                newSkill.basePower = s.basePower;
-                newSkill.baseCost = s.baseCost;
-                newSkill.baseRange = s.baseRange;
-                currentUnit.AddSkill(newSkill);
+            
+            foreach(Skill s in currentUnit.skills){
+                // Not the prettiest, but the performance cost is negligible 
+                foreach(Save.UnitSave.SkillSave ss in u.skillSaves){
+                    if(s.name == ss.name){
+                        s.source = lookupUnits?.GetValueOrDefault(ss.sourceID);
+                        break;
+                    }
+                }
             }
             foreach(Save.UnitSave.UnitEffectSave ue in u.unitEffects){
                 UnitEffect currentEffect = lookupUnitEffects[ue.ID];
@@ -367,11 +385,22 @@ public static class SaveUtil
         game.map = map;
         game.AddChild(map);
     }
-    static FileAccess file = FileAccess.Open("user://save_game.json", FileAccess.ModeFlags.ReadWrite);
     public static Save LoadSave(){
-        string loadJson = file.GetAsText();
+        using FileAccess saveFile = FileAccess.Open("user://Saves/save_game.json", FileAccess.ModeFlags.Read);
+        string loadJson = saveFile.GetAsText();
         Save loadedSave = JsonSerializer.Deserialize<Save>(loadJson, options);
         return loadedSave;
+    }
+
+    public static List<Unit> LoadDeck(){
+        List<Unit> units = new();
+        using FileAccess deckFile = FileAccess.Open("user://Decks/deck1.json", FileAccess.ModeFlags.Read);
+        string loadJson = deckFile.GetAsText();
+        Save loadedDeck = JsonSerializer.Deserialize<Save>(loadJson, options);
+        foreach(Save.UnitSave us in loadedDeck.units){
+            units.Add(CreateUnit(us, true));
+        }
+        return units;
     }
 }
 

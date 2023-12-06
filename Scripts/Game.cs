@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 public partial class Game : Node2D
@@ -41,7 +42,7 @@ public partial class Game : Node2D
 	button3.Pressed += LoadGame;
 	AddChild(button3);
 
-	test1();
+	testDeck();
   }
 
   void test1(){
@@ -57,18 +58,14 @@ public partial class Game : Node2D
 	map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("RockyTerrain"));
 	map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("Flame"));
 
-	
-	SpriteFrames unitSpriteSheet = (SpriteFrames)GD.Load("res://Sprites/Units/Frames/ArcherFrames.tres");
-	Unit u1 = new Unit(map, "u1", 1, 20, 50, 8, 5, 5, UnitSpriteFrames.blueArcher);
-	Node2D unit1Node = Unit.createUnitNode(u1);
-	map.AddChild(unit1Node);
+	Unit u1 = new Unit("u1", 1, 20, 50, 8, 5, 5, UnitSpriteFrames.blueArcher);
+	u1.AddUnitToMap(map);
 	map.unitMap[u1.x,u1.y] = u1;
 	u1.AddSkill(new DoubleTap());
 	u1.AddUnitEffect(new PreciseShots());
 	u1.AddSkill(Factory.GetSkill("HealingAura"));
-	Unit u2 = new Unit(map, "u2", 2, 20, 50, 8, 3, 3, UnitSpriteFrames.blueArcher);
-	Node2D unit2Node = Unit.createUnitNode(u2, unitSpriteSheet);
-	map.AddChild(unit2Node);
+	Unit u2 = new Unit("u2", 2, 20, 50, 8, 3, 3, UnitSpriteFrames.blueArcher);
+	u2.AddUnitToMap(map);
 	u2.sprite.Animation = "front_idle";
 	map.unitMap[u2.x,u2.y] = u2;
 	u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
@@ -78,7 +75,38 @@ public partial class Game : Node2D
 	AddChild(map);
   }
 
-  void test_aura(){
+  void testDeck(){
+	map = new GameMap(40, 40);
+	for (int i = 0; i < map.sizeX; i++){
+	  for (int j = 0; j < map.sizeY; j++){
+		Tile tile = Factory.GetPresetTile(TilePreset.Plains, i,j, map);
+		Node2D tileNode = Tile.createTileNode(tile, Factory.GetTileTexture(TileTexture.Plains));
+		map.AddChild(tileNode);
+	  } 
+	}
+
+	Unit u1 = new Unit("Healer", 1, 25, 50, 8, 5, 5, UnitSpriteFrames.blueArcher);
+	u1.AddSkill(Factory.GetSkill("HealingAura"));
+	u1.AddSkill(new BitterMedicine());
+	u1.AddSkill(new DoubleTap());
+	Unit u2 = new Unit("Sharpshooter", 2, 20, 50, 8, 3, 3, UnitSpriteFrames.blueArcher);
+	u2.AddSkill(Factory.GetSkill("DoubleTap"));
+	u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
+	u2.AddUnitEffect(new PreciseShots());
+
+	AddChild(map);
+
+	SaveUtil.SaveDeck(new List<Unit>(){u1, u2});
+
+	List<Unit> units = SaveUtil.LoadDeck();
+
+	int co = 0;
+	foreach(Unit u in units){
+		u.x = co;
+		u.y = co;
+		co++;
+		u.AddUnitToMap(map);
+	}
 
   }
 
