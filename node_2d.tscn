@@ -30,3 +30,11 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 22
 text = "3/5❤️"
+
+[node name="TextEdit" type="TextEdit" parent="."]
+offset_left = -114.0
+offset_top = -48.0
+offset_right = -29.0
+offset_bottom = -13.0
+text = "Insert"
+placeholder_text = "Insert me"

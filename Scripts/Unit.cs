@@ -6,7 +6,7 @@ using System.Linq;
 public partial class Unit : Node
 {
   public static int currentUnitID = 1;
-  public int ID;
+  public int ID = 0;
   // TODO maybe these triggers should be enums?
   public Dictionary<Trigger, LinkedList<UnitEffect>> unitEffects = new Dictionary<Trigger, LinkedList<UnitEffect>>{
   {Trigger.OnBeginTurn, new LinkedList<UnitEffect>()},
@@ -25,6 +25,7 @@ public partial class Unit : Node
   {Trigger.OnGetMaxHp, new LinkedList<UnitEffect>()},
   {Trigger.OnGetMaxStamina, new LinkedList<UnitEffect>()},
   {Trigger.OnGetMaxMovement, new LinkedList<UnitEffect>()},
+  {Trigger.OnGetUnitCost, new LinkedList<UnitEffect>()},
 
   {Trigger.OnGetSkillPower, new LinkedList<UnitEffect>()},
   {Trigger.OnGetSkillCost, new LinkedList<UnitEffect>()},
@@ -52,6 +53,8 @@ public partial class Unit : Node
   public int baseMaxMovement;
   public int maxMovement{ get { return StatGetter(baseMaxMovement, Trigger.OnGetMaxMovement); } }
   public int currentMovement;
+   public int baseUnitCost;
+  public int unitCost{ get { return StatGetter(baseUnitCost, Trigger.OnGetUnitCost); } }
   public bool isDead;
 
   public int x;
@@ -75,6 +78,7 @@ public partial class Unit : Node
   }
 
   static public Node2D CreateUnitNode(Unit unit, SpriteFrames spriteFrames){
+    unit.ID = currentUnitID++;
     Node2D unitNode = new Node2D();
     unitNode.Name = unit.unitName + "_node";
     unitNode.Position = unit.GetRealPosition();
@@ -111,8 +115,8 @@ public partial class Unit : Node
     return new Vector2(x*Game.tileSize, y*Game.tileSize);
   }
 
-  public Unit(string unitName, int team, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, int x, int y, UnitSpriteFrames unitSpriteFrames, bool isDead = false){
-    this.ID = currentUnitID++;
+  public Unit(string unitName, int team, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, 
+              int baseUnitCost, int x, int y, UnitSpriteFrames unitSpriteFrames, bool isDead = false){
     this.unitName = unitName;
     this.team = team;
     this.baseMaxHp = baseMaxHp;
@@ -121,6 +125,7 @@ public partial class Unit : Node
     currentStamina = baseMaxStamina;
     this.baseMaxMovement = baseMaxMovement;
     currentMovement = baseMaxMovement;
+    this.baseUnitCost = baseUnitCost;
     this.x = x;
     this.y = y;
     this.unitSpriteFrames = unitSpriteFrames;

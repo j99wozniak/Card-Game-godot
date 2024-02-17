@@ -9,6 +9,9 @@ public partial class Game : Node2D
   public int numberOfTeams = 2;
   public int currentTeam = 1;
   public GameMap map;
+  List<Unit> deck;
+  Label resourcesLabel;
+  int resources;
   string saveJson;
   // Called when the node enters the scene tree for the first time.
   public override void _Ready()
@@ -42,6 +45,14 @@ public partial class Game : Node2D
 	button3.Pressed += LoadGame;
 	AddChild(button3);
 
+	resourcesLabel = new Label();
+	resourcesLabel.ZIndex = 3;
+	resourcesLabel.Scale = new Vector2(1.5f, 1.5f);
+	resourcesLabel.AddThemeColorOverride("font_outline_color", new Color(0,0,0,1));
+	resourcesLabel.AddThemeConstantOverride("outline_size", 15);
+	AddChild(resourcesLabel);
+	resourcesLabel.Text = $"{resources}💰";
+
 	testDeck();
   }
 
@@ -58,13 +69,13 @@ public partial class Game : Node2D
 	map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("RockyTerrain"));
 	map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("Flame"));
 
-	Unit u1 = new Unit("u1", 1, 20, 50, 8, 5, 5, UnitSpriteFrames.blueArcher);
+	Unit u1 = new Unit("u1", 1, 20, 50, 8, 2, 5, 5, UnitSpriteFrames.blueArcher);
 	u1.AddUnitToMap(map);
 	map.unitMap[u1.x,u1.y] = u1;
 	u1.AddSkill(new DoubleTap());
 	u1.AddUnitEffect(new PreciseShots());
 	u1.AddSkill(Factory.GetSkill("HealingAura"));
-	Unit u2 = new Unit("u2", 2, 20, 50, 8, 3, 3, UnitSpriteFrames.blueArcher);
+	Unit u2 = new Unit("u2", 2, 20, 50, 8, 2, 3, 3, UnitSpriteFrames.blueArcher);
 	u2.AddUnitToMap(map);
 	u2.sprite.Animation = "front_idle";
 	map.unitMap[u2.x,u2.y] = u2;
@@ -84,29 +95,21 @@ public partial class Game : Node2D
 		map.AddChild(tileNode);
 	  } 
 	}
-
-	Unit u1 = new Unit("Healer", 1, 25, 50, 8, 5, 5, UnitSpriteFrames.blueArcher);
+	/*
+	Unit u1 = new Unit("Healer", 1, 25, 50, 8, 3, 5, 5, UnitSpriteFrames.blueArcher);
 	u1.AddSkill(Factory.GetSkill("HealingAura"));
 	u1.AddSkill(new BitterMedicine());
 	u1.AddSkill(new DoubleTap());
-	Unit u2 = new Unit("Sharpshooter", 2, 20, 50, 8, 3, 3, UnitSpriteFrames.blueArcher);
+	Unit u2 = new Unit("Sharpshooter", 2, 20, 50, 8, 4, 3, 3, UnitSpriteFrames.blueArcher);
 	u2.AddSkill(Factory.GetSkill("DoubleTap"));
 	u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
 	u2.AddUnitEffect(new PreciseShots());
-
+	*/
 	AddChild(map);
 
-	SaveUtil.SaveDeck(new List<Unit>(){u1, u2});
+	//SaveUtil.SaveDeck(new List<Unit>(){u1, u2});
 
-	List<Unit> units = SaveUtil.LoadDeck();
-
-	int co = 0;
-	foreach(Unit u in units){
-		u.x = co;
-		u.y = co;
-		co++;
-		u.AddUnitToMap(map);
-	}
+	deck = SaveUtil.LoadDeck();
 
   }
 

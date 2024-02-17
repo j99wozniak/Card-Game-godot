@@ -16,6 +16,7 @@ public enum Trigger {
   OnGetMaxHp,
   OnGetMaxStamina,
   OnGetMaxMovement,
+  OnGetUnitCost,
   OnMovingThrough,
   OnGetSkillPower,
   OnGetSkillCost,

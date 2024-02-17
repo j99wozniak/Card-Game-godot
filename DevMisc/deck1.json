@@ -1,0 +1,106 @@
+{
+  "units": [
+    {
+      "ID": 1,
+      "unitName": "Healer",
+      "team": 1,
+      "baseMaxHp": 25,
+      "currentHp": 25,
+      "baseMaxStamina": 50,
+      "currentStamina": 50,
+      "baseMaxMovement": 50,
+      "currentMovement": 8,
+	  "unitCost": 3,
+      "x": 5,
+      "y": 5,
+      "unitSpriteFrames": 1,
+      "skillSaves": [
+        {
+          "sourceID": 1,
+          "name": "HealingAura",
+          "type": 2,
+          "category": 3,
+          "isMelee": true,
+          "basePower": 10,
+          "baseCost": 2,
+          "baseRange": 4
+        },
+        {
+          "sourceID": 1,
+          "name": "BitterMedicine",
+          "type": 2,
+          "category": 3,
+          "isMelee": true,
+          "basePower": 10,
+          "baseCost": 2,
+          "baseRange": 2
+        },
+        {
+          "sourceID": 1,
+          "name": "DoubleTap",
+          "type": 1,
+          "category": 1,
+          "basePower": 10,
+          "baseCost": 5,
+          "baseRange": 5
+        }
+      ],
+      "unitEffects": []
+    },
+    {
+      "ID": 2,
+      "unitName": "Sharpshooter",
+      "team": 2,
+      "baseMaxHp": 20,
+      "currentHp": 20,
+      "baseMaxStamina": 50,
+      "currentStamina": 50,
+      "baseMaxMovement": 50,
+      "currentMovement": 8,
+	  "unitCost": 4,
+      "x": 3,
+      "y": 3,
+      "unitSpriteFrames": 1,
+      "skillSaves": [
+        {
+          "sourceID": 2,
+          "name": "DoubleTap",
+          "type": 1,
+          "category": 1,
+          "basePower": 10,
+          "baseCost": 5,
+          "baseRange": 5
+        }
+      ],
+      "unitEffects": [
+        {
+          "ID": 1,
+          "name": "Dodge",
+          "parentUnitID": 2,
+          "count": 100,
+          "priority": 10,
+          "removedOnDeath": true,
+          "type": 1,
+          "trigger": 4,
+          "linkedTileEffectsIDs": [],
+          "linkedUnitEffectsIDs": []
+        },
+        {
+          "ID": 2,
+          "name": "PreciseShots",
+          "parentUnitID": 2,
+          "count": 100,
+          "priority": 20,
+          "power": 5,
+          "removedOnDeath": true,
+          "type": 1,
+          "trigger": 18,
+          "linkedTileEffectsIDs": [],
+          "linkedUnitEffectsIDs": []
+        }
+      ]
+    }
+  ],
+  "customTiles": [],
+  "tileEffects": []
+}

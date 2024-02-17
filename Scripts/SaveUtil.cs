@@ -31,6 +31,7 @@ public class Save
         public int currentStamina;
         public int baseMaxMovement;
         public int currentMovement;
+        public int baseUnitCost;
         public bool isDead;
         public int x;
         public int y;
@@ -108,6 +109,7 @@ public static class SaveUtil
             currentStamina = currentUnit.currentStamina,
             baseMaxMovement = currentUnit.baseMaxStamina,
             currentMovement = currentUnit.currentMovement,
+            baseUnitCost = currentUnit.baseUnitCost,
             isDead = currentUnit.isDead,
             x = currentUnit.x,
             y = currentUnit.y,
@@ -244,7 +246,7 @@ public static class SaveUtil
     static Unit CreateUnit(Save.UnitSave unitSave, bool newUnit = false, Dictionary<int, UnitEffect> lookupUnitEffects = null){
         Unit unit = new Unit(unitSave.unitName, unitSave.team, 
             unitSave.baseMaxHp, unitSave.baseMaxStamina, 
-            unitSave.baseMaxMovement, unitSave.x, unitSave.y, 
+            unitSave.baseMaxMovement, unitSave.baseUnitCost, unitSave.x, unitSave.y, 
             (UnitSpriteFrames) unitSave.unitSpriteFrames, unitSave.isDead);
         if(!newUnit){
         unit.ID = unitSave.ID;
