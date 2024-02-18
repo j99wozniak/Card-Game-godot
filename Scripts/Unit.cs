@@ -63,6 +63,11 @@ public partial class Unit : Node
   public AnimatedSprite2D sprite;
   public Label currentHpLabel;
 
+  public Unit SetNewID(){
+    this.ID = currentUnitID++;
+    return this;
+  }
+
   public void AddUnitToMap(GameMap map){
     this.map = map;
     if(!isDead){
@@ -71,14 +76,14 @@ public partial class Unit : Node
     else{
       map.graveyard.Add(this);
     }
-    map.AddChild(CreateUnitNode(this));
+    map.AddChild(CreateUnitNodeWithFactoryFrames(this));
   }
-  static public Node2D CreateUnitNode(Unit unit){
+
+  static public Node2D CreateUnitNodeWithFactoryFrames(Unit unit){
     return CreateUnitNode(unit, Factory.GetUnitSpriteFrames(unit.unitSpriteFrames));
   }
 
   static public Node2D CreateUnitNode(Unit unit, SpriteFrames spriteFrames){
-    unit.ID = currentUnitID++;
     Node2D unitNode = new Node2D();
     unitNode.Name = unit.unitName + "_node";
     unitNode.Position = unit.GetRealPosition();
