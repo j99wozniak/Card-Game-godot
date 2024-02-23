@@ -23,6 +23,7 @@ public abstract class UnitEffect
   public virtual void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){} // Executed when calculating cost of a tile when attempting to move through it
   public virtual void Getter(ref int valueToModify){}
   public virtual void SkillGetter(ref int valueToModify, Skill skill){}
+  public virtual void ModifySkillList(LinkedList<Skill> skillList){}
   public void Countdown(){
     foreach(TileEffect e in linkedTileEffects){
       e.CountdownChild();
@@ -237,5 +238,23 @@ public class Sniper : UnitEffect
   public override void SkillGetter(ref int skillRange, Skill skill)
   {
     skillRange += 5;
+  }
+}
+
+public class SummonSkillsFromDeck : UnitEffect
+{
+  public SummonSkillsFromDeck(){
+    name = "SummonSkillsFromDeck";
+    type = Type.Physical;
+    trigger = Trigger.OnGetSkillList;
+    priority = 99;
+  }
+  public override void ModifySkillList(LinkedList<Skill> skillList){
+    List<Unit> playerDeck = parentUnit.map.decks[parentUnit.team];
+    foreach(Unit u in playerDeck){
+      Skill summonSkill = new Summon(u, playerDeck);
+      summonSkill.source = parentUnit;
+      skillList.AddLast(summonSkill);
+    }
   }
 }

@@ -10,6 +10,7 @@ public partial class GameMap : Node2D
   public Tile[,] tileMap;
   public Unit[,] unitMap;
   public List<Unit> graveyard = new();
+  public Dictionary<int, List<Unit>> decks = new Dictionary<int, List<Unit>>(); // Maybe seperate class?
   public int tileID(int x, int y){
     return x*maxSize+y;
   }

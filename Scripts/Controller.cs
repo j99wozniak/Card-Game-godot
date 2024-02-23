@@ -12,7 +12,7 @@ public partial class Controller : Node
   private PopupMenu popupMenu;
   private Tile selectedTile;
   private Unit selectedUnit;
-  private Skill selectedSkill;
+  private Targeter targeter;
   private State currentState = State.SELECTING_UNIT;
   Dictionary<(int x, int y), float> rangeDict = new();
   // Called when the node enters the scene tree for the first time.
@@ -59,14 +59,18 @@ public partial class Controller : Node
       int yTile = (int)Math.Floor((currentPosition.Y + Game.tileSize/2) / Game.tileSize);
       if(currentState == State.SELECTING_UNIT){
         if(xTile>=0 && yTile>=0 && xTile < parentGame.map.sizeX && yTile < parentGame.map.sizeY){
-          selectedTile = parentGame.map.tileMap[xTile, yTile];
-          selectedTile.SelectTile();
+          if(selectedTile==null || xTile!=selectedTile.x || yTile!=selectedTile.y){
+            selectedTile = parentGame.map.tileMap[xTile, yTile];
+            selectedTile.SelectTile();
+          }
         }
       }
       else if(currentState == State.TARGET_SKILL || currentState == State.TARGET_MOVEMENT){
         if(rangeDict.ContainsKey((xTile, yTile))){
-          selectedTile = parentGame.map.tileMap[xTile, yTile];
-          selectedTile.SelectTile();
+          if(selectedTile==null || xTile!=selectedTile.x || yTile!=selectedTile.y){
+            selectedTile = parentGame.map.tileMap[xTile, yTile];
+            selectedTile.SelectTile();
+          }
         }
       }
     }
@@ -78,7 +82,7 @@ public partial class Controller : Node
           selectedUnit = selectedTile.GetUnit();
           if(selectedUnit != null){
             int id = 0;
-            foreach(Skill skill in selectedUnit.skills){
+            foreach(Skill skill in selectedUnit.allSkills){
               popupMenu.AddItem($"{skill.name} | {skill.currentPower}🗡️ | {skill.currentCost}⚡", id);
               popupMenu.SetItemTooltip(id, $"{skill.currentRange}🏹");
               if(selectedUnit.currentStamina < skill.currentCost){
@@ -86,38 +90,42 @@ public partial class Controller : Node
               }
               id++;
             }
-
             popupMenu.Popup(new Rect2I((int)inputEventMouseButton.Position.X, (int)inputEventMouseButton.Position.Y, 10, 10));
+            currentState = State.SELECTING_SKILL;
           }
         }
         else if(currentState == State.TARGET_SKILL || currentState == State.TARGET_MOVEMENT){
-          RemoveHighlights();
-          rangeDict = new();
-          selectedSkill = null;
-          currentState = State.SELECTING_UNIT;
+          if(targeter.RemoveLastTileFromTargets() == Targeter.AlreadyEmpty){
+            RemoveHighlights();
+            rangeDict = new();
+            targeter = null;
+            currentState = State.SELECTING_UNIT;
+          }
         }
       }
       else if (inputEventMouseButton.IsPressed() && inputEventMouseButton.ButtonIndex == MouseButton.Left){
         GD.Print("Left Click");
         if(currentState == State.TARGET_SKILL){
-          // Different targeting modes
-          if(selectedTile.GetUnit()!=null){
-            selectedSkill.UseSkill(new List<Tile> {selectedTile});
+          if(targeter.AddTileToTargeting(selectedTile) == Targeter.AllTargetsSelected){
+            targeter.targetingSkill.UseSkill(targeter.targetedTiles);
             RemoveHighlights();
             rangeDict = new();
-            selectedSkill = null;
+            targeter = null;
             currentState = State.SELECTING_UNIT;
           }
         }
+        else if(currentState == State.SELECTING_SKILL){
+          currentState = State.SELECTING_UNIT;
+        }
         else if(selectedTile.GetUnit()!=null && (currentState == State.SELECTING_UNIT || currentState == State.TARGET_MOVEMENT)){
           selectedUnit = selectedTile.GetUnit();
-          currentState = State.TARGET_MOVEMENT;
           RemoveHighlights();
           rangeDict = Range.GetAccessibleMovementTiles(selectedUnit, parentGame.map);
           Tile.SetHighlightColor("BLUE_VIOLET");
           HighlightTiles();
           selectedTile.RemoveSelection();
           selectedTile = null;
+          currentState = State.TARGET_MOVEMENT;
         }
         else if(currentState == State.TARGET_MOVEMENT){
           if(selectedTile.GetUnit()==null){
@@ -138,9 +146,15 @@ public partial class Controller : Node
       //GD.Print(GetTree().Root.GetNode("Node2D").GetNode<Node2D>("Node2D").GetGlobalMousePosition());
   }
 
+  public void Reset(){
+    currentState = State.SELECTING_UNIT;
+    RemoveHighlights();
+  }
+
   
   public void SelectSkill(int id){
-    selectedSkill = selectedTile.GetUnit().skills.ElementAt(id);
+    Skill selectedSkill = selectedTile.GetUnit().allSkills.ElementAt(id);
+    targeter = new Targeter(selectedSkill);
     currentState = State.TARGET_SKILL;
     
     RemoveHighlights();

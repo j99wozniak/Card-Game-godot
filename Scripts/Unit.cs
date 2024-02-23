@@ -29,10 +29,13 @@ public partial class Unit : Node
 
   {Trigger.OnGetSkillPower, new LinkedList<UnitEffect>()},
   {Trigger.OnGetSkillCost, new LinkedList<UnitEffect>()},
-  {Trigger.OnGetSkillRange, new LinkedList<UnitEffect>()}
+  {Trigger.OnGetSkillRange, new LinkedList<UnitEffect>()},
+  {Trigger.OnGetSkillList, new LinkedList<UnitEffect>()},
   };
 
+
   public LinkedList<Skill> skills = new();
+  public LinkedList<Skill> allSkills { get { return OnGetSkillList(new LinkedList<Skill>(skills)); } }
 
   public GameMap map;
   public Node2D parentNode;
@@ -75,6 +78,7 @@ public partial class Unit : Node
     }
     else{
       map.graveyard.Add(this);
+      return;
     }
     map.AddChild(CreateUnitNodeWithFactoryFrames(this));
   }
@@ -246,7 +250,7 @@ public partial class Unit : Node
   }
 
   public Skill GetSkillByName(string skillName){
-    foreach(Skill s in skills){
+    foreach(Skill s in allSkills){
       if(s.name == skillName){
       return s;
       }
@@ -255,7 +259,7 @@ public partial class Unit : Node
   }
 
   public void UseSkill(string skillName, List<Tile> targetList){
-    foreach(Skill s in skills){
+    foreach(Skill s in allSkills){
       if(s.name == skillName){
       s.UseSkill(targetList);
       return;
@@ -277,7 +281,6 @@ public partial class Unit : Node
     ExecuteEffects(Trigger.OnDeath);
     CountdownUnitEffects(Trigger.OnDeath);
     if(currentHp == 0){
-      PlayAnimation("right_death");
       map.unitMap[x, y] = null;
       isDead = true;
       map.graveyard.Add(this);
@@ -290,6 +293,7 @@ public partial class Unit : Node
           e = e.Next;
         }
       }
+      PlayAnimation("right_death");
     }
   }
 
@@ -415,6 +419,13 @@ public partial class Unit : Node
     foreach(UnitEffect e in unitEffects[Trigger.OnMoving]){
       e.MovementExecute(ref movementCost, tile, this);
     }
+  }
+
+  public LinkedList<Skill> OnGetSkillList(LinkedList<Skill> skillList){
+    foreach(UnitEffect e in unitEffects[Trigger.OnGetSkillList]){
+      e.ModifySkillList(skillList);
+    }
+    return skillList;
   }
 
   void CountdownUnitEffects(Trigger countdownTrigger){

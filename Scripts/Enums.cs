@@ -20,7 +20,8 @@ public enum Trigger {
   OnMovingThrough,
   OnGetSkillPower,
   OnGetSkillCost,
-  OnGetSkillRange
+  OnGetSkillRange,
+  OnGetSkillList
 }
 
 public enum Type {
@@ -38,6 +39,16 @@ public enum Category {
   Defensive,
   Supportive,
   Utility
+}
+
+public enum Target {
+  none,
+  Unit,
+  EnemyUnit,
+  AllyUnit,
+  EmptyTile,
+  Any,
+  Self
 }
 
 public enum UnitSpriteFrames {

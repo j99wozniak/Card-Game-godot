@@ -43,6 +43,10 @@ public class Save
             public string name;
             public int type;
             public int category;
+            public int numberOfTargets;
+            public int targetQualifier;
+            public bool canTargetSameTileAgain;
+            public int splashZoneRange;
             public bool isMelee;
             public int basePower;
             public int baseCost;
@@ -107,7 +111,7 @@ public static class SaveUtil
             currentHp = currentUnit.currentHp,
             baseMaxStamina = currentUnit.baseMaxStamina,
             currentStamina = currentUnit.currentStamina,
-            baseMaxMovement = currentUnit.baseMaxStamina,
+            baseMaxMovement = currentUnit.baseMaxMovement,
             currentMovement = currentUnit.currentMovement,
             baseUnitCost = currentUnit.baseUnitCost,
             isDead = currentUnit.isDead,
@@ -122,6 +126,10 @@ public static class SaveUtil
                 type = (int) s.type,
                 category = (int) s.category,
                 isMelee = s.isMelee,
+                numberOfTargets = s.numberOfTargets,
+                targetQualifier = (int) s.targetQualifier,
+                canTargetSameTileAgain = s.canTargetSameTileAgain,
+                splashZoneRange = s.splashZoneRange,
                 basePower = s.basePower,
                 baseCost = s.baseCost,
                 baseRange = s.baseRange
@@ -150,6 +158,31 @@ public static class SaveUtil
                 foreach(TileEffect lte in e.linkedTileEffects){
                     unitEffectSave.linkedTileEffectsIDs.Add(lte.ID);
                 }
+                unitSave.unitEffects.Add(unitEffectSave);
+            }
+        }
+        return unitSave;
+    }
+    static Save.UnitSave SaveDeckUnit(Unit currentUnit){
+        Save.UnitSave unitSave = new(){
+            unitName = currentUnit.unitName,
+            baseMaxHp = currentUnit.baseMaxHp,
+            baseMaxStamina = currentUnit.baseMaxStamina,
+            baseMaxMovement = currentUnit.baseMaxMovement,
+            baseUnitCost = currentUnit.baseUnitCost,
+            unitSpriteFrames = (int)currentUnit.unitSpriteFrames
+        };
+        foreach(Skill s in currentUnit.skills){
+            Save.UnitSave.SkillSave skillSave = new(){
+                name = s.name
+            };
+            unitSave.skillSaves.Add(skillSave);
+        }
+        foreach (KeyValuePair<Trigger, LinkedList<UnitEffect>> list in currentUnit.unitEffects){
+            foreach(UnitEffect e in list.Value){
+                Save.UnitSave.UnitEffectSave unitEffectSave = new(){
+                    name = e.name
+                };
                 unitSave.unitEffects.Add(unitEffectSave);
             }
         }
@@ -227,30 +260,41 @@ public static class SaveUtil
         string saveJson = JsonSerializer.Serialize<Save>(save, options);
         using FileAccess saveFile = FileAccess.Open("user://Saves/save_game.json", FileAccess.ModeFlags.Write);
         saveFile.StoreString(saveJson);
+
+        foreach (var kvp in game.map.decks) {
+            int team = kvp.Key;
+            List<Unit> deck = kvp.Value;
+            Save deckSave = new Save();
+            foreach(Unit u in deck){
+                Save.UnitSave us = SaveDeckUnit(u);
+                deckSave.units.Add(us);
+            }
+            string deckSaveJson = JsonSerializer.Serialize<Save>(deckSave, options);
+            using FileAccess deckFile = FileAccess.Open($"user://Saves/deck{team}.json", FileAccess.ModeFlags.Write);
+            deckFile.StoreString(deckSaveJson);
+        }
         
         return saveJson;
     }
 
-    public static string SaveDeck(List<Unit> units){
+    public static string SaveDeck(List<Unit> units, int team){
         Save deckSave = new Save();
         foreach(Unit u in units){
-            Save.UnitSave us = SaveUnit(u);
+            Save.UnitSave us = SaveDeckUnit(u);
             deckSave.units.Add(us);
         }
         string saveJson = JsonSerializer.Serialize<Save>(deckSave, options);
-        using FileAccess deckFile = FileAccess.Open("user://Decks/deck1.json", FileAccess.ModeFlags.Write);
+        using FileAccess deckFile = FileAccess.Open($"user://Decks/deck{team}.json", FileAccess.ModeFlags.Write);
         deckFile.StoreString(saveJson);
         return saveJson;
     }
     
-    static Unit CreateUnit(Save.UnitSave unitSave, bool newUnit = false, Dictionary<int, UnitEffect> lookupUnitEffects = null){
+    static Unit CreateUnit(Save.UnitSave unitSave, Dictionary<int, UnitEffect> lookupUnitEffects){
         Unit unit = new Unit(unitSave.unitName, unitSave.team, 
             unitSave.baseMaxHp, unitSave.baseMaxStamina, 
             unitSave.baseMaxMovement, unitSave.baseUnitCost, unitSave.x, unitSave.y, 
             (UnitSpriteFrames) unitSave.unitSpriteFrames, unitSave.isDead);
-        if(!newUnit){
         unit.ID = unitSave.ID;
-        }
         unit.currentHp = unitSave.currentHp;
         unit.currentMovement = unitSave.currentMovement;
         unit.currentStamina = unitSave.currentStamina;
@@ -266,7 +310,7 @@ public static class SaveUtil
             newEffect.type = (Type) ue.type;
             newEffect.trigger = (Trigger) ue.trigger;
             newEffect.countdownTrigger = (Trigger) ue.countdownTrigger;
-            lookupUnitEffects?.Add(ue.ID, newEffect);
+            lookupUnitEffects.Add(ue.ID, newEffect);
             unit.AddUnitEffect(newEffect);
         }
         foreach(Save.UnitSave.SkillSave s in unitSave.skillSaves){
@@ -275,9 +319,28 @@ public static class SaveUtil
             newSkill.type = (Type) s.type;
             newSkill.category = (Category) s.category;
             newSkill.isMelee = s.isMelee;
+            newSkill.numberOfTargets = s.numberOfTargets;
+            newSkill.targetQualifier = (Target) s.targetQualifier;
+            newSkill.canTargetSameTileAgain = s.canTargetSameTileAgain;
+            newSkill.splashZoneRange = s.splashZoneRange;
             newSkill.basePower = s.basePower;
             newSkill.baseCost = s.baseCost;
             newSkill.baseRange = s.baseRange;
+            unit.AddSkill(newSkill);
+        }
+        return unit;
+    }
+    static Unit CreateDeckUnit(Save.UnitSave unitSave, int team){
+        Unit unit = new Unit(unitSave.unitName, team, 
+            unitSave.baseMaxHp, unitSave.baseMaxStamina, 
+            unitSave.baseMaxMovement, unitSave.baseUnitCost, 0, 0, 
+            (UnitSpriteFrames) unitSave.unitSpriteFrames, false);
+        foreach(Save.UnitSave.UnitEffectSave ue in unitSave.unitEffects){
+            UnitEffect newEffect = Factory.GetUnitEffect(ue.name);
+            unit.AddUnitEffect(newEffect);
+        }
+        foreach(Save.UnitSave.SkillSave s in unitSave.skillSaves){
+            Skill newSkill = Factory.GetSkill(s.name);
             unit.AddSkill(newSkill);
         }
         return unit;
@@ -312,7 +375,7 @@ public static class SaveUtil
         }
 
         foreach(Save.UnitSave u in save.units){
-            Unit restoredUnit = CreateUnit(u, newUnit:false, lookupUnitEffects);
+            Unit restoredUnit = CreateUnit(u, lookupUnitEffects);
             restoredUnit.AddUnitToMap(map);
             lookupUnits.Add(u.ID, restoredUnit);
         }
@@ -394,13 +457,24 @@ public static class SaveUtil
         return loadedSave;
     }
 
-    public static List<Unit> LoadDeck(){
+    public static List<Unit> LoadSaveDeck(int team){
         List<Unit> units = new();
-        using FileAccess deckFile = FileAccess.Open("user://Decks/deck1.json", FileAccess.ModeFlags.Read);
+        using FileAccess deckFile = FileAccess.Open($"user://Saves/deck{team}.json", FileAccess.ModeFlags.Read);
         string loadJson = deckFile.GetAsText();
         Save loadedDeck = JsonSerializer.Deserialize<Save>(loadJson, options);
         foreach(Save.UnitSave us in loadedDeck.units){
-            units.Add(CreateUnit(us, true));
+            units.Add(CreateDeckUnit(us, team));
+        }
+        return units;
+    }
+
+    public static List<Unit> LoadDeck(int team){
+        List<Unit> units = new();
+        using FileAccess deckFile = FileAccess.Open($"user://Decks/deck{team}.json", FileAccess.ModeFlags.Read);
+        string loadJson = deckFile.GetAsText();
+        Save loadedDeck = JsonSerializer.Deserialize<Save>(loadJson, options);
+        foreach(Save.UnitSave us in loadedDeck.units){
+            units.Add(CreateDeckUnit(us, team));
         }
         return units;
     }
