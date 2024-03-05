@@ -42,7 +42,7 @@ public partial class Unit : Node
 
   public string unitName;
 
-  public int team;
+  public Player player;
 
   public int baseMaxHp;
   public int maxHp { get { return StatGetter(baseMaxHp, Trigger.OnGetMaxHp); } } 
@@ -124,10 +124,10 @@ public partial class Unit : Node
     return new Vector2(x*Game.tileSize, y*Game.tileSize);
   }
 
-  public Unit(string unitName, int team, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, 
+  public Unit(string unitName, Player player, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, 
               int baseUnitCost, int x, int y, UnitSpriteFrames unitSpriteFrames, bool isDead = false){
     this.unitName = unitName;
-    this.team = team;
+    this.player = player;
     this.baseMaxHp = baseMaxHp;
     currentHp = baseMaxHp;
     this.baseMaxStamina = baseMaxStamina;

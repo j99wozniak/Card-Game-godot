@@ -150,6 +150,7 @@ public class Summon : Skill
     this.deckToRemoveFrom = deckToRemoveFrom;
   }
   public override void FireEffect(Tile targetTile){
+    unit.player = source.player;
     unit.x = targetTile.x;
     unit.y = targetTile.y;
     unit.SetNewID();

@@ -9,7 +9,7 @@ public partial class Game : Node2D
   public int numberOfTeams = 2;
   public int currentTeam = 1;
   public GameMap map;
-  List<Unit> deck;
+  public Player [] players;
   Label resourcesLabel;
   int resources;
   string saveJson;
@@ -53,7 +53,7 @@ public partial class Game : Node2D
     AddChild(resourcesLabel);
     resourcesLabel.Text = $"{resources}💰";
 
-    test1();
+    //test1();
   }
 
   void test1(){
@@ -65,32 +65,58 @@ public partial class Game : Node2D
       map.AddChild(tileNode);
       } 
     }
+    map.tileMap[0,10].tilePreset = TilePreset.Sands;
+    map.tileMap[0,10].tileTexture = TileTexture.Sands;
+    map.tileMap[0,10].tileSprite.Texture = Factory.GetTileTexture(TileTexture.Sands);
     // SETUP
     map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("RockyTerrain"));
     map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("Flame"));
 
-    Unit u1 = new Unit("Healer", 2, 20, 50, 8, 2, 5, 5, UnitSpriteFrames.blueArcher).SetNewID();
+    Player player1 = new Player(this, 1, false);
+    Player player2 = new Player(this, 2, true);
+    
+    Condition wincon11_p1 = Factory.GetCondition("CharacterStayCondition", player1, "10");
+    Condition wincon12_p1 = Factory.GetCondition("DestroyCastleCondition", player1, "246");
+    Condition wincon21_p1 = Factory.GetCondition("EliminateAllEnemiesCondition", player1);
+    Condition wincon_p2 = Factory.GetCondition("EliminateAllEnemiesCondition", player2);
+    Condition losecond_p1 = Factory.GetCondition("AllAlliesEliminatedCondition", player1);
+    Condition losecond_p2 = Factory.GetCondition("AllAlliesEliminatedCondition", player2);
+
+    CombinedCondition stay_and_destr = new CombinedCondition(ConditionOperator.AND, new List<Condition>(){wincon11_p1, wincon12_p1});
+    CombinedCondition finalWinCon = new CombinedCondition(ConditionOperator.OR, new List<Condition>(){stay_and_destr, wincon21_p1});
+    player1.winCondition = finalWinCon;
+    player2.winCondition = wincon_p2;
+
+    player1.loseCondition = losecond_p1;
+    player2.loseCondition = losecond_p2;
+
+    player1.deck = SaveUtil.LoadDeck(1);
+    player2.deck = SaveUtil.LoadDeck(2);
+
+    players = new Player[2];
+    players[0] = player1;
+    players[1] = player2;
+
+    Unit u1 = new Unit("Healer", player1, 20, 50, 8, 2, 5, 5, UnitSpriteFrames.blueArcher).SetNewID();
     u1.AddUnitToMap(map);
     map.unitMap[u1.x,u1.y] = u1;
     u1.AddSkill(new DoubleTap());
     u1.AddSkill(Factory.GetSkill("BitterMedicine"));
     u1.AddSkill(Factory.GetSkill("HealingAura"));
-    Unit u2 = new Unit("Sniper", 2, 20, 50, 8, 2, 3, 3, UnitSpriteFrames.blueArcher).SetNewID();
+    Unit u2 = new Unit("Sniper", player1, 20, 50, 8, 2, 3, 3, UnitSpriteFrames.blueArcher).SetNewID();
     u2.AddUnitToMap(map);
     u2.sprite.Animation = "front_idle";
     map.unitMap[u2.x,u2.y] = u2;
     u2.AddUnitEffect(new PreciseShots());
     u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
     u2.AddSkill(Factory.GetSkill("DoubleTap"));
-    Unit u3 = new Unit("Summoner", 2, 20, 50, 8, 2, 6, 6, UnitSpriteFrames.blueArcher).SetNewID();
+    Unit u3 = new Unit("Summoner", player2, 20, 50, 8, 2, 6, 6, UnitSpriteFrames.blueArcher).SetNewID();
     u3.AddUnitToMap(map);
     map.unitMap[u1.x,u1.y] = u1;
     u3.AddSkill(new DoubleTap());
     u3.AddUnitEffect(new SummonSkillsFromDeck());
-    deck = SaveUtil.LoadDeck(2);
-    map.decks[2] = deck;
-    
-    map.decks[1] = SaveUtil.LoadDeck(1);
+
+
 
     //List<Unit> newDeck = new List<Unit>(){u1, u2, u3};
     //SaveUtil.SaveDeck(newDeck, 2);
@@ -123,8 +149,6 @@ public partial class Game : Node2D
 
     //SaveUtil.SaveDeck(new List<Unit>(){u1, u2});
 
-    deck = SaveUtil.LoadDeck(1);
-
   }
 
   public void SaveGame(){
@@ -145,9 +169,14 @@ public partial class Game : Node2D
     Save loadedSave = SaveUtil.LoadSave();
     SaveUtil.CreateGame(this, loadedSave);
     for(int i = 1; i<=numberOfTeams; i++){
-      map.decks[i] = SaveUtil.LoadSaveDeck(i);
+      players[i-1].deck = SaveUtil.LoadSaveDeck(i);
     }
     controller.Reset();
+    
+    GD.Print("winCondition1"+players[0].winCondition.IsMet());
+    GD.Print("loseCondition1"+players[0].loseCondition.IsMet());
+    GD.Print("winCondition2"+players[1].winCondition.IsMet());
+    GD.Print("loseCondition2"+players[1].loseCondition.IsMet());
     GD.Print("Load SUCCESS!!");
 
 
@@ -178,14 +207,14 @@ public partial class Game : Node2D
 
   public void EndTurn(){
     foreach(Unit unit in map.unitMap){
-      if(unit!=null && unit.team == currentTeam){
+      if(unit!=null && unit.player.team == currentTeam){
         unit.OnEndTurn();
       }
     }
     foreach(Tile tile in map.tileMap){
       foreach(TileEffect tileEffect in tile.tileEffects){
         if(tileEffect.countdownTrigger == Trigger.OnEndTurn){
-          if(tileEffect.source == null || tileEffect.source.team == currentTeam){
+          if(tileEffect.source == null || tileEffect.source.player.team == currentTeam){
             tileEffect.Countdown();
           }
         }
@@ -195,14 +224,14 @@ public partial class Game : Node2D
 
   public void BeginTurn(){
   foreach(Unit unit in map.unitMap){
-    if(unit!=null && unit.team == currentTeam){
+    if(unit!=null && unit.player.team == currentTeam){
     unit.OnBeginTurn();
     }
   }
   foreach(Tile tile in map.tileMap){
     foreach(TileEffect tileEffect in tile.tileEffects){
     if(tileEffect.countdownTrigger == Trigger.OnBeginTurn){
-      if(tileEffect.source == null || tileEffect.source.team == currentTeam){
+      if(tileEffect.source == null || tileEffect.source.player.team == currentTeam){
       tileEffect.Countdown();
       }
     }

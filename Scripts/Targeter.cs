@@ -34,11 +34,11 @@ public class Targeter
           targetedTiles.Add(targetTile);
         break;
       case Target.EnemyUnit:
-        if(targetTile.GetUnit()!=null && targetTile.GetUnit().team!=targetingSkill.source.team)
+        if(targetTile.GetUnit()!=null && targetTile.GetUnit().player.team!=targetingSkill.source.player.team)
           targetedTiles.Add(targetTile);
         break;
       case Target.AllyUnit:
-        if(targetTile.GetUnit()!=null && targetTile.GetUnit().team==targetingSkill.source.team)
+        if(targetTile.GetUnit()!=null && targetTile.GetUnit().player.team==targetingSkill.source.player.team)
           targetedTiles.Add(targetTile);
         break;
       case Target.EmptyTile:

@@ -250,7 +250,7 @@ public class SummonSkillsFromDeck : UnitEffect
     priority = 99;
   }
   public override void ModifySkillList(LinkedList<Skill> skillList){
-    List<Unit> playerDeck = parentUnit.map.decks[parentUnit.team];
+    List<Unit> playerDeck = parentUnit.player.deck;
     foreach(Unit u in playerDeck){
       Skill summonSkill = new Summon(u, playerDeck);
       summonSkill.source = parentUnit;

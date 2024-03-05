@@ -20,7 +20,20 @@ public class Save
     public List<CustomTileSave> customTiles = new();
     public List<TileEffectSave> tileEffects = new();
     public string presetTiles;
+    public List<PlayerSave> players = new();
     
+    public class PlayerSave{
+        public int team;
+        public bool isCPU;
+        public ConditionSave winCondition;
+        public ConditionSave loseCondition;
+
+        public class ConditionSave{
+            public string name;
+            public string extraData;
+            public List<ConditionSave> conditions;
+        }
+    }
     public class UnitSave{
         public int ID;
         public string unitName;
@@ -106,7 +119,7 @@ public static class SaveUtil
         Save.UnitSave unitSave = new(){
             ID = currentUnit.ID,
             unitName = currentUnit.unitName,
-            team = currentUnit.team,
+            team = currentUnit.player.team,
             baseMaxHp = currentUnit.baseMaxHp,
             currentHp = currentUnit.currentHp,
             baseMaxStamina = currentUnit.baseMaxStamina,
@@ -188,6 +201,20 @@ public static class SaveUtil
         }
         return unitSave;
     }
+    private static Save.PlayerSave.ConditionSave SaveConditionTree(Condition currentCondition){
+        Save.PlayerSave.ConditionSave conditionSave = new Save.PlayerSave.ConditionSave
+        {
+            name = currentCondition.name,
+            extraData = currentCondition.getExtraData()
+        };
+        if (currentCondition is CombinedCondition currentCombined){
+            conditionSave.conditions = new();
+            foreach (Condition condition in currentCombined.conditions){
+                conditionSave.conditions.Add(SaveConditionTree(condition));
+            }
+        }
+        return conditionSave;
+    }
     public static Save CreateSave(Game game){
         Save save = new Save
         {
@@ -198,8 +225,19 @@ public static class SaveUtil
             sizeY = game.map.sizeY,
             currentUnitID = Unit.currentUnitID,
             currentUnitEffectID = UnitEffect.currentUnitEffectID,
-            currentTileEffectID = TileEffect.currentTileEffectID
+            currentTileEffectID = TileEffect.currentTileEffectID,
         };
+
+        foreach (Player p in game.players){
+            Save.PlayerSave playerSave = new Save.PlayerSave
+            {
+                team = p.team,
+                isCPU = p.isCPU,
+                winCondition = SaveConditionTree(p.winCondition),
+                loseCondition = SaveConditionTree(p.loseCondition)
+            };
+            save.players.Add(playerSave);
+        }
 
         StringBuilder tempPresetTiles = new StringBuilder();
 
@@ -261,9 +299,9 @@ public static class SaveUtil
         using FileAccess saveFile = FileAccess.Open("user://Saves/save_game.json", FileAccess.ModeFlags.Write);
         saveFile.StoreString(saveJson);
 
-        foreach (var kvp in game.map.decks) {
-            int team = kvp.Key;
-            List<Unit> deck = kvp.Value;
+        foreach (Player p in game.players) {
+            int team = p.team;
+            List<Unit> deck = p.deck;
             Save deckSave = new Save();
             foreach(Unit u in deck){
                 Save.UnitSave us = SaveDeckUnit(u);
@@ -289,8 +327,8 @@ public static class SaveUtil
         return saveJson;
     }
     
-    static Unit CreateUnit(Save.UnitSave unitSave, Dictionary<int, UnitEffect> lookupUnitEffects){
-        Unit unit = new Unit(unitSave.unitName, unitSave.team, 
+    static Unit CreateUnit(Save.UnitSave unitSave, Player player, Dictionary<int, UnitEffect> lookupUnitEffects){
+        Unit unit = new Unit(unitSave.unitName, player, 
             unitSave.baseMaxHp, unitSave.baseMaxStamina, 
             unitSave.baseMaxMovement, unitSave.baseUnitCost, unitSave.x, unitSave.y, 
             (UnitSpriteFrames) unitSave.unitSpriteFrames, unitSave.isDead);
@@ -330,8 +368,8 @@ public static class SaveUtil
         }
         return unit;
     }
-    static Unit CreateDeckUnit(Save.UnitSave unitSave, int team){
-        Unit unit = new Unit(unitSave.unitName, team, 
+    static Unit CreateDeckUnit(Save.UnitSave unitSave){
+        Unit unit = new Unit(unitSave.unitName, null, 
             unitSave.baseMaxHp, unitSave.baseMaxStamina, 
             unitSave.baseMaxMovement, unitSave.baseUnitCost, 0, 0, 
             (UnitSpriteFrames) unitSave.unitSpriteFrames, false);
@@ -345,16 +383,43 @@ public static class SaveUtil
         }
         return unit;
     }
+
+    private static Condition CreateConditionTree(Save.PlayerSave.ConditionSave conditionSave, Player player){
+        if(conditionSave.name == "CombinedCondition"){
+            ConditionOperator op = (ConditionOperator)Enum.Parse(typeof(ConditionOperator), conditionSave.extraData);
+            CombinedCondition combinedCondition = new CombinedCondition(op, new List<Condition>());
+            foreach (Save.PlayerSave.ConditionSave subConditionSave in conditionSave.conditions){
+                combinedCondition.conditions.Add(CreateConditionTree(subConditionSave, player));
+            }
+            return combinedCondition;
+        }
+        else{
+            Condition condition = Factory.GetCondition(conditionSave.name, player, conditionSave.extraData);
+            return condition;
+        }
+    }
     public static void CreateGame(Game game, Save save){
         Dictionary<int, Unit> lookupUnits = new();
         Dictionary<int, UnitEffect> lookupUnitEffects = new();
         Dictionary<int, TileEffect> lookupTileEffects = new();
 
         Game.tileSize = save.tileSize;
+        game.numberOfTeams = save.numberOfTeams;
+        game.currentTeam = save.currentTeam;
+        Unit.currentUnitID = save.currentUnitID;
+        UnitEffect.currentUnitEffectID = save.currentUnitEffectID;
+        TileEffect.currentTileEffectID = save.currentTileEffectID;
         GameMap map = new GameMap(save.sizeX, save.sizeY);
 
-        Func<int, (int x, int y)> toXY = ID => (ID / map.maxSize, ID % map.maxSize);
         string[] presetTiles = save.presetTiles.Split(',', StringSplitOptions.TrimEntries);
+
+        game.players = new Player[save.numberOfTeams];
+        foreach(Save.PlayerSave ps in save.players){
+            Player newPlayer = new Player(game, ps.team, ps.isCPU);
+            newPlayer.winCondition = CreateConditionTree(ps.winCondition, newPlayer);
+            newPlayer.loseCondition = CreateConditionTree(ps.loseCondition, newPlayer);
+            game.players[ps.team-1] = newPlayer;
+        }
         
         // The bottleneck for speed is of course adding the child (3/4 of the time of the time is spent on that)
         // Maybe think about keeping the children, and just switching the Tile object inside?
@@ -369,19 +434,19 @@ public static class SaveUtil
         }
 
         foreach(Save.CustomTileSave t in save.customTiles){
-            (int x, int y) = toXY(t.ID);
+            (int x, int y) = map.IDtoXY(t.ID);
             Tile newCustom = new Tile(map, t.tileName, t.cost, x, y, (TileTexture) t.tileTexture);
             map.AddChild(Tile.createTileNode(newCustom));
         }
 
         foreach(Save.UnitSave u in save.units){
-            Unit restoredUnit = CreateUnit(u, lookupUnitEffects);
+            Unit restoredUnit = CreateUnit(u, game.players[u.team-1], lookupUnitEffects);
             restoredUnit.AddUnitToMap(map);
             lookupUnits.Add(u.ID, restoredUnit);
         }
         foreach(Save.TileEffectSave te in save.tileEffects){
             TileEffect newEffect = Factory.GetTileEffect(te.name);
-            (int x, int y) = toXY(te.parentTileID);
+            (int x, int y) = map.IDtoXY(te.parentTileID);
             newEffect.ID = te.ID;
             newEffect.parentTile = map.tileMap[x, y];
             newEffect.count = te.count;
@@ -431,13 +496,6 @@ public static class SaveUtil
             }
         }
 
-        // Set the rest of variables
-        game.numberOfTeams = save.numberOfTeams;
-        game.currentTeam = save.currentTeam;
-        Unit.currentUnitID = save.currentUnitID;
-        UnitEffect.currentUnitEffectID = save.currentUnitEffectID;
-        TileEffect.currentTileEffectID = save.currentTileEffectID;
-
         // Another massive bottleneck is removing all of the elements.
         // If performance of Load is ever an issue think about creating a dummy map
         //  and applying some kind of delta on it, instead of always removing and creating a new map.
@@ -463,7 +521,7 @@ public static class SaveUtil
         string loadJson = deckFile.GetAsText();
         Save loadedDeck = JsonSerializer.Deserialize<Save>(loadJson, options);
         foreach(Save.UnitSave us in loadedDeck.units){
-            units.Add(CreateDeckUnit(us, team));
+            units.Add(CreateDeckUnit(us));
         }
         return units;
     }
@@ -474,7 +532,7 @@ public static class SaveUtil
         string loadJson = deckFile.GetAsText();
         Save loadedDeck = JsonSerializer.Deserialize<Save>(loadJson, options);
         foreach(Save.UnitSave us in loadedDeck.units){
-            units.Add(CreateDeckUnit(us, team));
+            units.Add(CreateDeckUnit(us));
         }
         return units;
     }

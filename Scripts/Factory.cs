@@ -6,6 +6,17 @@ using System.Reflection;
 // TODO if we need optimization we can convert switches to operate on enums
 public static class Factory
 {
+  public static Condition GetCondition(string conditionName, Player player, string extraData = null){
+    System.Type targetType = Assembly.GetExecutingAssembly().GetTypes()
+        .FirstOrDefault(t => t.IsSubclassOf(typeof(Condition)) && t.Name == conditionName);
+    if (targetType != null){
+      if(extraData == null){
+        return (Condition)Activator.CreateInstance(targetType, player);
+      }
+      return (Condition)Activator.CreateInstance(targetType, player, extraData);
+    }
+    return null;
+  }
   public static Skill GetSkill(string skillName){
     // Find the type with the specified class name that is derived from Skill
     System.Type targetType = Assembly.GetExecutingAssembly().GetTypes()
@@ -32,7 +43,7 @@ public static class Factory
     return null;
   }
   public static Tile GetPresetTile(TilePreset tilePreset, int x, int y, GameMap map){
-    return GetPresetTile(tilePreset, map.tileID(x,y), map);
+    return GetPresetTile(tilePreset, map.TileID(x,y), map);
   }
   public static Tile GetPresetTile(TilePreset tilePreset, int ID, GameMap map){
     int x = ID / map.maxSize;

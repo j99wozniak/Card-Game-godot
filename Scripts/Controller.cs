@@ -95,7 +95,7 @@ public partial class Controller : Node
           }
         }
         else if(currentState == State.TARGET_SKILL || currentState == State.TARGET_MOVEMENT){
-          if(targeter.RemoveLastTileFromTargets() == Targeter.AlreadyEmpty){
+          if(targeter == null || targeter.RemoveLastTileFromTargets() == Targeter.AlreadyEmpty){
             RemoveHighlights();
             rangeDict = new();
             targeter = null;
