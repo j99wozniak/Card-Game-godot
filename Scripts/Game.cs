@@ -163,9 +163,6 @@ public partial class Game : Node2D
   }
 
   public void LoadGame(){
-    Stopwatch stopwatch = new Stopwatch();
-    stopwatch.Start();
-
     Save loadedSave = SaveUtil.LoadSave();
     SaveUtil.CreateGame(this, loadedSave);
     for(int i = 1; i<=numberOfTeams; i++){
@@ -178,11 +175,6 @@ public partial class Game : Node2D
     GD.Print("winCondition2"+players[1].winCondition.IsMet());
     GD.Print("loseCondition2"+players[1].loseCondition.IsMet());
     GD.Print("Load SUCCESS!!");
-
-
-    stopwatch.Stop();
-    long elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
-    GD.Print($"Load Elapsed Time: {elapsedMilliseconds} ms");
 
     GD.Print("Dead units:");
     foreach(Unit u in map.graveyard){
