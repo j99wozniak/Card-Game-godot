@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Godot;
 
 public abstract class Condition
@@ -29,6 +30,9 @@ public class EliminateAllEnemiesCondition : Condition
     }
     return true;
   }
+  public override string ToString(){
+      return "Eliminate all enemies";
+  }
 }
 
 public class CharacterStayCondition : Condition
@@ -50,6 +54,11 @@ public class CharacterStayCondition : Condition
     return false;
   }
   public override string getExtraData(){return extraData;}
+  
+  public override string ToString(){
+    (int x, int y) = player.game.map.IDtoXY(tileID);
+    return $"Have a unit stay on tile ({x},{y})";
+  }
 }
 
 public class DestroyCastleCondition : Condition
@@ -71,6 +80,10 @@ public class DestroyCastleCondition : Condition
     return false;
   }
   public override string getExtraData(){return extraData;}
+  public override string ToString(){
+    (int x, int y) = player.game.map.IDtoXY(tileID);
+    return $"Destroy enemy from tile ({x},{y})";
+  }
 }
 
 public class AllAlliesEliminatedCondition : Condition
@@ -85,6 +98,9 @@ public class AllAlliesEliminatedCondition : Condition
       }
     }
     return true;
+  }
+  public override string ToString(){
+    return $"All allies eliminated";
   }
 }
 
@@ -130,4 +146,15 @@ public class CombinedCondition : Condition
     return result;
   }
   public override string getExtraData(){return ""+op;}
+  public override string ToString(){
+    StringBuilder outString = new StringBuilder('(');
+    foreach (Condition condition in conditions){
+      if (outString.Length > 1){
+        outString.Append(" "+op.ToString()+" ");
+      }
+      outString.Append(condition.ToString());
+    }
+    outString.Append(')');
+    return outString.ToString();
+  }
 }

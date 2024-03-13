@@ -66,14 +66,20 @@ public partial class Controller : Node
         if (movementKeys.ContainsKey(eventKey.Keycode))
             movementKeys[eventKey.Keycode] = Vector2.Zero;
     }
-      if (eventKey.Pressed && eventKey.Keycode == Key.Left){
+      if (eventKey.Pressed && eventKey.Keycode == Key.Up){
         parentGame.LoadGame();
+      }
+      if (eventKey.Pressed && eventKey.Keycode == Key.Down){
+        parentGame.SaveGame();
+      }
+      if (eventKey.Pressed && eventKey.Keycode == Key.Right){
+        parentGame.NextTurn();
       }
     }
     else if (@event is InputEventMouseMotion eventMouseMotion && IsInstanceValid(parentGame.map)){
       UpdateMouseSelection();
     }
-    else if (@event is InputEventMouseButton inputEventMouseButton){
+    else if (@event is InputEventMouseButton inputEventMouseButton && !parentGame.hudController.isMouseOverUI){
       if(inputEventMouseButton.IsPressed() && inputEventMouseButton.ButtonIndex == MouseButton.Right){
         GD.Print("Right Click");
         if(currentState == State.SELECTING_UNIT){
@@ -117,6 +123,7 @@ public partial class Controller : Node
           currentState = State.SELECTING_UNIT;
         }
         else if(selectedTile.GetUnit()!=null && (currentState == State.SELECTING_UNIT || currentState == State.TARGET_MOVEMENT)){
+          parentGame.hudController.ShowUnitBar(selectedTile.GetUnit());
           selectedUnit = selectedTile.GetUnit();
           RemoveHighlights();
           rangeDict = Range.GetAccessibleMovementTiles(selectedUnit, parentGame.map);
@@ -150,22 +157,32 @@ public partial class Controller : Node
   }
 
   private void UpdateMouseSelection(){
-    Vector2 currentPosition = root.GetGlobalMousePosition();
-    int xTile = (int)Math.Floor((currentPosition.X + Game.tileSize/2) / Game.tileSize);
-    int yTile = (int)Math.Floor((currentPosition.Y + Game.tileSize/2) / Game.tileSize);
-    if(currentState == State.SELECTING_UNIT){
-      if(xTile>=0 && yTile>=0 && xTile < parentGame.map.sizeX && yTile < parentGame.map.sizeY){
-        if(selectedTile==null || xTile!=selectedTile.x || yTile!=selectedTile.y){
-          selectedTile = parentGame.map.tileMap[xTile, yTile];
-          selectedTile.SelectTile();
+    if(!parentGame.hudController.isMouseOverUI){
+      Vector2 currentPosition = root.GetGlobalMousePosition();
+      int xTile = (int)Math.Floor((currentPosition.X + Game.tileSize/2) / Game.tileSize);
+      int yTile = (int)Math.Floor((currentPosition.Y + Game.tileSize/2) / Game.tileSize);
+      if(currentState == State.SELECTING_UNIT){
+        if(xTile>=0 && yTile>=0 && xTile < parentGame.map.sizeX && yTile < parentGame.map.sizeY){
+          if(selectedTile==null || xTile!=selectedTile.x || yTile!=selectedTile.y){
+            selectedTile = parentGame.map.tileMap[xTile, yTile];
+            selectedTile.SelectTile();
+            parentGame.hudController.UpdateTileInfobox(selectedTile);
+            if(selectedTile.GetUnit()!=null){
+              parentGame.hudController.ShowUnitBar(selectedTile.GetUnit());
+            }
+            else{
+              parentGame.hudController.HideUnitBar();
+            }
+          }
         }
       }
-    }
-    else if(currentState == State.TARGET_SKILL || currentState == State.TARGET_MOVEMENT){
-      if(rangeDict.ContainsKey((xTile, yTile))){
-        if(selectedTile==null || xTile!=selectedTile.x || yTile!=selectedTile.y){
-          selectedTile = parentGame.map.tileMap[xTile, yTile];
-          selectedTile.SelectTile();
+      else if(currentState == State.TARGET_SKILL || currentState == State.TARGET_MOVEMENT){
+        if(rangeDict.ContainsKey((xTile, yTile))){
+          if(selectedTile==null || xTile!=selectedTile.x || yTile!=selectedTile.y){
+            selectedTile = parentGame.map.tileMap[xTile, yTile];
+            selectedTile.SelectTile();
+            parentGame.hudController.UpdateTileInfobox(selectedTile);
+          }
         }
       }
     }

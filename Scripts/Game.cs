@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
 
 public partial class Game : Node2D
 {
@@ -10,6 +11,8 @@ public partial class Game : Node2D
   public int currentTeam = 1;
   public GameMap map;
   public Player [] players;
+  
+  public HudController hudController;
   Label resourcesLabel;
   int resources;
   string saveJson;
@@ -24,36 +27,7 @@ public partial class Game : Node2D
     AddChild(controller);
     GD.Print($"{this.Owner}");
 
-    
-    var button = new Button();
-    button.Text = "Next Turn";
-    button.ZIndex = 2;
-    button.Pressed += NextTurn;
-    AddChild(button);
-    
-    var button2 = new Button();
-    button2.Text = "SaveGame";
-    button2.ZIndex = 2;
-    button2.Position = new Vector2(button2.Position.X+32, button2.Position.Y+32);
-    button2.Pressed += SaveGame;
-    AddChild(button2);
-
-    var button3 = new Button();
-    button3.Text = "LoadGame";
-    button3.ZIndex = 2;
-    button3.Position = new Vector2(button2.Position.X+64, button2.Position.Y+32);
-    button3.Pressed += LoadGame;
-    AddChild(button3);
-
-    resourcesLabel = new Label();
-    resourcesLabel.ZIndex = 3;
-    resourcesLabel.Scale = new Vector2(1.5f, 1.5f);
-    resourcesLabel.AddThemeColorOverride("font_outline_color", new Color(0,0,0,1));
-    resourcesLabel.AddThemeConstantOverride("outline_size", 15);
-    AddChild(resourcesLabel);
-    resourcesLabel.Text = $"{resources}💰";
-
-    //test1();
+    test1();
   }
 
   void test1(){
@@ -65,6 +39,7 @@ public partial class Game : Node2D
       map.AddChild(tileNode);
       } 
     }
+    map.tileMap[0,10].tileName = "sands";
     map.tileMap[0,10].tilePreset = TilePreset.Sands;
     map.tileMap[0,10].tileTexture = TileTexture.Sands;
     map.tileMap[0,10].tileSprite.Texture = Factory.GetTileTexture(TileTexture.Sands);
@@ -116,7 +91,10 @@ public partial class Game : Node2D
     u3.AddSkill(new DoubleTap());
     u3.AddUnitEffect(new SummonSkillsFromDeck());
 
-
+    PackedScene scene = (PackedScene)GD.Load("res://hud.tscn"); 
+    CanvasLayer hudInst = (CanvasLayer)scene.Instantiate();
+    hudController = new HudController(hudInst, this);
+    AddChild(hudInst);
 
     //List<Unit> newDeck = new List<Unit>(){u1, u2, u3};
     //SaveUtil.SaveDeck(newDeck, 2);
@@ -188,6 +166,9 @@ public partial class Game : Node2D
     nextTeam();
     GD.Print($"---- Begin turn of team {currentTeam}");
     BeginTurn();
+    if(hudController.conditionsClosedScrollContainer.Visible == false){
+      hudController.ShowConditions();
+    }
   }
 
   private void nextTeam(){

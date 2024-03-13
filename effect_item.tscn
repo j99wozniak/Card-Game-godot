@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=3 uid="uid://cbxpb22d3vce"]
+
+[ext_resource type="Texture2D" uid="uid://bcitavcs3di31" path="res://Sprites/Misc/Heal_Icon.png" id="1_iua1w"]
+
+[node name="EffectItem" type="HBoxContainer"]
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 1
+
+[node name="EffectIcon" type="Sprite2D" parent="PanelContainer"]
+scale = Vector2(2, 2)
+texture = ExtResource("1_iua1w")
+centered = false
+
+[node name="EffectText" type="Label" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 13
+text = "sample_text"
+autowrap_mode = 3
