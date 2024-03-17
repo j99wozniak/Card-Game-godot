@@ -134,7 +134,7 @@ theme_override_font_sizes/font_size = 22
 text = "Someone"
 
 [node name="EffectsScrollContainer" type="ScrollContainer" parent="Control/UnitScrollContainer/ScrollContentsContainer/VBoxContainer"]
-custom_minimum_size = Vector2(130, 10)
+custom_minimum_size = Vector2(130, 100)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 2

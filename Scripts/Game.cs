@@ -143,9 +143,6 @@ public partial class Game : Node2D
   public void LoadGame(){
     Save loadedSave = SaveUtil.LoadSave();
     SaveUtil.CreateGame(this, loadedSave);
-    for(int i = 1; i<=numberOfTeams; i++){
-      players[i-1].deck = SaveUtil.LoadSaveDeck(i);
-    }
     controller.Reset();
     
     GD.Print("winCondition1"+players[0].winCondition.IsMet());

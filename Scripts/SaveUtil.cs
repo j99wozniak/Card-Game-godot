@@ -27,6 +27,7 @@ public class Save
         public bool isCPU;
         public ConditionSave winCondition;
         public ConditionSave loseCondition;
+        public List<UnitSave> currentDeck = new();
 
         public class ConditionSave{
             public string name;
@@ -227,7 +228,8 @@ public static class SaveUtil
             currentUnitEffectID = UnitEffect.currentUnitEffectID,
             currentTileEffectID = TileEffect.currentTileEffectID,
         };
-
+        
+        // Save Players
         foreach (Player p in game.players){
             Save.PlayerSave playerSave = new Save.PlayerSave
             {
@@ -236,13 +238,19 @@ public static class SaveUtil
                 winCondition = SaveConditionTree(p.winCondition),
                 loseCondition = SaveConditionTree(p.loseCondition)
             };
+            foreach(Unit u in p.deck){
+                Save.UnitSave us = SaveDeckUnit(u);
+                playerSave.currentDeck.Add(us);
+            }
             save.players.Add(playerSave);
         }
 
+        // Save the whole game board
         StringBuilder tempPresetTiles = new StringBuilder();
 
         for (int i = 0; i < game.map.sizeX; i++){
             for (int j = 0; j < game.map.sizeY; j++){
+
                 Unit currentUnit = game.map.unitMap[i,j];
                 if(currentUnit!=null){
                     save.units.Add(SaveUnit(currentUnit));
@@ -261,6 +269,7 @@ public static class SaveUtil
                 else{
                     tempPresetTiles.Append($"{currentTile.ID}:{(int)currentTile.tilePreset}, ");
                 }
+
                 foreach(TileEffect e in currentTile.tileEffects){
                     Save.TileEffectSave tileEffectSave = new(){
                         ID = e.ID,
@@ -283,6 +292,7 @@ public static class SaveUtil
                     }
                     save.tileEffects.Add(tileEffectSave);
                 }
+
             } 
         }
         save.presetTiles = tempPresetTiles.ToString();
@@ -299,19 +309,6 @@ public static class SaveUtil
         using FileAccess saveFile = FileAccess.Open("user://Saves/save_game.json", FileAccess.ModeFlags.Write);
         saveFile.StoreString(saveJson);
 
-        foreach (Player p in game.players) {
-            int team = p.team;
-            List<Unit> deck = p.deck;
-            Save deckSave = new Save();
-            foreach(Unit u in deck){
-                Save.UnitSave us = SaveDeckUnit(u);
-                deckSave.units.Add(us);
-            }
-            string deckSaveJson = JsonSerializer.Serialize<Save>(deckSave, options);
-            using FileAccess deckFile = FileAccess.Open($"user://Saves/deck{team}.json", FileAccess.ModeFlags.Write);
-            deckFile.StoreString(deckSaveJson);
-        }
-        
         return saveJson;
     }
 
@@ -418,6 +415,11 @@ public static class SaveUtil
             Player newPlayer = new Player(game, ps.team, ps.isCPU);
             newPlayer.winCondition = CreateConditionTree(ps.winCondition, newPlayer);
             newPlayer.loseCondition = CreateConditionTree(ps.loseCondition, newPlayer);
+            List<Unit> currentDeck = new();
+            foreach(Save.UnitSave us in ps.currentDeck){
+                currentDeck.Add(CreateDeckUnit(us));
+            }
+            newPlayer.deck = currentDeck;
             game.players[ps.team-1] = newPlayer;
         }
         
@@ -513,17 +515,6 @@ public static class SaveUtil
         string loadJson = saveFile.GetAsText();
         Save loadedSave = JsonSerializer.Deserialize<Save>(loadJson, options);
         return loadedSave;
-    }
-
-    public static List<Unit> LoadSaveDeck(int team){
-        List<Unit> units = new();
-        using FileAccess deckFile = FileAccess.Open($"user://Saves/deck{team}.json", FileAccess.ModeFlags.Read);
-        string loadJson = deckFile.GetAsText();
-        Save loadedDeck = JsonSerializer.Deserialize<Save>(loadJson, options);
-        foreach(Save.UnitSave us in loadedDeck.units){
-            units.Add(CreateDeckUnit(us));
-        }
-        return units;
     }
 
     public static List<Unit> LoadDeck(int team){
