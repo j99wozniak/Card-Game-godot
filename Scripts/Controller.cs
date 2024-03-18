@@ -127,6 +127,10 @@ public partial class Controller : Node
           selectedUnit = selectedTile.GetUnit();
           RemoveHighlights();
           rangeDict = Range.GetAccessibleMovementTiles(selectedUnit, parentGame.map);
+          if(rangeDict.Count == 0){
+            // TODO insert info for player that there is nowhere to move
+            return;
+          }
           Tile.SetHighlightColor("BLUE_VIOLET");
           HighlightTiles();
           selectedTile.RemoveSelection();
@@ -135,7 +139,8 @@ public partial class Controller : Node
         }
         else if(currentState == State.TARGET_MOVEMENT){
           if(selectedTile.GetUnit()==null){
-            selectedUnit.MoveUnit(selectedTile);
+            float tileMoveCost = rangeDict[(selectedTile.x, selectedTile.y)];
+            selectedUnit.MoveUnit(selectedTile, tileMoveCost);
             RemoveHighlights();
             selectedUnit = null;
             currentState = State.SELECTING_UNIT;

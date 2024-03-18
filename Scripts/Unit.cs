@@ -56,7 +56,7 @@ public partial class Unit : Node
   public int baseMaxMovement;
   public int maxMovement{ get { return StatGetter(baseMaxMovement, Trigger.OnGetMaxMovement); } }
   public int currentMovement;
-   public int baseUnitCost;
+  public int baseUnitCost;
   public int unitCost{ get { return StatGetter(baseUnitCost, Trigger.OnGetUnitCost); } }
   public bool isDead;
 
@@ -171,13 +171,14 @@ public partial class Unit : Node
     return fetchedStat;
   }
 
-  public void MoveUnit(Tile targetTile){
+  public void MoveUnit(Tile targetTile, float tileMoveCost){
     OnStartMove();
     map.unitMap[x, y] = null;
     x = targetTile.x;
     y = targetTile.y;
     map.unitMap[x, y] = this;
     parentNode.Position = GetRealPosition();
+    currentMovement -= (int) tileMoveCost;
     OnEndMove();
   }
 
@@ -268,6 +269,7 @@ public partial class Unit : Node
   }
 
   public void OnBeginTurn(){
+    currentMovement = maxMovement;
     ExecuteEffects(Trigger.OnBeginTurn);
     CountdownUnitEffects(Trigger.OnBeginTurn);
   }
