@@ -33,7 +33,7 @@ public class HudController{
   Button showConditionsButton;
 
   PackedScene effectItem = (PackedScene)GD.Load("res://effect_item.tscn"); 
-  Texture2D portrait = (Texture2D)GD.Load("res://Sprites/Units/Portraits/portrait_Archer_Blue1.png");
+  Dictionary<string, Texture2D> portraits = new();
   Texture2D icon = (Texture2D)GD.Load("res://Sprites/Misc/Heal_Icon.png");
 
   public HudController(CanvasLayer hud, Game parentGame){
@@ -113,8 +113,10 @@ public class HudController{
     healthBar.Value = unit.currentHp;
     healthLabel.Text = $"{unit.currentHp}/{unit.maxHp}";
 
-    // TODO actually have portraits
-    portraitSprite.Texture = portrait;
+    if(!portraits.ContainsKey(unit.portraitName)){
+      portraits.Add(unit.portraitName, (Texture2D)GD.Load($"res://Sprites/Units/Portraits/{unit.portraitName}.png"));
+    }
+    portraitSprite.Texture = portraits[unit.portraitName];
     unitNameLabel.Text = unit.unitName;
     foreach(Node child in unitEffectList.GetChildren()){
       unitEffectList.RemoveChild(child);

@@ -53,7 +53,8 @@ public enum Target {
 
 public enum UnitSpriteFrames {
   none,
-  blueArcher
+  blueArcher,
+  redArcher
 }
 
 public enum TileTexture{
@@ -66,4 +67,12 @@ public enum TilePreset{
   none,
   Plains,
   Sands
+}
+
+public enum Directions{
+  none,
+  UP,
+  DOWN,
+  RIGHT,
+  LEFT
 }

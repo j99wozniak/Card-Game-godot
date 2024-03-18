@@ -60,11 +60,14 @@ public static class Factory
   }
   
   static SpriteFrames blueArcherSprites;
+  static SpriteFrames redArcherSprites;
   public static SpriteFrames GetUnitSpriteFrames(UnitSpriteFrames spriteFrameEnum){
       switch(spriteFrameEnum)
       {
           case UnitSpriteFrames.blueArcher:
-              return blueArcherSprites ??= (SpriteFrames)GD.Load("res://Sprites/Units/Frames/ArcherFrames.tres");
+              return blueArcherSprites ??= (SpriteFrames)GD.Load("res://Sprites/Units/Frames/ArcherFrames_Blue.tres");
+          case UnitSpriteFrames.redArcher:
+              return redArcherSprites ??= (SpriteFrames)GD.Load("res://Sprites/Units/Frames/ArcherFrames_Red.tres");
           default:
               return null;
       }

@@ -72,7 +72,7 @@ public partial class Game : Node2D
     players[0] = player1;
     players[1] = player2;
 
-    Unit u1 = new Unit("Healer", player1, 20, 50, 8, 2, 5, 5, UnitSpriteFrames.blueArcher).SetNewID();
+    Unit u1 = new Unit("Healer", player1, 20, 50, 8, 2, 5, 5, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1").SetNewID();
     u1.AddUnitToMap(map);
     map.unitMap[u1.x,u1.y] = u1;
     u1.AddSkill(new DoubleTap());
@@ -85,7 +85,7 @@ public partial class Game : Node2D
     u2.AddUnitEffect(new PreciseShots());
     u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
     u2.AddSkill(Factory.GetSkill("DoubleTap"));
-    Unit u3 = new Unit("Summoner", player2, 20, 50, 8, 2, 6, 6, UnitSpriteFrames.blueArcher).SetNewID();
+    Unit u3 = new Unit("Summoner", player2, 20, 50, 8, 2, 6, 6, UnitSpriteFrames.redArcher, "portrait_Archer_Red1").SetNewID();
     u3.AddUnitToMap(map);
     map.unitMap[u1.x,u1.y] = u1;
     u3.AddSkill(new DoubleTap());

@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://bnpkdhc1r2s05" path="res://icon.svg" id="1_inkr3"]
 [ext_resource type="Script" path="res://Scripts/Game.cs" id="1_x86nl"]
-[ext_resource type="SpriteFrames" uid="uid://1s5vdpss41gh" path="res://Sprites/Units/Frames/ArcherFrames.tres" id="3_3dyj4"]
+[ext_resource type="SpriteFrames" uid="uid://1s5vdpss41gh" path="res://Sprites/Units/Frames/ArcherFrames_Blue.tres" id="3_sdbpk"]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_x86nl")
@@ -14,7 +14,7 @@ texture = ExtResource("1_inkr3")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 texture_filter = 1
 position = Vector2(-125, -63)
-sprite_frames = ExtResource("3_3dyj4")
+sprite_frames = ExtResource("3_sdbpk")
 animation = &"double_tap_right"
 autoplay = "front_idle"
 

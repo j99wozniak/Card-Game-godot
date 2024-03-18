@@ -172,6 +172,6 @@ animations = [{
 "texture": SubResource("AtlasTexture_4bw2h")
 }],
 "loop": false,
-"name": &"skill_right",
+"name": &"right_skill",
 "speed": 5.0
 }]

@@ -27,9 +27,9 @@ public abstract class Skill
   }
   public void Fire(List<Tile> targetList){
     foreach(Tile targetTile in targetList){
-      FireEffect(targetTile);
-      // TODO check if the tile is still viable, if it's not, SKIP IT (without breaking the loop)
-      // Probably make some generic targeting check in Targeter - public and static
+      if(Targeter.IsTileViableTarget(targetQualifier, this, targetTile)){
+        FireEffect(targetTile);
+      }
     }
   }
   public abstract void FireEffect(Tile targetTile);
@@ -51,7 +51,12 @@ public class DoubleTap : Skill
   }
   public override void FireEffect(Tile targetTile){
     Unit target = targetTile.GetUnit();
-    source.PlayAnimation("skill_right");
+    Directions flip = Directions.none;
+    if(Tile.GetDirection(source.GetTile(), targetTile).Contains(Directions.LEFT))
+      flip = Directions.LEFT;
+    if(Tile.GetDirection(source.GetTile(), targetTile).Contains(Directions.RIGHT))
+      flip = Directions.RIGHT;
+    source.PlayAnimation("right_skill", flip);
     source.OnAttacking(new Packet(this, target, currentPower, new Damage()));
   }
 }

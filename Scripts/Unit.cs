@@ -65,6 +65,7 @@ public partial class Unit : Node
   public UnitSpriteFrames unitSpriteFrames;
   public AnimatedSprite2D sprite;
   public Label currentHpLabel;
+  public string portraitName;
 
   public Unit SetNewID(){
     this.ID = currentUnitID++;
@@ -125,7 +126,8 @@ public partial class Unit : Node
   }
 
   public Unit(string unitName, Player player, int baseMaxHp, int baseMaxStamina, int baseMaxMovement, 
-              int baseUnitCost, int x, int y, UnitSpriteFrames unitSpriteFrames, bool isDead = false){
+              int baseUnitCost, int x, int y, UnitSpriteFrames unitSpriteFrames, 
+              string portraitName = "portrait_Default"){
     this.unitName = unitName;
     this.player = player;
     this.baseMaxHp = baseMaxHp;
@@ -138,7 +140,8 @@ public partial class Unit : Node
     this.x = x;
     this.y = y;
     this.unitSpriteFrames = unitSpriteFrames;
-    this.isDead = isDead;
+    this.isDead = false;
+    this.portraitName = portraitName;
   }
   
 
@@ -173,6 +176,10 @@ public partial class Unit : Node
 
   public void MoveUnit(Tile targetTile, float tileMoveCost){
     OnStartMove();
+    if(Tile.GetDirection(GetTile(), targetTile).Contains(Directions.LEFT))
+      sprite.FlipH = true;
+    if(Tile.GetDirection(GetTile(), targetTile).Contains(Directions.RIGHT))
+      sprite.FlipH = false;
     map.unitMap[x, y] = null;
     x = targetTile.x;
     y = targetTile.y;
@@ -337,19 +344,21 @@ public partial class Unit : Node
     sprite.Play();
   }
 */
-  Queue<string> animationQueue = new Queue<string>();
+  Queue<(string animName, Directions direction)> animationQueue = new Queue<(string animName, Directions direction)>();
   bool queueEmpty = true;
-  public void PlayAnimation(string anim){
+  public void PlayAnimation(string anim, Directions direction = Directions.none){
     if(IsInstanceValid(parentNode)){
       if(queueEmpty){
         queueEmpty = false;
+        //GD.Print($"{unitName} has {anim} anim: {sprite.SpriteFrames.HasAnimation(anim)}");
+        FlipByDirection(direction);
         sprite.Animation = anim;
         sprite.Play();
         sprite.AnimationFinished += FinishAnimation;
       }
       else{
         if(currentHp != 0 || anim.Contains("death")){
-          animationQueue.Enqueue(anim);
+          animationQueue.Enqueue((anim, direction));
         }
       }
     }
@@ -372,12 +381,25 @@ public partial class Unit : Node
         }
       }
       else{
-        sprite.Animation = animationQueue.Dequeue();
+        (string animName, Directions direction) = animationQueue.Dequeue();
+        FlipByDirection(direction);
+        sprite.Animation = animName;
         sprite.Play();
       }
     }
     else{
       GD.Print($"Tried to finish animation but {unitName} already doesn't have physical node2d");
+    }
+  }
+
+  public void FlipByDirection(Directions direction){
+    switch(direction){
+      case Directions.RIGHT:
+        sprite.FlipH = false;
+        break;
+      case Directions.LEFT:
+        sprite.FlipH = true;
+        break;
     }
   }
 

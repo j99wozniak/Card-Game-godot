@@ -53,6 +53,19 @@ public partial class Tile : Node
     return new Vector2(x*Game.tileSize, y*Game.tileSize);
   }
 
+  static public HashSet<Directions> GetDirection(Tile from, Tile to){
+    HashSet<Directions> directions = new();
+    if(from.y>to.y)
+      directions.Add(Directions.UP);
+    if(from.y<to.y)
+      directions.Add(Directions.DOWN);
+    if(from.x<to.x)
+      directions.Add(Directions.RIGHT);
+    if(from.x>to.x)
+      directions.Add(Directions.LEFT);
+    return directions;
+  }
+
   public Unit GetUnit(){
     return map.unitMap[x,y];
   }

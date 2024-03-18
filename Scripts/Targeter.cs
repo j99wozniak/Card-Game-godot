@@ -28,29 +28,11 @@ public class Targeter
   // TODO add check for canTargetSameTileAgain
   public bool AddTileToTargeting(Tile targetTile){
     Target t = targetingSkill.targetQualifier;
-    switch (t){
-      case Target.Unit:
-        if(targetTile.GetUnit()!=null)
-          targetedTiles.Add(targetTile);
-        break;
-      case Target.EnemyUnit:
-        if(targetTile.GetUnit()!=null && targetTile.GetUnit().player.team!=targetingSkill.source.player.team)
-          targetedTiles.Add(targetTile);
-        break;
-      case Target.AllyUnit:
-        if(targetTile.GetUnit()!=null && targetTile.GetUnit().player.team==targetingSkill.source.player.team)
-          targetedTiles.Add(targetTile);
-        break;
-      case Target.EmptyTile:
-        if(targetTile.GetUnit()==null)
-          targetedTiles.Add(targetTile);
-        break;
-      case Target.Any:
-        targetedTiles.Add(targetTile);
-        break;
-      case Target.Self:
-        targetedTiles.Add(targetingSkill.source.GetTile());
-        break;
+    if(t == Target.Self){
+      targetedTiles.Add(targetingSkill.source.GetTile());
+    }
+    else if(IsTileViableTarget(t, targetingSkill, targetTile)){
+      targetedTiles.Add(targetTile);
     }
     if(targetingSkill.numberOfTargets == targetedTiles.Count)
       return AllTargetsSelected;
@@ -61,5 +43,33 @@ public class Targeter
       return AlreadyEmpty;
     targetedTiles.RemoveAt(targetedTiles.Count-1);
     return RemovedLast;
+  }
+
+  public static bool IsTileViableTarget(Target targetQualifier, Skill targetingSkill, Tile targetTile){
+    switch (targetQualifier){
+      case Target.Unit:
+        if(targetTile.GetUnit()!=null)
+         return true;
+        break;
+      case Target.EnemyUnit:
+        if(targetTile.GetUnit()!=null && targetTile.GetUnit().player.team!=targetingSkill.source.player.team)
+          return true;
+        break;
+      case Target.AllyUnit:
+        if(targetTile.GetUnit()!=null && targetTile.GetUnit().player.team==targetingSkill.source.player.team)
+          return true;
+        break;
+      case Target.EmptyTile:
+        if(targetTile.GetUnit()==null)
+          return true;
+        break;
+      case Target.Any:
+        return true;
+      case Target.Self:
+        if(targetingSkill.source != null && !targetingSkill.source.isDead)
+          return true;
+        break;
+    }
+    return false;
   }
 }

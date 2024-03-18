@@ -49,7 +49,9 @@ public class Save
         public bool isDead;
         public int x;
         public int y;
+        public bool flipH;
         public int unitSpriteFrames;
+        public string portraitName;
         public List<SkillSave> skillSaves = new();
         public List<UnitEffectSave> unitEffects = new();
         public class SkillSave{
@@ -131,7 +133,9 @@ public static class SaveUtil
             isDead = currentUnit.isDead,
             x = currentUnit.x,
             y = currentUnit.y,
-            unitSpriteFrames = (int)currentUnit.unitSpriteFrames
+            flipH = currentUnit.sprite.FlipH,
+            unitSpriteFrames = (int)currentUnit.unitSpriteFrames,
+            portraitName = currentUnit.portraitName
         };
         foreach(Skill s in currentUnit.skills){
             Save.UnitSave.SkillSave skillSave = new(){
@@ -184,7 +188,8 @@ public static class SaveUtil
             baseMaxStamina = currentUnit.baseMaxStamina,
             baseMaxMovement = currentUnit.baseMaxMovement,
             baseUnitCost = currentUnit.baseUnitCost,
-            unitSpriteFrames = (int)currentUnit.unitSpriteFrames
+            unitSpriteFrames = (int)currentUnit.unitSpriteFrames,
+            portraitName = currentUnit.portraitName
         };
         foreach(Skill s in currentUnit.skills){
             Save.UnitSave.SkillSave skillSave = new(){
@@ -328,7 +333,8 @@ public static class SaveUtil
         Unit unit = new Unit(unitSave.unitName, player, 
             unitSave.baseMaxHp, unitSave.baseMaxStamina, 
             unitSave.baseMaxMovement, unitSave.baseUnitCost, unitSave.x, unitSave.y, 
-            (UnitSpriteFrames) unitSave.unitSpriteFrames, unitSave.isDead);
+            (UnitSpriteFrames) unitSave.unitSpriteFrames, unitSave.portraitName);
+        unit.isDead = unitSave.isDead;
         unit.ID = unitSave.ID;
         unit.currentHp = unitSave.currentHp;
         unit.currentMovement = unitSave.currentMovement;
@@ -369,7 +375,7 @@ public static class SaveUtil
         Unit unit = new Unit(unitSave.unitName, null, 
             unitSave.baseMaxHp, unitSave.baseMaxStamina, 
             unitSave.baseMaxMovement, unitSave.baseUnitCost, 0, 0, 
-            (UnitSpriteFrames) unitSave.unitSpriteFrames, false);
+            (UnitSpriteFrames) unitSave.unitSpriteFrames, unitSave.portraitName);
         foreach(Save.UnitSave.UnitEffectSave ue in unitSave.unitEffects){
             UnitEffect newEffect = Factory.GetUnitEffect(ue.name);
             unit.AddUnitEffect(newEffect);
@@ -444,6 +450,7 @@ public static class SaveUtil
         foreach(Save.UnitSave u in save.units){
             Unit restoredUnit = CreateUnit(u, game.players[u.team-1], lookupUnitEffects);
             restoredUnit.AddUnitToMap(map);
+            restoredUnit.sprite.FlipH = u.flipH;
             lookupUnits.Add(u.ID, restoredUnit);
         }
         foreach(Save.TileEffectSave te in save.tileEffects){
