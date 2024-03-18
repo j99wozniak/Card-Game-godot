@@ -23,6 +23,7 @@ public abstract class Skill
   public void UseSkill(List<Tile> targetList){
     source.OnConsumeStamina(new Packet(this, new ConsumeStamina()));
     Fire(targetList);
+    source.player.game.CheckConditions();
   }
   public void Fire(List<Tile> targetList){
     foreach(Tile targetTile in targetList){

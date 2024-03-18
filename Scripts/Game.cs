@@ -145,9 +145,7 @@ public partial class Game : Node2D
     SaveUtil.CreateGame(this, loadedSave);
     controller.Reset();
     
-    GD.Print("winCondition1"+players[0].winCondition.IsMet());
     GD.Print("loseCondition1"+players[0].loseCondition.IsMet());
-    GD.Print("winCondition2"+players[1].winCondition.IsMet());
     GD.Print("loseCondition2"+players[1].loseCondition.IsMet());
     GD.Print("Load SUCCESS!!");
 
@@ -207,6 +205,17 @@ public partial class Game : Node2D
     }
     }
   }
+  }
+
+  public void CheckConditions(){
+    foreach(Player player in players){
+      if(player.winCondition.IsMet()){
+        GD.Print("Player " + player.team + " wins!!");
+      }
+      if(player.loseCondition.IsMet()){
+        GD.Print("Player " + player.team + " loses!!");
+      }
+    }
   }
 
 }

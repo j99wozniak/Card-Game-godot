@@ -180,6 +180,7 @@ public partial class Unit : Node
     parentNode.Position = GetRealPosition();
     currentMovement -= (int) tileMoveCost;
     OnEndMove();
+    player.game.CheckConditions();
   }
 
   public Tile GetTile(){
