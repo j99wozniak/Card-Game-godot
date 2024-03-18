@@ -20,6 +20,7 @@ public class HudController{
 
   MarginContainer tileScrollContainer;
   Sprite2D tileSprite;
+  Label tileCoordinatesLabel;
   Label tileNameLabel;
   VBoxContainer tileEffectsList;
 
@@ -59,6 +60,7 @@ public class HudController{
     // Tile scroll
     tileScrollContainer = (MarginContainer)hud.FindChild("TileScrollContainer");
     tileSprite = (Sprite2D)hud.FindChild("TileSprite");
+    tileCoordinatesLabel = (Label)hud.FindChild("TileCoordinatesLabel");
     tileNameLabel = (Label)hud.FindChild("TileNameLabel");
     tileEffectsList = (VBoxContainer)hud.FindChild("TileEffectsList");
 
@@ -134,6 +136,7 @@ public class HudController{
 
   public void UpdateTileInfobox(Tile tile){
     tileSprite.Texture = tile.tileSprite.Texture;
+    tileCoordinatesLabel.Text = $"({tile.x},{tile.y})";
     tileNameLabel.Text = tile.tileName;
     foreach(Node child in tileEffectsList.GetChildren()){
       tileEffectsList.RemoveChild(child);

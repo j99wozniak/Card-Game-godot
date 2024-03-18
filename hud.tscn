@@ -160,6 +160,23 @@ texture_under = ExtResource("1_e1ig4")
 texture_over = ExtResource("2_lh7li")
 texture_progress = ExtResource("1_e1ig4")
 
+[node name="CoordinatesContainer" type="MarginContainer" parent="Control/TileScrollContainer"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 20
+
+[node name="TileCoordinatesLabel" type="Label" parent="Control/TileScrollContainer/CoordinatesContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 13
+text = "(33,10)"
+
 [node name="ScrollContentsContainer" type="MarginContainer" parent="Control/TileScrollContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 30
