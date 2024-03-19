@@ -54,6 +54,10 @@ public static class Factory
         return new Tile(map, "plains", 1, x, y, TileTexture.Plains){tilePreset = tilePreset};
       case TilePreset.Sands:
         return new Tile(map, "sands", 1, x, y, TileTexture.Sands){tilePreset = tilePreset};
+      case TilePreset.Rocky:
+        Tile rocky = new Tile(map, "rocky", 1, x, y, TileTexture.Rocky){tilePreset = tilePreset};
+        rocky.AddTileEffect(new RockyTerrain(){preset = true});
+        return rocky;
       default:
         return null;
     }
@@ -62,28 +66,31 @@ public static class Factory
   static SpriteFrames blueArcherSprites;
   static SpriteFrames redArcherSprites;
   public static SpriteFrames GetUnitSpriteFrames(UnitSpriteFrames spriteFrameEnum){
-      switch(spriteFrameEnum)
-      {
-          case UnitSpriteFrames.blueArcher:
-              return blueArcherSprites ??= (SpriteFrames)GD.Load("res://Sprites/Units/Frames/ArcherFrames_Blue.tres");
-          case UnitSpriteFrames.redArcher:
-              return redArcherSprites ??= (SpriteFrames)GD.Load("res://Sprites/Units/Frames/ArcherFrames_Red.tres");
-          default:
-              return null;
-      }
+    switch(spriteFrameEnum)
+    {
+      case UnitSpriteFrames.blueArcher:
+        return blueArcherSprites ??= (SpriteFrames)GD.Load("res://Sprites/Units/Frames/ArcherFrames_Blue.tres");
+      case UnitSpriteFrames.redArcher:
+        return redArcherSprites ??= (SpriteFrames)GD.Load("res://Sprites/Units/Frames/ArcherFrames_Red.tres");
+      default:
+        return null;
+    }
   }
 
   static Texture2D plainsTexture;
   static Texture2D sandsTexture;
+  static Texture2D rockyTexture;
   public static Texture2D GetTileTexture(TileTexture textureEnum){
-      switch(textureEnum)
-      {
-          case TileTexture.Plains:
-              return plainsTexture ??= (Texture2D)GD.Load("res://Sprites/Tiles/plains.png");
-          case TileTexture.Sands:
-              return sandsTexture ??= (Texture2D)GD.Load("res://Sprites/Tiles/sands.png");
-          default:
-              return null;
-      }
+    switch(textureEnum)
+    {
+      case TileTexture.Plains:
+        return plainsTexture ??= (Texture2D)GD.Load("res://Sprites/Tiles/plains.png");
+      case TileTexture.Sands:
+        return sandsTexture ??= (Texture2D)GD.Load("res://Sprites/Tiles/sands.png");
+      case TileTexture.Rocky:
+        return rockyTexture ??= (Texture2D)GD.Load("res://Sprites/Tiles/rocky.png");
+      default:
+        return null;
+    }
   }
 }

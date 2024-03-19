@@ -12,6 +12,7 @@ public class TileEffect
   public int priority = 0; // The higher the priority the sooner it will be executed
   public int power = 0;
   public bool stackable = false;
+  public bool preset = false;
   public Type type = Type.none;
   public Trigger trigger = Trigger.none;
   public Trigger countdownTrigger = Trigger.none;
@@ -60,10 +61,10 @@ public class TileEffect
 }
 
 // For now lowers all damage received by `power` 
-public class RockyTerrain : TileEffect
+public class ShieldTrees : TileEffect
 {
-  public RockyTerrain(){
-    name = "RockyTerrain";
+  public ShieldTrees(){
+    name = "ShieldTrees";
     type = Type.Physical;
     trigger = Trigger.OnDamage;
     priority = 1;
@@ -72,11 +73,12 @@ public class RockyTerrain : TileEffect
   public override void Execute(Packet packet){
     // TODO apply only on physical
     if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
-      GD.Print($"Applying RockyTerrain: {packet.value} - {power}, {packet.name}, for {parentTile.x}x:{parentTile.y}y");
+      GD.Print($"Applying ShieldTrees: {packet.value} - {power}, {packet.name}, for {parentTile.x}x:{parentTile.y}y");
       packet.value = packet.value - power > 0 ? packet.value - power : 0;
     }
   }
 }
+
 
 public class Flame : TileEffect
 {
@@ -113,6 +115,21 @@ public class HealingAuraTile : TileEffect
 
 // MOVEMENT EFFECTS
 
+public class JumpPad : TileEffect
+{
+  public JumpPad(){
+    name = "JumpPad";
+    type = Type.Physical;
+    trigger = Trigger.OnMoving;
+    priority = 5;
+  }
+  public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){
+    if(movementCost >= 5 && movementCost < 10){
+      movementCost -= 4;
+    }
+  }
+}
+
 // Changes the cost of the tile to 10
 public class Glue : TileEffect
 {
@@ -129,6 +146,23 @@ public class Glue : TileEffect
   public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){
     if(movingUnit.GetUnitEffectByName("Skip") == null){
       movementCost = 10;
+    }
+  }
+}
+
+
+public class RockyTerrain : TileEffect
+{
+  public RockyTerrain(){
+    name = "RockyTerrain";
+    type = Type.Physical;
+    trigger = Trigger.OnMovingThrough;
+    priority = 1;
+    this.power = 1;
+  }
+  public override void MovementExecute(ref float movementCost, Tile tile, Unit movingUnit){
+    if(movingUnit.GetUnitEffectByName("Skip") == null && movingUnit.GetUnitEffectByName("Fly") == null){
+      movementCost = 5;
     }
   }
 }

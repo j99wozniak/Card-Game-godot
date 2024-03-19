@@ -12,12 +12,12 @@ public enum Trigger {
   OnHealing,
   OnStartMove,
   OnEndMove,
-  OnMoving,
+  OnMoving, // Applied when there are effects on unit / tile we start on, that influence cost for CONSIDERED tile (goes last)
   OnGetMaxHp,
   OnGetMaxStamina,
   OnGetMaxMovement,
   OnGetUnitCost,
-  OnMovingThrough,
+  OnMovingThrough, // Applied when calculating current cost for THIS tile (goes first)
   OnGetSkillPower,
   OnGetSkillCost,
   OnGetSkillRange,
@@ -60,13 +60,15 @@ public enum UnitSpriteFrames {
 public enum TileTexture{
   none,
   Plains,
-  Sands
+  Sands,
+  Rocky
 }
 
 public enum TilePreset{
   none,
   Plains,
-  Sands
+  Sands,
+  Rocky
 }
 
 public enum Directions{

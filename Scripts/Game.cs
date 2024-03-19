@@ -43,9 +43,24 @@ public partial class Game : Node2D
     map.tileMap[0,10].tilePreset = TilePreset.Sands;
     map.tileMap[0,10].tileTexture = TileTexture.Sands;
     map.tileMap[0,10].tileSprite.Texture = Factory.GetTileTexture(TileTexture.Sands);
+
+    for (int i = 8; i < 12; i++){
+      for (int j = 0; j < 3; j++){
+        map.tileMap[i,j].tileName = "rocky";
+        map.tileMap[i,j].tilePreset = TilePreset.Rocky;
+        map.tileMap[i,j].tileTexture = TileTexture.Rocky;
+        map.tileMap[i,j].tileSprite.Texture = Factory.GetTileTexture(TileTexture.Rocky);
+        TileEffect rocky = Factory.GetTileEffect("RockyTerrain");
+        rocky.preset = true;
+        map.tileMap[i,j].AddTileEffect(rocky);
+      } 
+    }
+
     // SETUP
     map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("RockyTerrain"));
     map.tileMap[3,3].AddTileEffect(Factory.GetTileEffect("Flame"));
+
+    map.tileMap[7,1].AddTileEffect(Factory.GetTileEffect("JumpPad"));
 
     Player player1 = new Player(this, 1, false);
     Player player2 = new Player(this, 2, true);

@@ -276,6 +276,9 @@ public static class SaveUtil
                 }
 
                 foreach(TileEffect e in currentTile.tileEffects){
+                    if(e.preset){
+                        continue;
+                    }
                     Save.TileEffectSave tileEffectSave = new(){
                         ID = e.ID,
                         name = e.name,
