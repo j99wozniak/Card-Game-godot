@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
 public partial class Game : Node2D
@@ -83,7 +84,7 @@ public partial class Game : Node2D
     player1.deck = SaveUtil.LoadDeck(1);
     player2.deck = SaveUtil.LoadDeck(2);
 
-    players = new Player[2];
+    players = new Player[numberOfTeams];
     players[0] = player1;
     players[1] = player2;
 
@@ -221,16 +222,67 @@ public partial class Game : Node2D
     }
   }
   }
-
+  
+  HashSet<Player> winners = new();
+  HashSet<Player> losers = new();
   public void CheckConditions(){
     foreach(Player player in players){
       if(player.winCondition.IsMet()){
         GD.Print("Player " + player.team + " wins!!");
+        winners.Add(player);
       }
       if(player.loseCondition.IsMet()){
         GD.Print("Player " + player.team + " loses!!");
+        losers.Add(player);
+        // Could add Disable, so that we skip this players turn
       }
     }
+
+    if(winners.Count == 1){
+      GameOver($"Player {winners.Single().team} wins!");
+      return;
+    }
+    if(winners.Count > 1){
+      string winningPlayersString = "";
+      foreach(Player p in winners){
+        if(winningPlayersString.Length>1){
+          winningPlayersString += " and ";
+        }
+        winningPlayersString += $"Player {p.team}";
+      }
+      GameOver("Draw! " + winningPlayersString + " win!");
+      return;
+    }
+    if(losers.Count == numberOfTeams){
+      string loserPlayersString = "";
+      foreach(Player p in winners){
+        if(loserPlayersString.Length>1){
+          loserPlayersString += " and ";
+        }
+        loserPlayersString += $"Player {p.team}";
+      }
+      GameOver("Draw! " + loserPlayersString + " lose!");
+      return;
+    }
+    if(losers.Count == numberOfTeams-1){
+      foreach(Player player in players){
+        if(!losers.Contains(player)){
+          GameOver($"Player {player.team} wins!");
+          return;
+        }
+      }
+    }
+  }
+
+  public void GameOver(string message){
+    PackedScene scene = (PackedScene)GD.Load("res://game_over_screen.tscn"); 
+    CanvasLayer gameOverInst = (CanvasLayer)scene.Instantiate();
+    Label gameOverMessage = (Label)gameOverInst.FindChild("GameOverMessage");
+    gameOverMessage.Text = message;
+
+    Button gameOverQuitButton = (Button)gameOverInst.FindChild("GameOverQuitButton");
+    gameOverQuitButton.Connect("pressed", Callable.From(() => GetTree().Quit()));
+    GetTree().Root.AddChild(gameOverInst);
   }
 
 }
