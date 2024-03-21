@@ -23,6 +23,12 @@ public partial class Game : Node2D
     Camera2D camera = new Camera2D();
     camera.Enabled = true;
     AddChild(camera);
+    
+    PackedScene scene = (PackedScene)GD.Load("res://hud.tscn"); 
+    CanvasLayer hudInst = (CanvasLayer)scene.Instantiate();
+    hudController = new HudController(hudInst, this);
+    AddChild(hudInst);
+    
     controller = new Controller();
     controller.parentGame = this;
     AddChild(controller);
@@ -106,11 +112,6 @@ public partial class Game : Node2D
     map.unitMap[u1.x,u1.y] = u1;
     u3.AddSkill(new DoubleTap());
     u3.AddUnitEffect(new SummonSkillsFromDeck());
-
-    PackedScene scene = (PackedScene)GD.Load("res://hud.tscn"); 
-    CanvasLayer hudInst = (CanvasLayer)scene.Instantiate();
-    hudController = new HudController(hudInst, this);
-    AddChild(hudInst);
 
     //List<Unit> newDeck = new List<Unit>(){u1, u2, u3};
     //SaveUtil.SaveDeck(newDeck, 2);

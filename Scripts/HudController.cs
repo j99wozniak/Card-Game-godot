@@ -5,7 +5,7 @@ using Godot;
 public class HudController{
   Color[] teamColors = new Color[2];
   Game parentGame;
-  CanvasLayer hud;
+  public CanvasLayer hud;
   public bool isMouseOverUI = false;
 
   MarginContainer unitScrollContainer;
@@ -92,7 +92,7 @@ public class HudController{
     showConditionsButton.Connect("mouse_exited", Callable.From(OnMouseExited));
 
     unitScrollContainer.Visible = false;
-    ShowConditions();
+    HideConditions();
 
     // Mouse events should pass through scroll elements so that isMouseOverUI works correctly
     foreach(ScrollContainer sc in hud.FindChildren("", "ScrollContainer")){

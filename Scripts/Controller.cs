@@ -11,8 +11,8 @@ public partial class Controller : Node
   const float MovementSpeed = 300.0f;
   Dictionary<Key, Vector2> movementKeys = new Dictionary<Key, Vector2>();
   public Game parentGame;
-  
-  private PopupMenu popupMenu;
+
+  private VBoxContainer skillList;
   private Tile selectedTile;
   private Unit selectedUnit;
   private Targeter targeter;
@@ -23,10 +23,14 @@ public partial class Controller : Node
   {
     viewport = GetViewport();
     camera = viewport.GetCamera2D();
-    popupMenu = new PopupMenu();
-    GetTree().Root.GetNode<Node2D>("Node2D").AddChild(popupMenu);
-    Action<int> callback = new Action<int>(SelectSkill);
-    popupMenu.Connect("id_pressed", Callable.From(callback));
+
+    skillList = new();
+    skillList.ZIndex = 10;
+    skillList.AddThemeConstantOverride("separation", 0);
+    skillList.TopLevel = true;
+    skillList.Hide();
+    parentGame.hudController.hud.AddChild(skillList);
+
     camera.Zoom = new Vector2(2.2f, 2.2f);
     camera.Position = new Vector2(220f, 120f);
     root = GetTree().Root.GetNode<Node2D>("Node2D");
@@ -83,20 +87,12 @@ public partial class Controller : Node
       if(inputEventMouseButton.IsPressed() && inputEventMouseButton.ButtonIndex == MouseButton.Right){
         GD.Print("Right Click");
         if(currentState == State.SELECTING_UNIT){
-          popupMenu.Clear();
-          selectedUnit = selectedTile.GetUnit();
-          if(selectedUnit != null){
-            int id = 0;
-            foreach(Skill skill in selectedUnit.allSkills){
-              popupMenu.AddItem($"{skill.name} | {skill.currentPower}🗡️ | {skill.currentCost}⚡", id);
-              popupMenu.SetItemTooltip(id, $"{skill.currentRange}🏹");
-              if(selectedUnit.currentStamina < skill.currentCost){
-                popupMenu.SetItemDisabled(id, true);
-              }
-              id++;
+          if(selectedTile.GetUnit() != null){
+            selectedUnit = selectedTile.GetUnit();
+            if(selectedUnit.allSkills.Count != 0){
+              CreateNewSkillList(inputEventMouseButton.Position, selectedUnit);
+              currentState = State.SELECTING_SKILL;
             }
-            popupMenu.Popup(new Rect2I((int)inputEventMouseButton.Position.X, (int)inputEventMouseButton.Position.Y, 10, 10));
-            currentState = State.SELECTING_SKILL;
           }
         }
         else if(currentState == State.TARGET_SKILL || currentState == State.TARGET_MOVEMENT){
@@ -120,7 +116,10 @@ public partial class Controller : Node
           }
         }
         else if(currentState == State.SELECTING_SKILL){
-          currentState = State.SELECTING_UNIT;
+          if(!skillList.GetRect().HasPoint(inputEventMouseButton.Position)){
+            ClearSkillList();
+            currentState = State.SELECTING_UNIT;
+          }
         }
         else if(selectedTile.GetUnit()!=null && (currentState == State.SELECTING_UNIT || currentState == State.TARGET_MOVEMENT)){
           parentGame.hudController.ShowUnitBar(selectedTile.GetUnit());
@@ -198,12 +197,37 @@ public partial class Controller : Node
     RemoveHighlights();
   }
 
-  
-  public void SelectSkill(int id){
-    Skill selectedSkill = selectedTile.GetUnit().allSkills.ElementAt(id);
+  public void CreateNewSkillList(Vector2 position, Unit unit){
+    ClearSkillList();
+    foreach(Skill skill in unit.allSkills){
+      Button skillListItem = new();
+      skillListItem.Text = $"{skill.name} | {skill.currentPower}🗡️ | {skill.currentCost}⚡";
+      skillListItem.TooltipText = $"{skill.currentRange}🏹";
+      if(selectedUnit.currentStamina < skill.currentCost){
+        skillListItem.Disabled = true;
+      }
+      skillListItem.Connect("pressed", Callable.From(() => SelectSkill(skill)));
+      skillList.AddChild(skillListItem);
+    }
+    skillList.Size = skillList.GetMinimumSize();
+    skillList.Position = position;
+    skillList.Show();
+  }
+
+  public void ClearSkillList(){
+    skillList.Hide();
+    foreach(Node child in skillList.GetChildren()){
+      skillList.RemoveChild(child);
+      child.QueueFree();
+    }
+  }
+
+  public void SelectSkill(Skill selectedSkill){
     targeter = new Targeter(selectedSkill);
     currentState = State.TARGET_SKILL;
-    
+
+    ClearSkillList();
+
     RemoveHighlights();
     rangeDict = Range.GetAccessibleSkillTiles(selectedSkill, parentGame.map);
     Tile.SetHighlightColor("AQUAMARINE");
