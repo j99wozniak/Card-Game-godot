@@ -79,6 +79,13 @@ public partial class Controller : Node
       if (eventKey.Pressed && eventKey.Keycode == Key.Right){
         parentGame.NextTurn();
       }
+
+      if (eventKey.Pressed && eventKey.Keycode == Key.Bracketleft){
+        parentGame.BackInTime();
+      }
+      if (eventKey.Pressed && eventKey.Keycode == Key.Bracketright){
+        parentGame.ForwardInTime();
+      }
     }
     else if (@event is InputEventMouseMotion eventMouseMotion && IsInstanceValid(parentGame.map)){
       UpdateMouseSelection();

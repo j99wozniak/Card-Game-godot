@@ -61,6 +61,32 @@ public class DoubleTap : Skill
   }
 }
 
+public class Shot : Skill
+{
+  public Shot(){
+    name = "Shot";
+    this.type = Type.Physical;
+    this.category = Category.Offensive;
+    this.numberOfTargets = 1;
+    this.targetQualifier = Target.EnemyUnit;
+    this.splashZoneRange = 0;
+    this.isMelee = false;
+    this.basePower = 10;
+    this.baseCost = 5;
+    this.baseRange = 5;
+  }
+  public override void FireEffect(Tile targetTile){
+    Unit target = targetTile.GetUnit();
+    Directions flip = Directions.none;
+    if(Tile.GetDirection(source.GetTile(), targetTile).Contains(Directions.LEFT))
+      flip = Directions.LEFT;
+    if(Tile.GetDirection(source.GetTile(), targetTile).Contains(Directions.RIGHT))
+      flip = Directions.RIGHT;
+    source.PlayAnimation("right_skill", flip);
+    source.OnAttacking(new Packet(this, target, currentPower, new Damage()));
+  }
+}
+
 public class BitterMedicine : Skill
 {
   public BitterMedicine(){

@@ -2,10 +2,10 @@ using Godot;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 
 public partial class Game : Node2D
 {
+  public int loadVar;
   public static int tileSize = 32;
   public Controller controller;
   public int numberOfTeams = 2;
@@ -34,7 +34,15 @@ public partial class Game : Node2D
     AddChild(controller);
     GD.Print($"{this.Owner}");
 
-    test1();
+    if(loadVar == 1){
+      test1();
+    }
+    else{
+      CheckIfFileExistsElseCreate("Levels/Editable/", "map1.png");
+      CheckIfFileExistsElseCreate("Levels/Editable/", "mapUnits1.png");
+      testSampleLevel();
+    }
+
   }
 
   void test1(){
@@ -121,29 +129,120 @@ public partial class Game : Node2D
     AddChild(map);
     }
 
-    void testDeck(){
-    map = new GameMap(40, 40);
-    for (int i = 0; i < map.sizeX; i++){
-      for (int j = 0; j < map.sizeY; j++){
-        Tile tile = Factory.GetPresetTile(TilePreset.Plains, i,j, map);
-        Node2D tileNode = Tile.createTileNode(tile, Factory.GetTileTexture(TileTexture.Plains));
-        map.AddChild(tileNode);
-      } 
-    }
+  void testSampleLevel(){
     /*
-    Unit u1 = new Unit("Healer", 1, 25, 50, 8, 3, 5, 5, UnitSpriteFrames.blueArcher);
-    u1.AddSkill(Factory.GetSkill("HealingAura"));
-    u1.AddSkill(new BitterMedicine());
-    u1.AddSkill(new DoubleTap());
-    Unit u2 = new Unit("Sharpshooter", 2, 20, 50, 8, 4, 3, 3, UnitSpriteFrames.blueArcher);
-    u2.AddSkill(Factory.GetSkill("DoubleTap"));
-    u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
-    u2.AddUnitEffect(new PreciseShots());
+    R=132, G=126, B=135 //rock = (0,5176471, 0,49411765, 0,5294118, 1)
+    R=251, G=242, B=54 //sand = (0,9843137, 0,9490196, 0,21176471, 1)
+    R=106, G=190, B=48 //plains = (0,41568628, 0,74509805, 0,1882353, 1)
     */
+    Dictionary<Color, (TilePreset, TileTexture)> terrainDict = new(){
+      {new Color(0.5176471f, 0.49411765f, 0.5294118f, 1), (TilePreset.Rocky, TileTexture.Rocky)},
+      {new Color(0.9843137f, 0.9490196f, 0.21176471f, 1), (TilePreset.Sands, TileTexture.Sands)},
+      {new Color(0.41568628f, 0.74509805f, 0.1882353f, 1), (TilePreset.Plains, TileTexture.Plains)},
+    };
+    CreateTerrainFromFile(terrainDict, "user://Levels/Editable/map1.png");
+
+    // Create players
+    players = new Player[numberOfTeams];
+    Player player1 = new Player(this, 1, false);
+    players[0] = player1;
+    Player player2 = new Player(this, 2, false);
+    players[1] = player2;
+    Condition wincon1_p1 = Factory.GetCondition("CharacterStayCondition", player1, "310");
+    Condition wincon2_p1 = Factory.GetCondition("EliminateAllEnemiesCondition", player1);
+    CombinedCondition stay_or_el = new CombinedCondition(ConditionOperator.OR, new List<Condition>(){wincon1_p1, wincon2_p1});
+    Condition wincon_p2 = Factory.GetCondition("EliminateAllEnemiesCondition", player2);
+    Condition losecond_p1 = Factory.GetCondition("AllAlliesEliminatedCondition", player1);
+    Condition losecond_p2 = Factory.GetCondition("AllAlliesEliminatedCondition", player2);
+    player1.winCondition = stay_or_el;
+    player1.loseCondition = losecond_p1;
+    player2.winCondition = wincon_p2;
+    player2.loseCondition = losecond_p2;
+
+    /*
+      Strong Archer (Has double the power of his shots)
+      Quick Archer (Has doubletap)
+      Far Archer (Has double range)
+    */
+    Unit strongArcher = new("Strong Archer", player1, 30, 50, 6, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
+    strongArcher.AddSkill(new Shot());
+    strongArcher.AddUnitEffect(new StrongShots());
+    Unit quickArcher = new("Quick Archer", player1, 20, 40, 10, 5, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
+    quickArcher.AddSkill(new DoubleTap());
+    Unit preciseArcher = new("Precise Archer", player1, 25, 45, 8, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
+    preciseArcher.AddSkill(new Shot());
+    preciseArcher.AddUnitEffect(new Sniper());
+
+    player1.deck = new List<Unit>{strongArcher, quickArcher, preciseArcher};
+
+    Dictionary<Color, ((string, Player, int hp, int st, int mv, int cost,  UnitSpriteFrames, string), List<Skill>, List<UnitEffect>)> unitDict = new(){
+      {new Color(0, 0, 1, 1), (("Summoner", player1, 20, 50, 8, 2, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1"), new List<Skill>(){new Shot()}, new List<UnitEffect>(){new SummonSkillsFromDeck()})},
+      {new Color(1, 0, 0, 1), (("Archer", player2, 20, 50, 8, 2, UnitSpriteFrames.redArcher, "portrait_Archer_Red1"), new List<Skill>(){new Shot()}, new List<UnitEffect>(){})}
+    };
+    CreateUnitsFromFile(unitDict, "user://Levels/Editable/mapUnits1.png");
+
     AddChild(map);
+    InitializeTimeline();
+  }
 
-    //SaveUtil.SaveDeck(new List<Unit>(){u1, u2});
+  public void CreateTerrainFromFile(Dictionary<Color, (TilePreset, TileTexture)> dict, string path){
+    Image image = Image.LoadFromFile(path);
+    map = new GameMap(image.GetWidth(), image.GetHeight());
+    for (int x = 0; x < image.GetWidth(); x++){
+      for (int y = 0; y < image.GetHeight(); y++){
+        TilePreset tp = TilePreset.none;
+        TileTexture tt = TileTexture.none;
+        Color color = image.GetPixel(x, y);
+        foreach(var (dictColor, (tilePreset, tileTexture)) in dict){
+          if(color == dictColor){
+            tp = tilePreset;
+            tt = tileTexture;
+            break;
+          }
+        }
+        Tile tile = Factory.GetPresetTile(tp, x,y, map);
+        Node2D tileNode = Tile.createTileNode(tile, Factory.GetTileTexture(tt));
+        map.AddChild(tileNode);
+      }
+    }
+  }
 
+  
+  public void CreateUnitsFromFile(Dictionary<Color, ((string, Player, int, int, int, int, UnitSpriteFrames, string), List<Skill>, List<UnitEffect>)> dict, string path){
+    Image image = Image.LoadFromFile(path);
+    for (int x = 0; x < image.GetWidth(); x++){
+      for (int y = 0; y < image.GetHeight(); y++){
+        Color color = image.GetPixel(x, y);
+        foreach(var (dictColor, ((unitName, player, baseMaxHp, baseMaxStamina, baseMaxMovement, baseCost,
+                                  frames, portraitName), skills, effects)) in dict){
+          if(color == dictColor){
+            Unit u = new Unit(unitName, player, baseMaxHp, baseMaxStamina, baseMaxMovement, baseCost, x, y, frames, portraitName).SetNewID();
+            foreach(Skill skill in skills){
+              u.AddSkill(skill);
+            }
+            foreach(UnitEffect effect in effects){
+              u.AddUnitEffect(effect);
+            }
+            u.AddUnitToMap(map);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  private void CheckIfFileExistsElseCreate(string dir, string file){
+    if (FileAccess.FileExists("user://"+dir+file))
+    {
+      GD.Print("File exists.");
+    }
+    else{
+      GD.Print("File does not exist.");
+      DirAccess.MakeDirRecursiveAbsolute("user://"+dir);
+      Image readFile = ((Texture2D)GD.Load("res://"+dir+file)).GetImage();
+      readFile.SavePng("user://"+dir+file);
+    }
+    
   }
 
   public void SaveGame(){
@@ -273,6 +372,7 @@ public partial class Game : Node2D
         }
       }
     }
+    AddToTimeline();
   }
 
   public void GameOver(string message){
@@ -286,4 +386,58 @@ public partial class Game : Node2D
     GetTree().Root.AddChild(gameOverInst);
   }
 
+  SaveNode oldestSave;
+  SaveNode currentSave;
+  int numberOfSaves = 0;
+  int change = 0;
+
+  public void InitializeTimeline(){
+    SaveNode firstSave = new(SaveUtil.CreateSave(this));
+    oldestSave = firstSave;
+    currentSave = firstSave;
+    numberOfSaves = 1;
+  }
+
+  public void AddToTimeline(){
+    SaveNode newSave = new(SaveUtil.CreateSave(this));
+    newSave.previousNode = currentSave;
+    currentSave.nextNode = newSave;
+    currentSave = newSave;
+    numberOfSaves += change;
+    change = 0;
+    numberOfSaves += 1;
+  }
+
+  public void BackInTime(){
+    if(currentSave.previousNode!=null){
+      currentSave = currentSave.previousNode;
+      SaveUtil.CreateGame(this, currentSave.save);
+      change -= 1;
+    }
+    else{
+      GD.Print("Can't go any older");
+    }
+  }
+
+  public void ForwardInTime(){
+    if(currentSave.nextNode!=null){
+      currentSave = currentSave.nextNode;
+      SaveUtil.CreateGame(this, currentSave.save);
+      change += 1;
+    }
+    else{
+      GD.Print("Can't go any newer");
+    }
+  }
+
 }
+
+public class SaveNode{
+  public Save save;
+  public SaveNode nextNode = null;
+  public SaveNode previousNode = null;
+  public SaveNode(Save save){
+    this.save = save;
+  }
+}
+

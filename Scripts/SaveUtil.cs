@@ -133,7 +133,7 @@ public static class SaveUtil
             isDead = currentUnit.isDead,
             x = currentUnit.x,
             y = currentUnit.y,
-            flipH = currentUnit.sprite.FlipH,
+            flipH = currentUnit.isDead ? false : currentUnit.sprite.FlipH,
             unitSpriteFrames = (int)currentUnit.unitSpriteFrames,
             portraitName = currentUnit.portraitName
         };
@@ -243,9 +243,11 @@ public static class SaveUtil
                 winCondition = SaveConditionTree(p.winCondition),
                 loseCondition = SaveConditionTree(p.loseCondition)
             };
-            foreach(Unit u in p.deck){
-                Save.UnitSave us = SaveDeckUnit(u);
-                playerSave.currentDeck.Add(us);
+            if(p.deck!=null){
+                foreach(Unit u in p.deck){
+                    Save.UnitSave us = SaveDeckUnit(u);
+                    playerSave.currentDeck.Add(us);
+                }
             }
             save.players.Add(playerSave);
         }
@@ -424,11 +426,13 @@ public static class SaveUtil
             Player newPlayer = new Player(game, ps.team, ps.isCPU);
             newPlayer.winCondition = CreateConditionTree(ps.winCondition, newPlayer);
             newPlayer.loseCondition = CreateConditionTree(ps.loseCondition, newPlayer);
-            List<Unit> currentDeck = new();
-            foreach(Save.UnitSave us in ps.currentDeck){
-                currentDeck.Add(CreateDeckUnit(us));
+            if(ps.currentDeck!=null){
+                List<Unit> currentDeck = new();
+                foreach(Save.UnitSave us in ps.currentDeck){
+                    currentDeck.Add(CreateDeckUnit(us));
+                }
+                newPlayer.deck = currentDeck;
             }
-            newPlayer.deck = currentDeck;
             game.players[ps.team-1] = newPlayer;
         }
         
@@ -453,7 +457,8 @@ public static class SaveUtil
         foreach(Save.UnitSave u in save.units){
             Unit restoredUnit = CreateUnit(u, game.players[u.team-1], lookupUnitEffects);
             restoredUnit.AddUnitToMap(map);
-            restoredUnit.sprite.FlipH = u.flipH;
+            if(!restoredUnit.isDead)
+                restoredUnit.sprite.FlipH = u.flipH;
             lookupUnits.Add(u.ID, restoredUnit);
         }
         foreach(Save.TileEffectSave te in save.tileEffects){

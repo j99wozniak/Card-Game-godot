@@ -3,20 +3,25 @@ using System;
 
 public partial class MenuController : Control
 {
-  Button loadButton;
+  Button loadTestButton;
+  Button loadEditorButton;
   Button quitButton;
   public override void _Ready(){
-    loadButton = (Button)FindChild("LoadButton");
-    loadButton.Connect("pressed", Callable.From(() => RunTheGame(1)));
+    loadTestButton = (Button)FindChild("LoadTestButton");
+    loadTestButton.Connect("pressed", Callable.From(() => RunTheGame(1)));
+
+    loadEditorButton = (Button)FindChild("LoadEditorButton");
+    loadEditorButton.Connect("pressed", Callable.From(() => RunTheGame(2)));
 
     quitButton = (Button)FindChild("QuitButton");
     quitButton.Connect("pressed", Callable.From(() => GetTree().Quit()));
   }
 
-  private void RunTheGame(int b){
-    GD.Print(b);
+  private void RunTheGame(int choice){
+    GD.Print(choice);
     PackedScene scene = (PackedScene)GD.Load("res://game.tscn"); 
-    Node2D gameInst = (Node2D)scene.Instantiate();
+    Game gameInst = (Game)scene.Instantiate();
+    gameInst.loadVar = choice;
     GetTree().Root.AddChild(gameInst);
     this.Hide();
   }

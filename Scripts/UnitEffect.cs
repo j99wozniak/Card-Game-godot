@@ -227,6 +227,23 @@ public class PreciseShots : UnitEffect
   }
 }
 
+public class StrongShots : UnitEffect
+{
+  public StrongShots(){
+    name = "StrongShots";
+    type = Type.Physical;
+    trigger = Trigger.OnGetSkillPower;
+    priority = 20;
+    this.power = 2;
+  }
+  public override void SkillGetter(ref int valueToModify, Skill skill){
+    GD.Print($"Applying StrongShots: {valueToModify}*{power}");
+    if(skill.category == Category.Offensive && skill.isMelee == false){
+      valueToModify *= power;
+    }
+  }
+}
+
 public class Sniper : UnitEffect
 {
   public Sniper(){
@@ -234,10 +251,12 @@ public class Sniper : UnitEffect
     type = Type.Physical;
     trigger = Trigger.OnGetSkillRange;
     priority = 5;
+    power = 2;
   }
-  public override void SkillGetter(ref int skillRange, Skill skill)
-  {
-    skillRange += 5;
+  public override void SkillGetter(ref int skillRange, Skill skill){
+    if(skill.category == Category.Offensive && skill.isMelee == false){
+      skillRange *= power;
+    }
   }
 }
 
