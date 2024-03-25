@@ -25,11 +25,13 @@ public class HudController{
   VBoxContainer tileEffectsList;
 
   MarginContainer conditionsScrollContainer;
+  TextureProgressBar openScrollBackground;
   Button hideConditionsButton;
   Label winText;
   Label loseText;
 
   public MarginContainer conditionsClosedScrollContainer;
+  TextureProgressBar closedScrollBackground;
   Button showConditionsButton;
 
   PackedScene effectItem = (PackedScene)GD.Load("res://effect_item.tscn"); 
@@ -67,10 +69,12 @@ public class HudController{
     // Conditions
       // Opened
     conditionsScrollContainer = (MarginContainer)hud.FindChild("ConditionsScrollContainer");
+    openScrollBackground = (TextureProgressBar)hud.FindChild("OpenScrollBackground");
     hideConditionsButton = (Button)hud.FindChild("HideConditionsButton");
     winText = (Label)hud.FindChild("WinText");
     loseText = (Label)hud.FindChild("LoseText");
       // Closed
+    closedScrollBackground = (TextureProgressBar)hud.FindChild("ClosedScrollBackground");
     conditionsClosedScrollContainer = (MarginContainer)hud.FindChild("ConditionsClosedScrollContainer");
     showConditionsButton = (Button)hud.FindChild("ShowConditionsButton");
 
@@ -170,5 +174,9 @@ public class HudController{
     isMouseOverUI = false;
     winText.Text = parentGame.players[parentGame.currentTeam-1].winCondition.ToString();
     loseText.Text = parentGame.players[parentGame.currentTeam-1].loseCondition.ToString();
+  }
+  public void ColorConditions(){
+    closedScrollBackground.TintOver = teamColors[parentGame.currentTeam-1];
+    openScrollBackground.TintOver = teamColors[parentGame.currentTeam-1];
   }
 }

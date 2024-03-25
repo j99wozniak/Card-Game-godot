@@ -277,9 +277,10 @@ public partial class Unit : Node
   }
 
   public void OnBeginTurn(){
-    currentMovement = maxMovement;
     ExecuteEffects(Trigger.OnBeginTurn);
     CountdownUnitEffects(Trigger.OnBeginTurn);
+    currentMovement = maxMovement;
+    currentStamina = maxStamina;
   }
 
   public void OnEndTurn(){

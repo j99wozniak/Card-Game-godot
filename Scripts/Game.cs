@@ -42,7 +42,7 @@ public partial class Game : Node2D
       CheckIfFileExistsElseCreate("Levels/Editable/", "mapUnits1.png");
       testSampleLevel();
     }
-
+    BeginTurn();
   }
 
   void test1(){
@@ -175,9 +175,9 @@ public partial class Game : Node2D
 
     player1.deck = new List<Unit>{strongArcher, quickArcher, preciseArcher};
 
-    Dictionary<Color, ((string, Player, int hp, int st, int mv, int cost,  UnitSpriteFrames, string), List<Skill>, List<UnitEffect>)> unitDict = new(){
-      {new Color(0, 0, 1, 1), (("Summoner", player1, 20, 50, 8, 2, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1"), new List<Skill>(){new Shot()}, new List<UnitEffect>(){new SummonSkillsFromDeck()})},
-      {new Color(1, 0, 0, 1), (("Archer", player2, 20, 50, 8, 2, UnitSpriteFrames.redArcher, "portrait_Archer_Red1"), new List<Skill>(){new Shot()}, new List<UnitEffect>(){})}
+    Dictionary<Color, ((string, Player, int hp, int st, int mv, int cost,  UnitSpriteFrames, string), List<string>, List<string>)> unitDict = new(){
+      {new Color(0, 0, 1, 1), (("Summoner", player1, 20, 50, 8, 2, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1"), new List<string>(){"Shot"}, new List<string>(){"SummonSkillsFromDeck"})},
+      {new Color(1, 0, 0, 1), (("Archer", player2, 20, 50, 8, 2, UnitSpriteFrames.redArcher, "portrait_Archer_Red1"), new List<string>(){"Shot"}, new List<string>(){})}
     };
     CreateUnitsFromFile(unitDict, "user://Levels/Editable/mapUnits1.png");
 
@@ -208,20 +208,20 @@ public partial class Game : Node2D
   }
 
   
-  public void CreateUnitsFromFile(Dictionary<Color, ((string, Player, int, int, int, int, UnitSpriteFrames, string), List<Skill>, List<UnitEffect>)> dict, string path){
+  public void CreateUnitsFromFile(Dictionary<Color, ((string, Player, int, int, int, int, UnitSpriteFrames, string), List<string>, List<string>)> dict, string path){
     Image image = Image.LoadFromFile(path);
     for (int x = 0; x < image.GetWidth(); x++){
       for (int y = 0; y < image.GetHeight(); y++){
         Color color = image.GetPixel(x, y);
         foreach(var (dictColor, ((unitName, player, baseMaxHp, baseMaxStamina, baseMaxMovement, baseCost,
-                                  frames, portraitName), skills, effects)) in dict){
+                                  frames, portraitName), skillNames, effectNames)) in dict){
           if(color == dictColor){
             Unit u = new Unit(unitName, player, baseMaxHp, baseMaxStamina, baseMaxMovement, baseCost, x, y, frames, portraitName).SetNewID();
-            foreach(Skill skill in skills){
-              u.AddSkill(skill);
+            foreach(string skillName in skillNames){
+              u.AddSkill(Factory.GetSkill(skillName));
             }
-            foreach(UnitEffect effect in effects){
-              u.AddUnitEffect(effect);
+            foreach(string effectName in effectNames){
+              u.AddUnitEffect(Factory.GetUnitEffect(effectName));
             }
             u.AddUnitToMap(map);
             break;
@@ -301,12 +301,14 @@ public partial class Game : Node2D
       }
     }
     CheckConditions();
+    controller.Reset();
   }
 
   public void BeginTurn(){
+  hudController.ColorConditions();
   foreach(Unit unit in map.unitMap){
     if(unit!=null && unit.player.team == currentTeam){
-    unit.OnBeginTurn();
+      unit.OnBeginTurn();
     }
   }
   foreach(Tile tile in map.tileMap){

@@ -94,7 +94,7 @@ public partial class Controller : Node
       if(inputEventMouseButton.IsPressed() && inputEventMouseButton.ButtonIndex == MouseButton.Right){
         GD.Print("Right Click");
         if(currentState == State.SELECTING_UNIT){
-          if(selectedTile.GetUnit() != null){
+          if(selectedTile.GetUnit() != null && selectedTile.GetUnit().player.team == parentGame.currentTeam){
             selectedUnit = selectedTile.GetUnit();
             if(selectedUnit.allSkills.Count != 0){
               CreateNewSkillList(inputEventMouseButton.Position, selectedUnit);
@@ -128,7 +128,8 @@ public partial class Controller : Node
             currentState = State.SELECTING_UNIT;
           }
         }
-        else if(selectedTile.GetUnit()!=null && (currentState == State.SELECTING_UNIT || currentState == State.TARGET_MOVEMENT)){
+        else if(selectedTile.GetUnit()!=null && selectedTile.GetUnit().player.team == parentGame.currentTeam &&
+                (currentState == State.SELECTING_UNIT || currentState == State.TARGET_MOVEMENT)){
           parentGame.hudController.ShowUnitBar(selectedTile.GetUnit());
           selectedUnit = selectedTile.GetUnit();
           RemoveHighlights();
@@ -202,6 +203,11 @@ public partial class Controller : Node
   public void Reset(){
     currentState = State.SELECTING_UNIT;
     RemoveHighlights();
+    rangeDict = new();
+    targeter = null;
+    selectedUnit = null;
+    parentGame.hudController.HideUnitBar();
+    ClearSkillList();
   }
 
   public void CreateNewSkillList(Vector2 position, Unit unit){

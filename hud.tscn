@@ -230,7 +230,7 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="ScrollBackground" type="TextureProgressBar" parent="Control/ConditionsScrollContainer"]
+[node name="OpenScrollBackground" type="TextureProgressBar" parent="Control/ConditionsScrollContainer"]
 layout_mode = 2
 nine_patch_stretch = true
 stretch_margin_top = 20
@@ -323,7 +323,7 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="ScrollBackground" type="TextureProgressBar" parent="Control/ConditionsClosedScrollContainer"]
+[node name="ClosedScrollBackground" type="TextureProgressBar" parent="Control/ConditionsClosedScrollContainer"]
 modulate = Color(1, 1, 1, 0.396078)
 layout_mode = 2
 nine_patch_stretch = true

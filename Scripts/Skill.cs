@@ -42,7 +42,7 @@ public class DoubleTap : Skill
     this.type = Type.Physical;
     this.category = Category.Offensive;
     this.numberOfTargets = 2;
-    this.targetQualifier = Target.Unit;
+    this.targetQualifier = Target.EnemyUnit;
     this.splashZoneRange = 0;
     this.isMelee = false;
     this.basePower = 10;
