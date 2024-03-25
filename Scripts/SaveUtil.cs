@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text;
+using System.Linq;
 
 public class Save
 {
@@ -109,6 +110,10 @@ public class Save
         public List<int> linkedTileEffectsIDs = new();
         public List<int> linkedUnitEffectsIDs = new();
     }
+    public bool isCurrentSave;
+    public List<Save> timeline = new();
+    public int numberOfSaves;
+    public int saveChange;
 }
 
 public static class SaveUtil
@@ -315,6 +320,17 @@ public static class SaveUtil
     }
     public static string SaveGame(Game game){
         Save save = CreateSave(game);
+        SaveNode timelineSave = game.oldestSave;
+        while(timelineSave!=null){
+            if(timelineSave==game.currentSave){
+                timelineSave.save.isCurrentSave = true;
+                GD.Print("true");
+            }
+            save.timeline.Add(timelineSave.save);
+            timelineSave = timelineSave.nextNode;
+        }
+        save.numberOfSaves = game.numberOfSaves;
+        save.saveChange = game.saveChange;
         string saveJson = JsonSerializer.Serialize<Save>(save, options);
         using FileAccess saveFile = FileAccess.Open("user://Saves/save_game.json", FileAccess.ModeFlags.Write);
         saveFile.StoreString(saveJson);
@@ -525,10 +541,30 @@ public static class SaveUtil
         game.map = map;
         game.AddChild(map);
     }
-    public static Save LoadSave(){
+    public static Save LoadSave(Game game){
         using FileAccess saveFile = FileAccess.Open("user://Saves/save_game.json", FileAccess.ModeFlags.Read);
         string loadJson = saveFile.GetAsText();
         Save loadedSave = JsonSerializer.Deserialize<Save>(loadJson, options);
+        CreateGame(game, loadedSave);
+
+        game.numberOfSaves = loadedSave.numberOfSaves;
+        game.saveChange = loadedSave.saveChange;
+        SaveNode iter = null;
+        foreach(Save s in loadedSave.timeline){
+            if(iter==null){
+                iter = game.oldestSave = new SaveNode(s);
+            }
+            else{
+                SaveNode newSaveNode = new SaveNode(s);
+                iter.nextNode = newSaveNode;
+                newSaveNode.previousNode = iter;
+                iter = newSaveNode;
+            }
+            if(s.isCurrentSave==true){
+                game.currentSave = iter;
+            }
+        }
+
         return loadedSave;
     }
 

@@ -232,8 +232,7 @@ public partial class Game : Node2D
   }
 
   private void CheckIfFileExistsElseCreate(string dir, string file){
-    if (FileAccess.FileExists("user://"+dir+file))
-    {
+    if (FileAccess.FileExists("user://"+dir+file)){
       GD.Print("File exists.");
     }
     else{
@@ -257,12 +256,9 @@ public partial class Game : Node2D
   }
 
   public void LoadGame(){
-    Save loadedSave = SaveUtil.LoadSave();
-    SaveUtil.CreateGame(this, loadedSave);
+    SaveUtil.LoadSave(this);
     controller.Reset();
     
-    GD.Print("loseCondition1"+players[0].loseCondition.IsMet());
-    GD.Print("loseCondition2"+players[1].loseCondition.IsMet());
     GD.Print("Load SUCCESS!!");
 
     GD.Print("Dead units:");
@@ -304,6 +300,7 @@ public partial class Game : Node2D
         }
       }
     }
+    CheckConditions();
   }
 
   public void BeginTurn(){
@@ -386,10 +383,10 @@ public partial class Game : Node2D
     GetTree().Root.AddChild(gameOverInst);
   }
 
-  SaveNode oldestSave;
-  SaveNode currentSave;
-  int numberOfSaves = 0;
-  int change = 0;
+  public SaveNode oldestSave;
+  public SaveNode currentSave;
+  public int numberOfSaves = 0;
+  public int saveChange = 0;
 
   public void InitializeTimeline(){
     SaveNode firstSave = new(SaveUtil.CreateSave(this));
@@ -403,8 +400,8 @@ public partial class Game : Node2D
     newSave.previousNode = currentSave;
     currentSave.nextNode = newSave;
     currentSave = newSave;
-    numberOfSaves += change;
-    change = 0;
+    numberOfSaves += saveChange;
+    saveChange = 0;
     numberOfSaves += 1;
   }
 
@@ -412,7 +409,7 @@ public partial class Game : Node2D
     if(currentSave.previousNode!=null){
       currentSave = currentSave.previousNode;
       SaveUtil.CreateGame(this, currentSave.save);
-      change -= 1;
+      saveChange -= 1;
     }
     else{
       GD.Print("Can't go any older");
@@ -423,7 +420,7 @@ public partial class Game : Node2D
     if(currentSave.nextNode!=null){
       currentSave = currentSave.nextNode;
       SaveUtil.CreateGame(this, currentSave.save);
-      change += 1;
+      saveChange += 1;
     }
     else{
       GD.Print("Can't go any newer");
