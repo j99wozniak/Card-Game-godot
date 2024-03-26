@@ -2,6 +2,7 @@ using Godot;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 
 public partial class Game : Node2D
 {
@@ -146,7 +147,7 @@ public partial class Game : Node2D
     players = new Player[numberOfTeams];
     Player player1 = new Player(this, 1, false);
     players[0] = player1;
-    Player player2 = new Player(this, 2, false);
+    Player player2 = new Player(this, 2, true);
     players[1] = player2;
     Condition wincon1_p1 = Factory.GetCondition("CharacterStayCondition", player1, "310");
     Condition wincon2_p1 = Factory.GetCondition("EliminateAllEnemiesCondition", player1);
@@ -164,12 +165,12 @@ public partial class Game : Node2D
       Quick Archer (Has doubletap)
       Far Archer (Has double range)
     */
-    Unit strongArcher = new("Strong Archer", player1, 30, 50, 6, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
+    Unit strongArcher = new("Strong Archer", player1, 30, 15, 6, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
     strongArcher.AddSkill(new Shot());
     strongArcher.AddUnitEffect(new StrongShots());
-    Unit quickArcher = new("Quick Archer", player1, 20, 40, 10, 5, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
+    Unit quickArcher = new("Quick Archer", player1, 20, 15, 10, 5, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
     quickArcher.AddSkill(new DoubleTap());
-    Unit preciseArcher = new("Precise Archer", player1, 25, 45, 8, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
+    Unit preciseArcher = new("Precise Archer", player1, 20, 14, 8, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
     preciseArcher.AddSkill(new Shot());
     preciseArcher.AddUnitEffect(new Sniper());
 
@@ -177,7 +178,7 @@ public partial class Game : Node2D
 
     Dictionary<Color, ((string, Player, int hp, int st, int mv, int cost,  UnitSpriteFrames, string), List<string>, List<string>)> unitDict = new(){
       {new Color(0, 0, 1, 1), (("Summoner", player1, 20, 50, 8, 2, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1"), new List<string>(){"Shot"}, new List<string>(){"SummonSkillsFromDeck"})},
-      {new Color(1, 0, 0, 1), (("Archer", player2, 20, 50, 8, 2, UnitSpriteFrames.redArcher, "portrait_Archer_Red1"), new List<string>(){"Shot"}, new List<string>(){})}
+      {new Color(1, 0, 0, 1), (("Archer", player2, 20, 7, 3, 2, UnitSpriteFrames.redArcher, "portrait_Archer_Red1"), new List<string>(){"Shot"}, new List<string>(){})}
     };
     CreateUnitsFromFile(unitDict, "user://Levels/Editable/mapUnits1.png");
 
@@ -276,6 +277,10 @@ public partial class Game : Node2D
     if(hudController.conditionsClosedScrollContainer.Visible == false){
       hudController.ShowConditions();
     }
+    if(players[currentTeam-1].isCPU){
+      players[currentTeam-1].AIExecute();
+      NextTurn();
+    }
   }
 
   private void nextTeam(){
@@ -300,31 +305,31 @@ public partial class Game : Node2D
         }
       }
     }
-    CheckConditions();
     controller.Reset();
   }
 
   public void BeginTurn(){
-  hudController.ColorConditions();
-  foreach(Unit unit in map.unitMap){
-    if(unit!=null && unit.player.team == currentTeam){
-      unit.OnBeginTurn();
-    }
-  }
-  foreach(Tile tile in map.tileMap){
-    foreach(TileEffect tileEffect in tile.tileEffects){
-    if(tileEffect.countdownTrigger == Trigger.OnBeginTurn){
-      if(tileEffect.source == null || tileEffect.source.player.team == currentTeam){
-      tileEffect.Countdown();
+    foreach(Unit unit in map.unitMap){
+      if(unit!=null && unit.player.team == currentTeam){
+        unit.OnBeginTurn();
       }
     }
+    foreach(Tile tile in map.tileMap){
+      foreach(TileEffect tileEffect in tile.tileEffects){
+        if(tileEffect.countdownTrigger == Trigger.OnBeginTurn){
+          if(tileEffect.source == null || tileEffect.source.player.team == currentTeam){
+          tileEffect.Countdown();
+          }
+        }
+      }
     }
-  }
+    CheckConditions();
   }
   
   HashSet<Player> winners = new();
   HashSet<Player> losers = new();
   public void CheckConditions(){
+    hudController.ColorConditions();
     foreach(Player player in players){
       if(player.winCondition.IsMet()){
         GD.Print("Player " + player.team + " wins!!");
@@ -389,6 +394,7 @@ public partial class Game : Node2D
   public SaveNode currentSave;
   public int numberOfSaves = 0;
   public int saveChange = 0;
+  public int maxNumberOfSaves = 30;
 
   public void InitializeTimeline(){
     SaveNode firstSave = new(SaveUtil.CreateSave(this));
@@ -398,6 +404,8 @@ public partial class Game : Node2D
   }
 
   public void AddToTimeline(){
+    if(players[currentTeam-1].isCPU)
+      return;
     SaveNode newSave = new(SaveUtil.CreateSave(this));
     newSave.previousNode = currentSave;
     currentSave.nextNode = newSave;
@@ -405,6 +413,12 @@ public partial class Game : Node2D
     numberOfSaves += saveChange;
     saveChange = 0;
     numberOfSaves += 1;
+    if(numberOfSaves>maxNumberOfSaves){
+      oldestSave = oldestSave.nextNode;
+      oldestSave.previousNode = null;
+      numberOfSaves -= 1;
+      GD.Print("Removing Tail");
+    }
   }
 
   public void BackInTime(){

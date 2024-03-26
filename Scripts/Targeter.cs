@@ -31,7 +31,7 @@ public class Targeter
     if(t == Target.Self){
       targetedTiles.Add(targetingSkill.source.GetTile());
     }
-    else if(IsTileViableTarget(t, targetingSkill, targetTile)){
+    else if(IsTileViableTarget(targetingSkill, targetTile)){
       targetedTiles.Add(targetTile);
     }
     if(targetingSkill.numberOfTargets == targetedTiles.Count)
@@ -45,8 +45,8 @@ public class Targeter
     return RemovedLast;
   }
 
-  public static bool IsTileViableTarget(Target targetQualifier, Skill targetingSkill, Tile targetTile){
-    switch (targetQualifier){
+  public static bool IsTileViableTarget(Skill targetingSkill, Tile targetTile){
+    switch (targetingSkill.targetQualifier){
       case Target.Unit:
         if(targetTile.GetUnit()!=null)
          return true;

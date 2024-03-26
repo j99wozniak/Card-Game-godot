@@ -27,7 +27,7 @@ public abstract class Skill
   }
   public void Fire(List<Tile> targetList){
     foreach(Tile targetTile in targetList){
-      if(Targeter.IsTileViableTarget(targetQualifier, this, targetTile)){
+      if(Targeter.IsTileViableTarget(this, targetTile)){
         FireEffect(targetTile);
       }
     }
@@ -46,7 +46,7 @@ public class DoubleTap : Skill
     this.splashZoneRange = 0;
     this.isMelee = false;
     this.basePower = 10;
-    this.baseCost = 5;
+    this.baseCost = 7;
     this.baseRange = 5;
   }
   public override void FireEffect(Tile targetTile){

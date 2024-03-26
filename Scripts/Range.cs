@@ -12,6 +12,10 @@ public static class Range{
     float maxRange = skill.currentRange;
     return CalculateAccessibleTiles(skill.source, map, skill.source.x, skill.source.y, maxRange, getSkillRangeCostForTile);
   }
+  public static Dictionary<(int, int), float> GetAccessibleSkillTilesFromTile(Skill skill, Tile tile, GameMap map){
+    float maxRange = skill.currentRange;
+    return CalculateAccessibleTiles(skill.source, map, tile.x, tile.y, maxRange, getSkillRangeCostForTile);
+  }
   public static Dictionary<(int, int), float> GetRadius(GameMap map, int x, int y, int r){
     return CalculateAccessibleTiles(null, map, x, y, r, getCostOne);
   }
@@ -54,6 +58,80 @@ public static class Range{
     return accessibleTiles;
   }
 
+  public static List<Tile> AStarGetShortestPath(GameMap map, Unit unit, Tile start, Tile end){
+    Func<Unit, Tile, float> getCostFunc =  getMovementCostForTile;
+    Func<Tile, Tile, int> heuristic =  Manhattan;
+
+    HashSet<Tile> closedSet = new HashSet<Tile>();
+    HashSet<Tile> openSet = new HashSet<Tile> { start };
+    Dictionary<Tile, Tile> cameFrom = new Dictionary<Tile, Tile>();
+
+    Dictionary<Tile, float> gScore = new Dictionary<Tile, float>();
+    foreach(Tile tile in map.tileMap){
+      gScore[tile] = float.MaxValue;
+    }
+    gScore[start] = 0;
+
+    Dictionary<Tile, float> fScore = new Dictionary<Tile, float>();
+    foreach(Tile tile in map.tileMap){
+      fScore[tile] = float.MaxValue;
+    }
+    fScore[start] = heuristic(start, end);
+
+    List<(int modX, int modY)> directions = new List<(int, int)>{(-1, 0), (1, 0), (0, -1), (0, 1)};
+
+    while(openSet.Count > 0){
+      Tile current = null;
+      float minFScore = float.MaxValue;
+      foreach(Tile tile in openSet){
+        if(fScore[tile] < minFScore){
+          minFScore = fScore[tile];
+          current = tile;
+        }
+      }
+
+      if(current == end){
+        List<Tile> path = new List<Tile>();
+        while(cameFrom.ContainsKey(current)){
+          path.Add(current);
+          current = cameFrom[current];
+        }
+        path.Reverse();
+        return path;
+      }
+
+      openSet.Remove(current);
+      closedSet.Add(current);
+
+      foreach( (int x, int y) mod in directions){
+        int modedX = current.x+mod.x;
+        int modedY = current.y+mod.y;
+
+        if(modedX < 0 || modedX >= map.sizeX || modedY < 0 || modedY >= map.sizeY){
+          continue;
+        }
+
+        Tile neighbor = map.tileMap[modedX, modedY];
+        if(closedSet.Contains(neighbor)){
+          continue;
+        }
+
+        float tentativeGScore = gScore[current] + getCostFunc(unit, neighbor);
+        if(!openSet.Contains(neighbor)){
+          openSet.Add(neighbor);
+        }
+        else if(tentativeGScore >= gScore[neighbor]){
+          continue;
+        }
+
+        cameFrom[neighbor] = current;
+        gScore[neighbor] = tentativeGScore;
+        fScore[neighbor] = tentativeGScore + heuristic(neighbor, end);
+      }
+    }
+    return null;
+  }
+
   // Move this to Unit?
   static float getMovementCostForTile(Unit unit, Tile tile){
     float movementCost = tile.cost;
@@ -68,6 +146,14 @@ public static class Range{
 
   static float getCostOne(Unit unit=null, Tile tile=null){
     return 1;
+  }
+
+  public static int Manhattan(Tile a, Tile b){
+    return Manhattan(a.x, a.y, b.x, b.y);
+  }
+
+  public static int Manhattan(int ax, int ay, int bx, int by){
+    return Math.Abs(ax - bx) + Math.Abs(ay - by);
   }
 
 }
