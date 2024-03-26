@@ -127,7 +127,8 @@ public partial class Game : Node2D
     // TODO make the SummonSkillsFromList effect compatibile with save
 
 
-    AddChild(map);
+      AddChild(map);
+      InitializeTimeline();
     }
 
   void testSampleLevel(){
