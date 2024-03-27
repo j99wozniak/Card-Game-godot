@@ -332,6 +332,7 @@ public static class SaveUtil
         save.numberOfSaves = game.numberOfSaves;
         save.saveChange = game.saveChange;
         string saveJson = JsonSerializer.Serialize<Save>(save, options);
+        DirAccess.MakeDirRecursiveAbsolute("user://Saves");
         using FileAccess saveFile = FileAccess.Open("user://Saves/save_game.json", FileAccess.ModeFlags.Write);
         saveFile.StoreString(saveJson);
 
@@ -345,6 +346,7 @@ public static class SaveUtil
             deckSave.units.Add(us);
         }
         string saveJson = JsonSerializer.Serialize<Save>(deckSave, options);
+        DirAccess.MakeDirRecursiveAbsolute("user://Decks");
         using FileAccess deckFile = FileAccess.Open($"user://Decks/deck{team}.json", FileAccess.ModeFlags.Write);
         deckFile.StoreString(saveJson);
         return saveJson;

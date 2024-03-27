@@ -36,6 +36,10 @@ public partial class Game : Node2D
     GD.Print($"{this.Owner}");
 
     if(loadVar == 1){
+      if (FileAccess.FileExists("user://Decks/deck1.json")){
+        GD.Print("File exists.");
+      }
+      saveInitialDeck();
       test1();
     }
     else{
@@ -44,6 +48,25 @@ public partial class Game : Node2D
       testSampleLevel();
     }
     BeginTurn();
+  }
+
+  void saveInitialDeck(){
+    Unit u1 = new Unit("Healer", null, 20, 50, 8, 2, 5, 5, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1").SetNewID();
+    u1.AddSkill(new DoubleTap());
+    u1.AddSkill(Factory.GetSkill("BitterMedicine"));
+    u1.AddSkill(Factory.GetSkill("HealingAura"));
+    Unit u2 = new Unit("Sniper", null, 20, 50, 8, 2, 3, 3, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1").SetNewID();
+    u2.AddUnitEffect(new PreciseShots());
+    u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
+    u2.AddSkill(Factory.GetSkill("DoubleTap"));
+
+    SaveUtil.SaveDeck(new List<Unit>(){u1, u2}, 1);
+
+    Unit u3 = new Unit("Summoner", null, 20, 50, 8, 2, 6, 6, UnitSpriteFrames.redArcher, "portrait_Archer_Red1").SetNewID();
+    u3.AddSkill(new DoubleTap());
+    u3.AddUnitEffect(new SummonSkillsFromDeck());
+
+    SaveUtil.SaveDeck(new List<Unit>(){u3}, 2);
   }
 
   void test1(){
@@ -79,7 +102,7 @@ public partial class Game : Node2D
     map.tileMap[7,1].AddTileEffect(Factory.GetTileEffect("JumpPad"));
 
     Player player1 = new Player(this, 1, false);
-    Player player2 = new Player(this, 2, true);
+    Player player2 = new Player(this, 2, false);
     
     Condition wincon11_p1 = Factory.GetCondition("CharacterStayCondition", player1, "10");
     Condition wincon12_p1 = Factory.GetCondition("DestroyCastleCondition", player1, "246");
@@ -109,7 +132,7 @@ public partial class Game : Node2D
     u1.AddSkill(new DoubleTap());
     u1.AddSkill(Factory.GetSkill("BitterMedicine"));
     u1.AddSkill(Factory.GetSkill("HealingAura"));
-    Unit u2 = new Unit("Sniper", player1, 20, 50, 8, 2, 3, 3, UnitSpriteFrames.blueArcher).SetNewID();
+    Unit u2 = new Unit("Sniper", player1, 20, 50, 8, 2, 3, 3, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1").SetNewID();
     u2.AddUnitToMap(map);
     u2.sprite.Animation = "front_idle";
     map.unitMap[u2.x,u2.y] = u2;
@@ -130,6 +153,8 @@ public partial class Game : Node2D
       AddChild(map);
       InitializeTimeline();
     }
+  
+
 
   void testSampleLevel(){
     /*
