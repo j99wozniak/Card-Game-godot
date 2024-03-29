@@ -34,39 +34,53 @@ public partial class Game : Node2D
     controller.parentGame = this;
     AddChild(controller);
     GD.Print($"{this.Owner}");
+    
+    if(!FileAccess.FileExists("user://Decks/deck1.json"))
+      saveInitialDeck1();
+    if(!FileAccess.FileExists("user://Decks/deck2.json"))
+        saveInitialDeck2();
 
-    if(loadVar == 1){
-      if (FileAccess.FileExists("user://Decks/deck1.json")){
-        GD.Print("File exists.");
-      }
-      saveInitialDeck();
-      test1();
+    switch(loadVar){
+      case 1:
+        test1();
+        break;
+      case 2:
+        CheckIfFileExistsElseCreate("Levels/Editable/", "map1.png");
+        CheckIfFileExistsElseCreate("Levels/Editable/", "mapUnits1.png");
+        editableLevel();
+        break;
+      case 3:
+        LoadGame();
+        break;
     }
-    else{
-      CheckIfFileExistsElseCreate("Levels/Editable/", "map1.png");
-      CheckIfFileExistsElseCreate("Levels/Editable/", "mapUnits1.png");
-      testSampleLevel();
-    }
-    BeginTurn();
   }
 
-  void saveInitialDeck(){
-    Unit u1 = new Unit("Healer", null, 20, 50, 8, 2, 5, 5, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1").SetNewID();
+  void saveInitialDeck1(){
+    Unit strongArcher = new("Strong Archer", null, 30, 15, 6, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
+    strongArcher.AddSkill(new Shot());
+    strongArcher.AddUnitEffect(new StrongShots());
+    Unit quickArcher = new("Quick Archer", null, 20, 15, 10, 5, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
+    quickArcher.AddSkill(new DoubleTap());
+    Unit preciseArcher = new("Precise Archer", null, 20, 14, 8, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
+    preciseArcher.AddSkill(new Shot());
+    preciseArcher.AddUnitEffect(new Sniper());
+
+    SaveUtil.SaveDeck(new List<Unit>(){strongArcher, quickArcher, preciseArcher}, 1);
+  }
+  void saveInitialDeck2(){
+    Unit u1 = new Unit("Healer", null, 20, 50, 8, 2, 5, 5, UnitSpriteFrames.redArcher, "portrait_Archer_Red1").SetNewID();
     u1.AddSkill(new DoubleTap());
     u1.AddSkill(Factory.GetSkill("BitterMedicine"));
     u1.AddSkill(Factory.GetSkill("HealingAura"));
-    Unit u2 = new Unit("Sniper", null, 20, 50, 8, 2, 3, 3, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1").SetNewID();
+    Unit u2 = new Unit("Sniper", null, 20, 50, 8, 2, 3, 3, UnitSpriteFrames.redArcher, "portrait_Archer_Red1").SetNewID();
     u2.AddUnitEffect(new PreciseShots());
     u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
     u2.AddSkill(Factory.GetSkill("DoubleTap"));
-
-    SaveUtil.SaveDeck(new List<Unit>(){u1, u2}, 1);
-
     Unit u3 = new Unit("Summoner", null, 20, 50, 8, 2, 6, 6, UnitSpriteFrames.redArcher, "portrait_Archer_Red1").SetNewID();
     u3.AddSkill(new DoubleTap());
     u3.AddUnitEffect(new SummonSkillsFromDeck());
 
-    SaveUtil.SaveDeck(new List<Unit>(){u3}, 2);
+    SaveUtil.SaveDeck(new List<Unit>(){u1, u2, u3}, 2);
   }
 
   void test1(){
@@ -128,35 +142,31 @@ public partial class Game : Node2D
 
     Unit u1 = new Unit("Healer", player1, 20, 50, 8, 2, 5, 5, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1").SetNewID();
     u1.AddUnitToMap(map);
-    map.unitMap[u1.x,u1.y] = u1;
     u1.AddSkill(new DoubleTap());
     u1.AddSkill(Factory.GetSkill("BitterMedicine"));
     u1.AddSkill(Factory.GetSkill("HealingAura"));
     Unit u2 = new Unit("Sniper", player1, 20, 50, 8, 2, 3, 3, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1").SetNewID();
     u2.AddUnitToMap(map);
     u2.sprite.Animation = "front_idle";
-    map.unitMap[u2.x,u2.y] = u2;
     u2.AddUnitEffect(new PreciseShots());
     u2.AddUnitEffect(Factory.GetUnitEffect("Dodge"));
     u2.AddSkill(Factory.GetSkill("DoubleTap"));
+    Unit u21 = new Unit("Summoner", player1, 20, 50, 8, 2, 4, 5, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1").SetNewID();
+    u21.AddUnitToMap(map);
+    u21.AddSkill(new DoubleTap());
+    u21.AddUnitEffect(new SummonSkillsFromDeck());
     Unit u3 = new Unit("Summoner", player2, 20, 50, 8, 2, 6, 6, UnitSpriteFrames.redArcher, "portrait_Archer_Red1").SetNewID();
     u3.AddUnitToMap(map);
-    map.unitMap[u1.x,u1.y] = u1;
     u3.AddSkill(new DoubleTap());
     u3.AddUnitEffect(new SummonSkillsFromDeck());
 
-    //List<Unit> newDeck = new List<Unit>(){u1, u2, u3};
-    //SaveUtil.SaveDeck(newDeck, 2);
-    // TODO make the SummonSkillsFromList effect compatibile with save
 
+    AddChild(map);
+    InitializeTimeline();
+    BeginTurn();
+  }
 
-      AddChild(map);
-      InitializeTimeline();
-    }
-  
-
-
-  void testSampleLevel(){
+  void editableLevel(){
     /*
     R=132, G=126, B=135 //rock = (0,5176471, 0,49411765, 0,5294118, 1)
     R=251, G=242, B=54 //sand = (0,9843137, 0,9490196, 0,21176471, 1)
@@ -191,16 +201,9 @@ public partial class Game : Node2D
       Quick Archer (Has doubletap)
       Far Archer (Has double range)
     */
-    Unit strongArcher = new("Strong Archer", player1, 30, 15, 6, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
-    strongArcher.AddSkill(new Shot());
-    strongArcher.AddUnitEffect(new StrongShots());
-    Unit quickArcher = new("Quick Archer", player1, 20, 15, 10, 5, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
-    quickArcher.AddSkill(new DoubleTap());
-    Unit preciseArcher = new("Precise Archer", player1, 20, 14, 8, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
-    preciseArcher.AddSkill(new Shot());
-    preciseArcher.AddUnitEffect(new Sniper());
 
-    player1.deck = new List<Unit>{strongArcher, quickArcher, preciseArcher};
+    player1.deck = SaveUtil.LoadDeck(1);
+    player2.deck = SaveUtil.LoadDeck(2);
 
     Dictionary<Color, ((string, Player, int hp, int st, int mv, int cost,  UnitSpriteFrames, string), List<string>, List<string>)> unitDict = new(){
       {new Color(0, 0, 1, 1), (("Summoner", player1, 20, 50, 8, 2, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1"), new List<string>(){"Shot"}, new List<string>(){"SummonSkillsFromDeck"})},
@@ -210,6 +213,7 @@ public partial class Game : Node2D
 
     AddChild(map);
     InitializeTimeline();
+    BeginTurn();
   }
 
   public void CreateTerrainFromFile(Dictionary<Color, (TilePreset, TileTexture)> dict, string path){
@@ -285,7 +289,7 @@ public partial class Game : Node2D
   public void LoadGame(){
     SaveUtil.LoadSave(this);
     controller.Reset();
-    
+    hudController.ColorConditions();
     GD.Print("Load SUCCESS!!");
 
     GD.Print("Dead units:");

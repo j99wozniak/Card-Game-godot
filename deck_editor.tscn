@@ -1,0 +1,156 @@
+[gd_scene load_steps=7 format=3 uid="uid://sabpawtngjxj"]
+
+[ext_resource type="Script" path="res://Scripts/Menu/DeckEditor.cs" id="1_asfwn"]
+[ext_resource type="Texture2D" uid="uid://13el26sjwsql" path="res://Sprites/Misc/Scroll_Under.png" id="2_lxgwp"]
+[ext_resource type="Texture2D" uid="uid://b23rvtlhfryvl" path="res://Sprites/Misc/Scroll_Over.png" id="3_g2al7"]
+[ext_resource type="Texture2D" uid="uid://cyjqv104s11dq" path="res://Sprites/Misc/Bar_Under.png" id="4_m5ris"]
+[ext_resource type="Texture2D" uid="uid://c27xlswfvjv06" path="res://Sprites/Misc/Bar_Over.png" id="5_nu7cu"]
+[ext_resource type="Texture2D" uid="uid://cx4jqlj74d6so" path="res://Sprites/Units/Portraits/portrait_Archer_Blue1.png" id="6_mpfg0"]
+
+[node name="DeckEditor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_asfwn")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 198.0
+grow_vertical = 2
+
+[node name="ItemList" type="ItemList" parent="MarginContainer"]
+layout_mode = 2
+item_count = 2
+item_0/text = "unit_name"
+item_1/text = "unit_name2"
+
+[node name="UnitScrollContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="ScrollBackground" type="TextureProgressBar" parent="UnitScrollContainer"]
+layout_mode = 2
+nine_patch_stretch = true
+stretch_margin_top = 20
+stretch_margin_bottom = 20
+texture_under = ExtResource("2_lxgwp")
+texture_over = ExtResource("3_g2al7")
+texture_progress = ExtResource("2_lxgwp")
+tint_over = Color(0.462745, 0, 0.160784, 1)
+
+[node name="ScrollContentsContainer" type="MarginContainer" parent="UnitScrollContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UnitScrollContainer/ScrollContentsContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Upper_HBoxContainer" type="HBoxContainer" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="StaminaBox" type="VBoxContainer" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer/Upper_HBoxContainer"]
+custom_minimum_size = Vector2(32, 128)
+layout_mode = 2
+
+[node name="StaminaBar" type="TextureProgressBar" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer/Upper_HBoxContainer/StaminaBox"]
+custom_minimum_size = Vector2(11, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+value = 30.0
+fill_mode = 3
+nine_patch_stretch = true
+stretch_margin_left = 3
+stretch_margin_top = 3
+stretch_margin_right = 3
+stretch_margin_bottom = 3
+texture_under = ExtResource("4_m5ris")
+texture_over = ExtResource("5_nu7cu")
+texture_progress = ExtResource("4_m5ris")
+tint_under = Color(0.172549, 0.172549, 0.0156863, 1)
+tint_over = Color(0.894118, 0.639216, 0, 1)
+tint_progress = Color(1, 1, 0.0470588, 1)
+
+[node name="StaminaLabel" type="Label" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer/Upper_HBoxContainer/StaminaBox"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+text = "13/20"
+
+[node name="PortraitPanel" type="PanelContainer" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer/Upper_HBoxContainer"]
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 1
+
+[node name="PortraitSprite" type="Sprite2D" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer/Upper_HBoxContainer/PortraitPanel"]
+texture = ExtResource("6_mpfg0")
+centered = false
+
+[node name="HealthBox" type="VBoxContainer" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer/Upper_HBoxContainer"]
+custom_minimum_size = Vector2(32, 128)
+layout_mode = 2
+
+[node name="HealthBar" type="TextureProgressBar" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer/Upper_HBoxContainer/HealthBox"]
+custom_minimum_size = Vector2(11, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+value = 30.0
+fill_mode = 3
+nine_patch_stretch = true
+stretch_margin_left = 3
+stretch_margin_top = 3
+stretch_margin_right = 3
+stretch_margin_bottom = 3
+texture_under = ExtResource("4_m5ris")
+texture_over = ExtResource("5_nu7cu")
+texture_progress = ExtResource("4_m5ris")
+tint_under = Color(0.270588, 0.0313726, 0.101961, 1)
+tint_over = Color(0.345098, 0.0431373, 0, 1)
+tint_progress = Color(1, 0.14902, 0.129412, 1)
+
+[node name="HealthLabel" type="Label" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer/Upper_HBoxContainer/HealthBox"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+text = "13/20"
+
+[node name="UnitNameLabel" type="Label" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 22
+text = "Someone"
+
+[node name="EffectsScrollContainer" type="ScrollContainer" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer"]
+custom_minimum_size = Vector2(130, 100)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 2
+
+[node name="UnitEffectsList" type="VBoxContainer" parent="UnitScrollContainer/ScrollContentsContainer/VBoxContainer/EffectsScrollContainer"]
+layout_mode = 2
