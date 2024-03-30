@@ -1,6 +1,4 @@
-using Godot;
 using System.Collections.Generic;
-using System.Data;
 
 public abstract class Skill
 {

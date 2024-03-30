@@ -1,4 +1,3 @@
-
 public enum Trigger {
   none,
   OnBeginTurn, 
