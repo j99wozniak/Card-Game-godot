@@ -52,7 +52,7 @@ public partial class Controller : Node
   public override void _Input(InputEvent @event)
   {
     if(@event is InputEventKey eventKey){
-      GD.Print("Keys");
+      //GD.Print("Keys");
       if (eventKey.Pressed) {
         if (!movementKeys.ContainsKey(eventKey.Keycode))
             movementKeys[eventKey.Keycode] = Vector2.Zero;

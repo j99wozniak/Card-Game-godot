@@ -65,12 +65,12 @@ public abstract class UnitEffect
 // At the end of turn, directly shoot packet with command Damage of power `power` and type `chemical` to the target
 public class Poison : UnitEffect
 {
-  public Poison(int power = 5){
+  public Poison(){
     name = "Poison";
     type = Type.Chemical;
     trigger = Trigger.OnEndTurn;
     priority = 5;
-    this.power = power;
+    power = 5;
     count = 5;
     stackable = true;
   }
@@ -104,12 +104,12 @@ public class Dodge : UnitEffect
 // For now lowers all damage received by `power` 
 public class Armor : UnitEffect
 {
-  public Armor(int power = 5){
+  public Armor(){
     name = "Armor";
     type = Type.Physical;
     trigger = Trigger.OnDamage;
     priority = 5;
-    this.power = power;
+    power = 5;
   }
   public override void Execute(Packet packet)
   {
@@ -121,14 +121,31 @@ public class Armor : UnitEffect
   }
 }
 
+// Amplifies all damage dealt when attacking by `power` 
+public class Lucky : UnitEffect
+{
+  public Lucky(){
+    name = "Lucky";
+    type = Type.Physical;
+    trigger = Trigger.OnAttacking;
+    priority = 5;
+    power = 1;
+  }
+  public override void Execute(Packet packet)
+  {
+    GD.Print($"Applying Lucky: {packet.value}+{power}, {packet.trigger}");
+    packet.value += power;
+  }
+}
+
 public class Counter : UnitEffect
 {
-  public Counter(int power = 5){
+  public Counter(){
     name = "Counter";
     type = Type.Physical;
     trigger = Trigger.OnDamage;
     priority = 20;
-    this.power = power;
+    power = 5;
   }
   public override void Execute(Packet packet){
     GD.Print($"Applying counter: {packet.value}-{power}, {packet.trigger}");
@@ -164,6 +181,8 @@ public class RemoveHealingAura : UnitEffect
     name = "RemoveHealingAura";
     type = Type.Chemical;
     trigger = Trigger.OnStartMove;
+    countdownTrigger = Trigger.OnEndTurn;
+    count = 4;
     priority = 5;
   }
   public override void Execute(Packet packet= null){

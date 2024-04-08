@@ -56,13 +56,14 @@ public partial class Game : Node2D
 
   void saveInitialDeck1(){
     Unit strongArcher = new("Strong Archer", null, 30, 15, 6, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
-    strongArcher.AddSkill(new Shot());
+    strongArcher.AddSkill(new Shoot());
     strongArcher.AddUnitEffect(new StrongShots());
     Unit quickArcher = new("Quick Archer", null, 20, 15, 10, 5, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
     quickArcher.AddSkill(new DoubleTap());
     Unit preciseArcher = new("Precise Archer", null, 20, 14, 8, 4, 0, 0, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1");
-    preciseArcher.AddSkill(new Shot());
+    preciseArcher.AddSkill(new Shoot());
     preciseArcher.AddUnitEffect(new Sniper());
+    preciseArcher.AddUnitEffect(new Lucky());
 
     SaveUtil.SaveDeck(new List<Unit>(){strongArcher, quickArcher, preciseArcher}, 1);
   }
@@ -205,8 +206,8 @@ public partial class Game : Node2D
     player2.deck = SaveUtil.LoadDeck(2);
 
     Dictionary<Color, ((string, Player, int hp, int st, int mv, int cost,  UnitSpriteFrames, string), List<string>, List<string>)> unitDict = new(){
-      {new Color(0, 0, 1, 1), (("Summoner", player1, 20, 50, 8, 2, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1"), new List<string>(){"Shot"}, new List<string>(){"SummonSkillsFromDeck"})},
-      {new Color(1, 0, 0, 1), (("Archer", player2, 20, 7, 3, 2, UnitSpriteFrames.redArcher, "portrait_Archer_Red1"), new List<string>(){"Shot"}, new List<string>(){})}
+      {new Color(0, 0, 1, 1), (("Summoner", player1, 20, 50, 8, 2, UnitSpriteFrames.blueArcher, "portrait_Archer_Blue1"), new List<string>(){"Shoot"}, new List<string>(){"SummonSkillsFromDeck"})},
+      {new Color(1, 0, 0, 1), (("Archer", player2, 20, 7, 3, 2, UnitSpriteFrames.redArcher, "portrait_Archer_Red1"), new List<string>(){"Shoot"}, new List<string>(){})}
     };
     CreateUnitsFromFile(unitDict, "user://Levels/Editable/mapUnits1.png");
 

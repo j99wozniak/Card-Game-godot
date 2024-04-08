@@ -7,7 +7,7 @@ public partial class Unit : Node
 {
   public static int currentUnitID = 1;
   public int ID = 0;
-  // TODO maybe these triggers should be enums?
+
   public Dictionary<Trigger, LinkedList<UnitEffect>> unitEffects = new Dictionary<Trigger, LinkedList<UnitEffect>>{
   {Trigger.OnBeginTurn, new LinkedList<UnitEffect>()},
   {Trigger.OnEndTurn, new LinkedList<UnitEffect>()},
@@ -224,6 +224,7 @@ public partial class Unit : Node
     UpdateHpLabel();
   }
   
+  // TODO we should probably get it by Class name, not by the .name itself
   public UnitEffect GetUnitEffectByName(string effectName, Trigger effectTrigger = Trigger.none){
     if(effectTrigger != Trigger.none){
       foreach(UnitEffect e in unitEffects[effectTrigger]){
@@ -455,10 +456,14 @@ public partial class Unit : Node
   }
 
   void CountdownUnitEffects(Trigger countdownTrigger){
-    LinkedListNode<UnitEffect> e = unitEffects[countdownTrigger].First;
-    while(e != null){
-      e.Value.Countdown();
-      e = e.Next;
+    foreach(KeyValuePair<Trigger, LinkedList<UnitEffect>> list in unitEffects){
+      LinkedListNode<UnitEffect> e = list.Value.First;
+      while(e != null){
+        if(e.Value.countdownTrigger == countdownTrigger){
+          e.Value.Countdown();
+        }
+        e = e.Next;
+      }
     }
   }
 

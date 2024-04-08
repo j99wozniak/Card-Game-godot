@@ -59,10 +59,10 @@ public class DoubleTap : Skill
   }
 }
 
-public class Shot : Skill
+public class Shoot : Skill
 {
-  public Shot(){
-    name = "Shot";
+  public Shoot(){
+    name = "Shoot";
     this.type = Type.Physical;
     this.category = Category.Offensive;
     this.numberOfTargets = 1;
