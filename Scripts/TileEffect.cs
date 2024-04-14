@@ -68,11 +68,11 @@ public class ShieldTrees : TileEffect
     type = Type.Physical;
     trigger = Trigger.OnDamage;
     priority = 1;
-    this.power = 1;
+    this.power = 2;
   }
   public override void Execute(Packet packet){
     // TODO apply only on physical
-    if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
+    if(packet.type == Type.Physical && packet.trigger == Trigger.OnAttacking){
       GD.Print($"Applying ShieldTrees: {packet.value} - {power}, {packet.name}, for {parentTile.x}x:{parentTile.y}y");
       packet.value = packet.value - power > 0 ? packet.value - power : 0;
     }

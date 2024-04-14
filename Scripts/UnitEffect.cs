@@ -101,7 +101,7 @@ public class Dodge : UnitEffect
   }
 }
 
-// For now lowers all damage received by `power` 
+// For now lowers attacking damage received by `power` 
 public class Armor : UnitEffect
 {
   public Armor(){
@@ -113,9 +113,8 @@ public class Armor : UnitEffect
   }
   public override void Execute(Packet packet)
   {
-    // TODO apply only on physical
-    GD.Print($"Applying armor: {packet.value}-{power}, {packet.trigger}");
-    if(packet.trigger == Trigger.OnAttacking || packet.trigger == Trigger.OnDamage){
+    if(packet.trigger == Trigger.OnAttacking){
+      GD.Print($"Applying armor: {packet.value}-{power}, {packet.trigger}");
       packet.value = packet.value - power > 0 ? packet.value - power : 0;
     }
   }
